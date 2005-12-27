@@ -1,7 +1,7 @@
 % Read a sparse matrix
 function matrix = read_sparse (filename)
     % Open file
-    fid = fopen(filename, 'r');
+    fid = fopen(filename, 'rt');
     if (fid == -1)
         error('Can''t open file');
     end
