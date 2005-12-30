@@ -17,8 +17,6 @@ function Phi = create_phi(Xl, Xk, sigma)
         end
     end
     
-    Phi = normalize_rows(PhiT);
+    Phi = normalize_cols(PhiT);
     
 % end function
-
-    
