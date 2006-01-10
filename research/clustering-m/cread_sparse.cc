@@ -299,19 +299,19 @@ Internal function to help in loading sparse matrices.\n\
       *p++ = '\0';
       col = strtoul(q, &perr, 10);
       if (*perr) {
-	error("cread_sparse_idf: ill formed line (wrong column format '%s') at %s:%d",
-	      q, filename, r + 1);
-	fclose(file);
-	return octave_value_list();
+        error("cread_sparse_idf: ill formed line (wrong column format '%s') at %s:%d",
+          q, filename, r + 1);
+        fclose(file);
+        return octave_value_list();
       }
 
       // Skip blank
       while (*p && isspace(*p)) ++p;
       if (!*p) {
-	error("cread_sparse_idf: ill formed line (no value) at %s:%d",
-	      filename, r + 1);
-	fclose(file);
-	return octave_value_list();
+        error("cread_sparse_idf: ill formed line (no value) at %s:%d",
+          filename, r + 1);
+        fclose(file);
+        return octave_value_list();
       }
       
       // Keep the pos
@@ -319,18 +319,18 @@ Internal function to help in loading sparse matrices.\n\
       while(*p && !isspace(*p)) ++p;
       
       if (!*p) {
-	more = false;
+        more = false;
       } else {
-	*p++ = '\0';
+        *p++ = '\0';
       }
 
       // Parse
       val = strtod(q, &perr);
       if (*perr) {
-	error("cread_sparse_idf: ill formed line (wrong value format '%s') at %s:%d",
-	      q, filename, r + 1);
-	fclose(file);
-	return octave_value_list();
+        error("cread_sparse_idf: ill formed line (wrong value format '%s') at %s:%d",
+          q, filename, r + 1);
+        fclose(file);
+        return octave_value_list();
       }
 
       // Debug
@@ -395,7 +395,7 @@ Internal function to help in loading sparse matrices.\n\
       
       // Normalize
       for (int ti = startI; ti < i; ++ti)
-	vals(ti) /= total;
+        vals(ti) /= total;
       
       // Reset
       r      = rows[i];
