@@ -9,7 +9,7 @@
 #define skip 0
 
 // Buffer sizes
-#define MAX_LINE_LENGTH 2048
+#define MAX_LINE_LENGTH 65536
 #define MAX_LINE_ELEMS  1024
 #define MAX_ID_LENGTH   32
 
@@ -20,16 +20,19 @@ typedef enum errcode { err_noerr, err_premature, err_illhead,
 
 // Error messages
 const char* errMessages[] =
-    { "No error.",
-      "Premature end of input.",
-      "Ill-formed header.",
-      "Ill-formed line (no value).",
-      "Ill-formed line (wrong index format).",
-      "Ill-formed line (wrong value format).",
-      "Input error.",
-      "Too many documents.",
-      "Index out of range." };
+    { "No error",
+      "Premature end of input",
+      "Ill-formed header",
+      "Ill-formed line (no value)",
+      "Ill-formed line (wrong index format)",
+      "Ill-formed line (wrong value format)",
+      "Input error",
+      "Too many documents",
+      "Index out of range" };
 
+// Error line and buffer
+static char errBuffer[MAX_LINE_ELEMS];
+static int  errLine;
 
 // Read the information in the file header
 static errcode readHeader(FILE* file, int* ndocs, int* nterms, int* nnz) {
@@ -45,6 +48,7 @@ static errcode readHeader(FILE* file, int* ndocs, int* nterms, int* nnz) {
         return err_illhead;
         
     // Ok
+    ++errLine;
     return err_noerr;
 }
 
@@ -71,9 +75,9 @@ static int insertSorted(double* valArray, int* idxArray,
     
 
 // Load a sparse matrix in the simple way
-errcode readSparse(FILE* file, int ndocs, int nterms,
-                   int nnz, double* sr, int* irs,
-                   int* jcs) {
+static errcode readSparse(FILE* file, int ndocs, int nterms,
+                          int nnz, double* sr, int* irs,
+                          int* jcs) {
     // Buffer
     char buffer[MAX_LINE_LENGTH];
                      
@@ -158,6 +162,9 @@ errcode readSparse(FILE* file, int ndocs, int nterms,
             // If everything went fine, add it to the matrix
             arrSize = insertSorted(values, indices,
                                    val, idx, arrSize);
+            
+            // DEBUG
+            // printf("(%d, %d) = %g\n", idx, c, val);
         }
 
         // Copy to the target
@@ -168,6 +175,7 @@ errcode readSparse(FILE* file, int ndocs, int nterms,
                 
         // Next column
         ++c;
+        ++errLine;
     }
  
     // Error or EOF?
@@ -226,11 +234,13 @@ void mexFunction(int nlhs, mxArray *plhs[],
         mexErrMsgTxt("Filename too long.");
     if (!(file = fopen(filename, "r")))
         mexErrMsgTxt("Cannot open file.");
+    errLine = 1;
 
     // Get header information
     if (status = readHeader(file, &ndocs, &nterms, &nnz)) {
         fclose(file);
-        mexErrMsgTxt(errMessages[status]);
+        sprintf(errBuffer, "%s at line %d.", errMessages[status], errLine);
+        mexErrMsgTxt(errBuffer);
     }
     
     // Create matrix
@@ -250,7 +260,8 @@ void mexFunction(int nlhs, mxArray *plhs[],
     if (status) {
         mxDestroyArray(plhs[0]);
         plhs[0] = 0;
-        mexErrMsgTxt(errMessages[status]);
+        sprintf(errBuffer, "%s at line %d.", errMessages[status], errLine);
+        mexErrMsgTxt(errBuffer);
     }
     
     // That's all!
