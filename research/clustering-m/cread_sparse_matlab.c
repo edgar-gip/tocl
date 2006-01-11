@@ -11,6 +11,7 @@
 // Buffer sizes
 #define MAX_LINE_LENGTH 65536
 #define MAX_LINE_ELEMS  1024
+#define MAX_ERR_LENGTH  1024
 #define MAX_ID_LENGTH   32
 
 // Error codes
@@ -19,7 +20,7 @@ typedef enum errcode { err_noerr, err_premature, err_illhead,
                        err_inerr, err_toodoc, err_idxrange } errcode;
 
 // Error messages
-const char* errMessages[] =
+static const char* errMessages[] =
     { "No error",
       "Premature end of input",
       "Ill-formed header",
@@ -31,7 +32,7 @@ const char* errMessages[] =
       "Index out of range" };
 
 // Error line and buffer
-static char errBuffer[MAX_LINE_ELEMS];
+static char errBuffer[MAX_ERR_LENGTH];
 static int  errLine;
 
 // Read the information in the file header
@@ -172,7 +173,7 @@ static errcode readSparse(FILE* file, int ndocs, int nterms,
             sr [i] = values [j];
             irs[i] = indices[j];
         }
-                
+
         // Next column
         ++c;
         ++errLine;
@@ -186,8 +187,10 @@ static errcode readSparse(FILE* file, int ndocs, int nterms,
     fclose(file);
   
     // Enough data read?
-    if (i < nnz)
+    if (i < nnz) {
+        printf("%d %d\n", i, nnz);
         return err_premature;
+    }
     
     // Finish the columns
     for (j = c; j <= ndocs; ++j)
@@ -232,14 +235,19 @@ void mexFunction(int nlhs, mxArray *plhs[],
     // Open the file
     if (mxGetString(prhs[0], filename, MAX_LINE_LENGTH))
         mexErrMsgTxt("Filename too long.");
-    if (!(file = fopen(filename, "r")))
-        mexErrMsgTxt("Cannot open file.");
+    if (!(file = fopen(filename, "r"))) {
+        sprintf(errBuffer, "Cannot open file %s.",
+                filename);
+        mexErrMsgTxt(errBuffer);
+    }
+    
     errLine = 1;
 
     // Get header information
     if (status = readHeader(file, &ndocs, &nterms, &nnz)) {
         fclose(file);
-        sprintf(errBuffer, "%s at line %d.", errMessages[status], errLine);
+        sprintf(errBuffer, "%s at %s:%d.", errMessages[status],
+                filename, errLine);
         mexErrMsgTxt(errBuffer);
     }
     
@@ -260,7 +268,8 @@ void mexFunction(int nlhs, mxArray *plhs[],
     if (status) {
         mxDestroyArray(plhs[0]);
         plhs[0] = 0;
-        sprintf(errBuffer, "%s at line %d.", errMessages[status], errLine);
+        sprintf(errBuffer, "%s at %s:%d.", errMessages[status],
+                filename, errLine);
         mexErrMsgTxt(errBuffer);
     }
     
