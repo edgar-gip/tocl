@@ -544,3 +544,218 @@ Load the document labels as string matrices.\n\
   output(1) = octave_value(output2);
   return output;
 }
+
+
+// Function to load DOC_TO_CAT in a numerical way
+DEFUN_DLD(read_labels_num, args, nargout,
+          "-*- texinfo -*-\n\
+@deftypefn {Loadable Function} {[ Labels nLabels ] =} read_labels_num(@var{rlabel_file}, @var{doc2cat_file}])\n\
+\n\
+Load the document labels as a column vector.\n\
+@end deftypefn") {
+  // Buffer
+  char buffer  [MAX_LINE_LENGTH];
+  char filename[MAX_LINE_LENGTH];
+
+  // Check the parameter
+  if (args.length() != 2 || !args(0).is_string() ||
+      !args(1).is_string()) {
+    print_usage("read_labels_num");
+    return octave_value_list();
+  }
+
+  // Open the doc2cat file
+  strcpy(filename, args(1).string_value().c_str());
+  FILE* file = fopen(filename, "r");
+  if (!file) {
+    error("read_labels_num: cannot open file %s", filename);
+    return octave_value_list();
+  }
+
+  // Doc2cat map
+  map<string, string> doc2cat;
+  char docId  [MAX_ID_LENGTH];
+  char labelId[MAX_ID_LENGTH];
+  
+  // Read doc2cat
+  int line = 1;
+  while(fgets(buffer, MAX_LINE_LENGTH, file)) {
+    if (sscanf(buffer, "%s %s", docId, labelId) < 2) {
+      error("read_labels_num: wrong line format at %s:%d",
+	    filename, line);
+      return octave_value_list();
+    }
+    doc2cat[docId] = labelId;
+    ++line;
+
+    // Debug
+    // printf("%s -> %s\n", docId, labelId);
+  }
+
+  // Error or EOF?
+  if (ferror(file)) {
+    error("read_labels_num: input error at %s:%d",
+	  filename, line);
+    fclose(file);
+    return octave_value_list();
+  }
+
+  // Close
+  fclose(file);
+
+  // Open the rlabel file
+  strcpy(filename, args(0).string_value().c_str());
+  file = fopen(filename, "r");
+  if (!file) {
+    error("read_labels_num: cannot open file %s", filename);
+    return octave_value_list();
+  }
+  
+  // Category for each document
+  vector<int> docCats;
+
+  // Number of Categories
+  int numCats = 0;
+
+  // Present
+  map<string, int> present;
+
+  // Read rlabel
+  line = 1;
+  while(fgets(buffer, MAX_LINE_LENGTH, file)) {
+    if (sscanf(buffer, "%s", docId) < 1) {
+      error("read_labels_num: wrong line format at %s:%d",
+	    filename, line);
+      return octave_value_list();
+    }
+    
+    map<string, int>::iterator it =
+      present.find(doc2cat[docId]);
+    
+    if (it == present.end()) {
+      // Not found
+      present[doc2cat[docId]] = numCats;
+      docCats.push_back(numCats++);
+
+    } else {
+      // Found
+      docCats.push_back(it->second);
+    }
+    ++line;
+  }
+
+  // Error or EOF?
+  if (ferror(file)) {
+    error("read_labels_num: input error at %s",
+	  filename);
+    fclose(file);
+    return octave_value_list();
+  }
+
+  // Close
+  fclose(file);
+
+  // Create a column vector
+  ColumnVector output1(docCats.size());
+  for (int i = 0; i < docCats.size(); ++i)
+    output1(i) = docCats[i];
+  
+  // Return the cell
+  octave_value_list output;
+  output.resize(2);
+  output(0) = octave_value(output1);
+  output(1) = octave_value(numCats);
+  return output;
+}
+
+
+// Function to load clusterings
+DEFUN_DLD(read_clustering, args, nargout,
+          "-*- texinfo -*-\n\
+@deftypefn {Loadable Function} {[...] =} read_clustering(@var{file})\n\
+\n\
+Load a clustering.\n\
+@end deftypefn") {
+  // Buffer
+  char buffer  [MAX_LINE_LENGTH];
+  char filename[MAX_LINE_LENGTH];
+
+  // Check the parameter
+  if (args.length() != 1 || !args(0).is_string()) {
+    print_usage("cread_clustering");
+    return octave_value_list();
+  }
+
+  // Open the file
+  strcpy(filename, args(0).string_value().c_str());
+  FILE* file = fopen(filename, "r");
+  if (!file) {
+    error("cread_clustering: cannot open file %s", filename);
+    return octave_value_list();
+  }
+
+  // Now, reserve a vector
+  vector<int> clustering;
+
+  // Different clusters
+  int k = -1;
+
+  // Current row
+  int r = 1;
+  
+  // Auxiliary vars
+  char *p, *q, *perr;
+  unsigned long int col;
+  double val;
+  bool   more;
+
+  // Read every line
+  while(fgets(buffer, MAX_LINE_LENGTH, file)) {
+    // Current cluster
+    int cluster;
+
+    // Process
+    if (!sscanf(buffer, "%d", &cluster)) {
+      error("cread_clustering: ill formed line (not an integer) at %s:%d",
+	    filename, r);
+      fclose(file);
+      return octave_value_list();
+    }
+
+    // Update k?
+    if (cluster > k)
+      k = cluster;
+
+    // Add it
+    clustering.push_back(cluster);
+    
+    // Next row
+    ++r;
+  }
+  
+  // Error or EOF?
+  if (ferror(file)) {
+    error("cread_clustering: input error at %s:%d",
+	  filename, r);
+    fclose(file);
+    return octave_value_list();
+  }
+  
+  // Free
+  fclose(file);
+  
+  // Output colum vector
+  ColumnVector dclust(clustering.size());
+
+  // Convert to double
+  for (int i = 0; i < clustering.size(); ++i) {
+    dclust(i) = double(clustering[i]);
+  }
+  
+  // Everything seems fine
+  octave_value_list output;
+  output.resize(2);
+  output(0) = octave_value(dclust);
+  output(1) = octave_value(k + 1);
+  return output;
+}
