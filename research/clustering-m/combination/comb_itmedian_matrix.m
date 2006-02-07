@@ -1,7 +1,7 @@
-%% Combine several clusterings into a binary matrix
+%% Combine several clusterings into a multinomial matrix
 %% May take an arbitrary number of arguments
 %% But should be <clustering, nclusters> pairs
-function [ CM KM ] = comb_binary_matrix (varargin)
+function [ CM KM ] = comb_itmedian_matrix (varargin)
   %% Is it empty?
   if nargin == 0
     error('There should be at least one clustering');
@@ -18,10 +18,12 @@ function [ CM KM ] = comb_binary_matrix (varargin)
   
   %% Number of elements
   [ nelems dummy ] = size(Clust1);
+  if dummy ~= 1
+    error('Clusterings should be column vectors');
+  end
 
   %% Number of total clusters
   kTotal = k1;
-  nTotal = nelems;
 
   %% Following
   for i = 3 : 2 : nargin
@@ -31,27 +33,21 @@ function [ CM KM ] = comb_binary_matrix (varargin)
 
     %% Check the number of elements
     [ nelemsn dummy ] = size(Clustn);
-    if nelemsn ~= nelems
+    if dummy ~= 1
+      error('Clusterings should be column vectors');
+    elseif nelemsn ~= nelems
       error('All clusterings should have the same size');
     end
 
     %% Add to the total
     kTotal = kTotal + kn;
-    nTotal = nTotal + nelemsn;
   end
 
   %% Reserve the space
-  Rows = zeros(nTotal, 1);
-  Cols = zeros(nTotal, 1);
-
-  %% Normalized (so every has module 1)
-  Vals = ones (nTotal, 1) / sqrt(nargin / 2);
-
-  %% KM
+  CM   = zeros(nelems, kTotal);
   KM   = zeros(nargin / 2, 1);
-  
+
   %% Current pos
-  pos  = 1;
   off  = 1;
 
   %% Now again
@@ -62,11 +58,10 @@ function [ CM KM ] = comb_binary_matrix (varargin)
     kn     = varargin{i + 1};
 
     %% Add to the values
-    Rows(pos : (pos + nelems - 1)) = 1 : nelems;
-    Cols(pos : (pos + nelems - 1)) = Clustn + off;
+    CM(:, off : (off + kn - 1)) = ...
+	((Clustn * ones(1, kn)) == (ones(nelems, 1) * [ 0 : (kn - 1) ]));
 
-    %% Update pos
-    pos = pos + nelems;
+    %% Update off
     off = off + kn;
 
     %% Update KM
@@ -74,9 +69,7 @@ function [ CM KM ] = comb_binary_matrix (varargin)
     j = j + 1;
   end
 
-  %% Turn it into a sparse matrix
-  CM = sparse(Rows, Cols, Vals, nelems, kTotal, nTotal);
+  %% Normalize
+  CM = CM - ones(nelems, 1) * (sum(CM) / nelems);
 
 % endfunction
-  
-  

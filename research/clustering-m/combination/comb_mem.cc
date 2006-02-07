@@ -115,6 +115,63 @@ void mStep(Matrix& alpha,
 }
 
 
+// Log-Likelihood of data
+double logLike(Matrix& alpha,
+	       Matrix* coefs,
+	       Matrix& data) {
+  
+#ifdef DEBUG
+  // DEBUG
+  printf("Log-Likelihood\n");
+#endif
+
+  // Find useful sizes
+  int nData  = data.rows();
+  int nFeats = data.cols();
+  int nClust = alpha.rows();
+    
+  // Total
+  double llike = 0.0;
+
+  // For every point
+  for (int i = 0; i < nData; ++i) {
+    // The single factor
+    double factor = 0.0;
+
+    // For every cluster
+    for (int c = 0; c < nClust; ++c) {
+      // The single term
+      double term = alpha(c);
+
+      // For every feature
+      for (int f = 0; f < nFeats; ++f) {
+	int idx = int(data(i, f));
+
+#ifdef DEBUG
+	// Check index validity
+	if (idx < 0 || idx >= coefs[f].cols()) {
+	  printf("Error! i: %d c: %d f: %d idx: %d\nPrepare to die!\n",
+		 i, c, f, idx);
+	}
+#endif
+
+	// Add to the term
+	term *= coefs[f](c, idx);
+      }
+
+      // Add to the factor
+      factor += term;
+    }
+
+    // Add to the total
+    llike += log(factor);
+  }
+
+  // Return it
+  return llike;
+}
+
+
 /*******************/
 /* Octave-C++ Glue */
 /*******************/
@@ -127,7 +184,7 @@ DEFUN_DLD(comb_mem_expectation, args, nargout,
 Perform an expectation step.\n\
 @end deftypefn") {
   // Check argument number
-  if (args.length() != 2 || nargout != 1) {
+  if (args.length() != 2 || nargout > 1) {
     print_usage("comb_mem_expectation");
     return octave_value_list();
   }
@@ -215,7 +272,7 @@ DEFUN_DLD(comb_mem_maximization, args, nargout,
 Perform an expectation step.\n\
 @end deftypefn") {
   // Check argument number
-  if (args.length() != 3 || nargout != 1) {
+  if (args.length() != 3 || nargout > 1) {
     print_usage("comb_mem_maximization");
     return octave_value_list();
   }
@@ -290,6 +347,87 @@ Perform an expectation step.\n\
   octave_value_list output;
   output.resize(1);
   output(0) = octave_value(model);
+  return output;
+}
+
+
+// Find the log likelihood
+DEFUN_DLD(comb_mem_loglike, args, nargout,
+          "-*- texinfo -*-\n\
+@deftypefn {Loadable Function} {logLike =} comb_mem_loglike(@var{model}, @var{data})\n\
+\n\
+Find the log-likelihood of data according to the model.\n\
+@end deftypefn") {
+  // Check argument number
+  if (args.length() != 2 || nargout > 1) {
+    print_usage("comb_mem_loglike");
+    return octave_value_list();
+  }
+
+  // Check types of arguments
+  if (!args(0).is_map()) {
+    error("MODEL should be a struct");
+    return octave_value_list();
+  }
+
+  if (!args(1).is_real_matrix()) {
+    error("DATA should be a matrix");
+    return octave_value_list();
+  }
+  
+  // Find the alpha element of the struct
+  Octave_map model         = args(0).map_value();
+  Octave_map::iterator ial = model.seek("alpha");
+  if (ial == model.end()) {
+    error("MODEL does not have an alpha field");
+    return octave_value_list();
+  }
+
+  // Find the alpha matrix
+  if (!model.contents(ial)(0).is_real_matrix()) {
+    error("MODEL.alpha should be a matrix");
+    return octave_value_list();
+  }
+  Matrix alpha = model.contents(ial)(0).matrix_value();
+
+  // Find the coefs element of the struct
+  Octave_map::iterator ico = model.seek("coefs");
+  if (ico == model.end()) {
+    error("MODEL does not have a coefs field");
+    return octave_value_list();
+  }
+
+  // Find the contents
+  if (!model.contents(ico)(0).is_cell()) {
+    error("MODEL.coefs should be a cell");
+    return octave_value_list();
+  }
+  Cell ccoefs = model.contents(ico)(0).cell_value();
+
+  // Make a matrix array
+  Matrix* coefs = new Matrix[ccoefs.cols()];
+  for (int c = 0; c < ccoefs.cols(); ++c) {
+    if (!ccoefs(c).is_real_matrix()) {
+      error("MODEL.coefs should contain matrices");
+      delete[] coefs;
+      return octave_value_list();
+    }
+    coefs[c] = ccoefs(c).matrix_value();
+  }
+
+  // Find the data
+  Matrix data = args(1).matrix_value();
+
+  // Call the function
+  double llike = logLike(alpha, coefs, data);
+
+  // Free the coefs array
+  delete[] coefs;
+
+  // Return
+  octave_value_list output;
+  output.resize(1);
+  output(0) = octave_value(llike);
   return output;
 }
 
