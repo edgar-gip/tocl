@@ -474,7 +474,12 @@ Load the document labels as string matrices.\n\
 	    filename, line);
       return octave_value_list();
     }
-    doc2cat[docId] = labelId;
+
+    // Keep the first found category
+    if (doc2cat.find(docId) == doc2cat.end()) {
+      doc2cat[docId] = labelId;
+    }
+
     ++line;
 
     // Debug
@@ -585,7 +590,12 @@ Load the document labels as a column vector.\n\
 	    filename, line);
       return octave_value_list();
     }
-    doc2cat[docId] = labelId;
+
+    // Keep the first found category
+    if (doc2cat.find(docId) == doc2cat.end()) {
+      doc2cat[docId] = labelId;
+    }
+
     ++line;
 
     // Debug
