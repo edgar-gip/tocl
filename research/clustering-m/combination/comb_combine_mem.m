@@ -1,7 +1,7 @@
 %% Return the combination of several clusters
 function [ Lls Sizes Models ] = comb_combine_mem (Nclusters, varargin)
-  %% At least one parameter
-  if nargin == 1
+  %% At least two parameters
+  if nargin < 2
     error('Must give at least a clustering');
   end
 
