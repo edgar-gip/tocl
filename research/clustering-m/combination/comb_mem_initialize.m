@@ -18,6 +18,7 @@ function sModel = comb_mem_initialize (nclusters, FeatureSizes)
   end
   
   %% Set the struct
+  sModel.kind  = 1;
   sModel.alpha = Alpha;
   sModel.coefs = Coefs;
 

@@ -50,6 +50,52 @@ void eStep(Matrix& expectation,
 }
 
 
+// Expectation step
+// Weighted
+void eStepW(Matrix& expectation,
+	    Matrix& data,
+	    Matrix& alpha,
+	    Matrix* coefs,
+	    Matrix& weights) {
+
+#ifdef DEBUG
+  // DEBUG
+  printf("E Step W\n");
+#endif
+  
+  // Find useful sizes
+  int nData  = data.rows();
+  int nFeats = data.cols();
+  int nClust = alpha.rows();
+  
+  // For every point
+  for (int i = 0; i < nData; ++i) {
+    // Total (for normalization)
+    double total = 0.0;
+
+    // Find the possibility for each multinomial
+    for (int c = 0; c < nClust; ++c) {
+      // Prior
+      double val = alpha(c);
+
+      // Multinomial components
+      for (int f = 0; f < nFeats; ++f) {
+	val *= pow(coefs[f](c, int(data(i, f))), weights(f));
+      }
+
+      // Add to matrix and total
+      expectation(i, c) = val;
+      total += val;
+    }
+
+    // Normalize
+    if (total != 0.0)
+      for (int c = 0; c < nClust; ++c)
+	expectation(i, c) /= total;
+  }
+}
+
+
 // Maximization step
 void mStep(Matrix& alpha,
 	   Matrix* coefs,
@@ -172,6 +218,65 @@ double logLike(Matrix& alpha,
 }
 
 
+// Log-Likelihood of data
+// Weighted
+double logLikeW(Matrix& alpha,
+		Matrix* coefs,
+		Matrix& data,
+		Matrix& weights) {
+  
+#ifdef DEBUG
+  // DEBUG
+  printf("Log-Likelihood W\n");
+#endif
+
+  // Find useful sizes
+  int nData  = data.rows();
+  int nFeats = data.cols();
+  int nClust = alpha.rows();
+    
+  // Total
+  double llike = 0.0;
+
+  // For every point
+  for (int i = 0; i < nData; ++i) {
+    // The single factor
+    double factor = 0.0;
+
+    // For every cluster
+    for (int c = 0; c < nClust; ++c) {
+      // The single term
+      double term = alpha(c);
+
+      // For every feature
+      for (int f = 0; f < nFeats; ++f) {
+	int idx = int(data(i, f));
+
+#ifdef DEBUG
+	// Check index validity
+	if (idx < 0 || idx >= coefs[f].cols()) {
+	  printf("Error! i: %d c: %d f: %d idx: %d\nPrepare to die!\n",
+		 i, c, f, idx);
+	}
+#endif
+
+	// Add to the term
+	term *= pow(coefs[f](c, idx), weights(f));
+      }
+
+      // Add to the factor
+      factor += term;
+    }
+
+    // Add to the total
+    llike += log(factor);
+  }
+
+  // Return it
+  return llike;
+}
+
+
 /*******************/
 /* Octave-C++ Glue */
 /*******************/
@@ -200,8 +305,28 @@ Perform an expectation step.\n\
     return octave_value_list();
   }
   
-  // Find the alpha element of the struct
+  // Find the kind element of the struct
   Octave_map model         = args(0).map_value();
+  Octave_map::iterator iki = model.seek("kind");
+  if (iki == model.end()) {
+    error("MODEL does not have a kind field");
+    return octave_value_list();
+  }
+
+  // Find the kind
+  if (!model.contents(iki)(0).is_real_scalar()) {
+    error("MODEL.kind should be an integer");
+    return octave_value_list();
+  }
+  int kind = model.contents(iki)(0).int_value();
+
+  // Check supported kinds
+  if (kind < 1 || kind > 2) {
+    error("MODEL.kind unsupported");
+    return octave_value_list();
+  }
+  
+  // Find the alpha element of the struct
   Octave_map::iterator ial = model.seek("alpha");
   if (ial == model.end()) {
     error("MODEL does not have an alpha field");
@@ -250,9 +375,35 @@ Perform an expectation step.\n\
   // Return value
   Matrix expectation(nData, nClust, 0.0);
 
-  // Call the function
-  eStep(expectation, data, alpha, coefs);
+  // According to the kind
+  switch (kind) {
+  case 1:
+    // Unweighted
+    // Call the function
+    eStep(expectation, data, alpha, coefs);
+    break;
 
+  case 2:
+    // Find the weights element of the struct
+    Octave_map::iterator iwe = model.seek("weights");
+    if (iwe == model.end()) {
+      error("MODEL does not have a weights field");
+      delete[] coefs;
+      return octave_value_list();
+    }
+    
+    // Find the weights matrix
+    if (!model.contents(iwe)(0).is_real_matrix()) {
+      error("MODEL.weights should be a matrix");
+      delete[] coefs;
+      return octave_value_list();
+    }
+    Matrix weights = model.contents(iwe)(0).matrix_value();
+    
+    // Call the function
+    eStepW(expectation, data, alpha, coefs, weights);
+  }
+    
   // Free the coefs array
   delete[] coefs;
 
@@ -374,9 +525,29 @@ Find the log-likelihood of data according to the model.\n\
     error("DATA should be a matrix");
     return octave_value_list();
   }
+
+  // Find the kind element of the struct
+  Octave_map model         = args(0).map_value();
+  Octave_map::iterator iki = model.seek("kind");
+  if (iki == model.end()) {
+    error("MODEL does not have a kind field");
+    return octave_value_list();
+  }
+
+  // Find the kind
+  if (!model.contents(iki)(0).is_real_scalar()) {
+    error("MODEL.kind should be an integer");
+    return octave_value_list();
+  }
+  int kind = model.contents(iki)(0).int_value();
+
+  // Check supported kinds
+  if (kind < 1 || kind > 2) {
+    error("MODEL.kind unsupported");
+    return octave_value_list();
+  }
   
   // Find the alpha element of the struct
-  Octave_map model         = args(0).map_value();
   Octave_map::iterator ial = model.seek("alpha");
   if (ial == model.end()) {
     error("MODEL does not have an alpha field");
@@ -418,8 +589,34 @@ Find the log-likelihood of data according to the model.\n\
   // Find the data
   Matrix data = args(1).matrix_value();
 
-  // Call the function
-  double llike = logLike(alpha, coefs, data);
+  // According to the kind
+  double llike;
+  switch (kind) {
+  case 1:
+    // Unweighted
+    // Call the function
+    llike = logLike(alpha, coefs, data);
+
+  case 2:
+    // Find the weights element of the struct
+    Octave_map::iterator iwe = model.seek("weights");
+    if (iwe == model.end()) {
+      error("MODEL does not have a weights field");
+      delete[] coefs;
+      return octave_value_list();
+    }
+    
+    // Find the weights matrix
+    if (!model.contents(iwe)(0).is_real_matrix()) {
+      error("MODEL.weights should be a matrix");
+      delete[] coefs;
+      return octave_value_list();
+    }
+    Matrix weights = model.contents(iwe)(0).matrix_value();
+    
+    // Call the function
+    llike = logLikeW(alpha, coefs, data, weights);
+  }
 
   // Free the coefs array
   delete[] coefs;

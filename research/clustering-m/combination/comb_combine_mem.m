@@ -30,6 +30,10 @@ function [ Lls Sizes Models ] = comb_combine_mem (Nclusters, varargin)
   %% Create the multinomial matrix
   [ CM KM ] = comb_multinomial_matrix (target{:});
 
+  %% Delta threshold
+  [ elems dummy ] = size(CM);
+  deltaTh         = 1e-8 * elems;
+
   %% Automatically find sizes?
   if Nclusters == 0
     low  = max(2, floor(0.80 * min(KM)));
@@ -63,7 +67,7 @@ function [ Lls Sizes Models ] = comb_combine_mem (Nclusters, varargin)
 	model = comb_mem_maximization(CM, KM, Exp);
 	Exp   = comb_mem_expectation(model, CM);
 	delta = sum(sum((Exp - OExp) .^ 2));
-      until (delta < 1e-10)
+      until (delta < deltaTh)
       
       %% Result
       [ Max Idx ] = max(Exp');
