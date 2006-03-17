@@ -6,11 +6,6 @@ function sModel = comb_mem_addweight (inModel, Weights)
     error('Should receive a column vector');
   end
   
-  %% Check sum of weights
-  if sum(Weights) ~= nweigs
-    error('Weights should sum up to the number of features');
-  end
-
   %% Set the struct
   sModel         = inModel;
   sModel.kind    = 2;

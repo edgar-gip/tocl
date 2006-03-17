@@ -491,6 +491,7 @@ Perform an expectation step.\n\
 
   // Return
   Octave_map model;
+  model.assign("kind",  octave_value(1));
   model.assign("alpha", octave_value(alpha));
   model.assign("coefs", Cell(octave_value(ccoefs)));
 
