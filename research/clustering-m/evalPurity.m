@@ -1,6 +1,6 @@
 %% Add something to the LOADPATH
-LOADPATH = [ LOADPATH ":/home/usuaris/egonzalez/devel/research/matlabClustering/io" ];
-LOADPATH = [ LOADPATH ":/home/usuaris/egonzalez/devel/research/matlabClustering/measures" ];
+LOADPATH = [ LOADPATH ":/home/egonzalez/devel/research/matlabClustering/io" ];
+LOADPATH = [ LOADPATH ":/home/egonzalez/devel/research/matlabClustering/measures" ];
 
 %% Get arguments
 doc2cat = argv{1};
