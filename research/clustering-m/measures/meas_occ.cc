@@ -12,7 +12,10 @@ void occMatrix(Matrix& occurrency,
 	       int nelems) {
   // For every point
   for (int i = 0; i < nelems; ++i) {
-    ++occurrency(int(cl1(i)), int(cl2(i)));
+    int c1 = int(cl1(i));
+    int c2 = int(cl2(i));
+    if (c1 != -1 && c2 != -1)
+      ++occurrency(c1, c2);
   }
 }
 
