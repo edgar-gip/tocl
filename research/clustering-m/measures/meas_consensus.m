@@ -103,7 +103,7 @@ function c = meas_consensus (cfunc, Clust1, Clust2)
     H2    = - sum(Marg2 .* log(Marg2));
 
     %% Normalized mutual information
-    c     = MI / sqrt(H1, H2);
+    c     = MI / sqrt(H1 * H2);
 
   else
     error('Function not supported');
