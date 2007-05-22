@@ -16,7 +16,7 @@ for i = 3:length
   [ C nc ] = read_clustering(argv{i});
 
   %% Find purity
-  [ pur ipur f1 Occ ] = meas_purity(C, L)
+  [ pur ipur f1 Occ ] = meas_purity(C, L);
 
   %% Number of clusters (real)
   nr = sum(sum(Occ') ~= 0);
