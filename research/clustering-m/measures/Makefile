@@ -1,4 +1,9 @@
-all: meas_occ.oct
+OBJECTS = meas_occ.oct
 
-meas_occ.oct: meas_occ.cc
-	mkoctfile meas_occ.cc
+all: $(OBJECTS)
+
+%.oct: %.cc
+	mkoctfile $<
+
+clean:
+	rm -f $(OBJECTS)
