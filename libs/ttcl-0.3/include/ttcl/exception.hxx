@@ -18,7 +18,7 @@
 #include <iostream>
 #include <string>
 
-#ifdef TTCL_USE_BOOST
+#ifndef TTCL_NO_USE_BOOST
 #include <boost/format.hpp>
 #endif
 
@@ -72,9 +72,9 @@ namespace ttcl {
 #endif
     }
 
-#ifdef TTCL_USE_BOOST
+#ifndef TTCL_NO_USE_BOOST
     /// Constructor from a boost::format
-    /** Only enabled if TTCL_USE_BOOST is defined
+    /** Disabled if TTCL_NO_USE_BOOST is defined
 	@param _message Description message
 	@param _file    Exception source file
 	@param _line_no Exception source line number
@@ -94,7 +94,7 @@ namespace ttcl {
 
       // Check for out of memory
       if (not _M_trace)
-	throw std::bad_alloc;
+	throw std::bad_alloc();
 #endif
     }
 #endif
