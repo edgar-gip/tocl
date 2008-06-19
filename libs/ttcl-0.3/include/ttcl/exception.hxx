@@ -31,20 +31,20 @@ namespace ttcl {
   class exception : std::exception {
   private:
     /// Description message
-    std::string _M_message;
+    std::string message_;
     
     /// Exception source file
-    std::string _M_file;
+    std::string file_;
     
     /// Exception source line number
-    uint _M_line_no;
+    uint line_no_;
 
 #ifdef _EXECINFO_H    
     /// Backtrace
-    char** _M_trace;
+    char** trace_;
     
     /// Number of positions of trace filled
-    int _M_n_filled;
+    int n_filled_;
 #endif    
 
   public:
@@ -54,20 +54,20 @@ namespace ttcl {
 	@param _line_no Exception source line number
     */
     exception(std::string _message, std::string _file, uint _line_no) :
-      _M_message(_message), _M_file(_file), _M_line_no(_line_no) {
+      message_(_message), file_(_file), line_no_(_line_no) {
 #ifdef _EXECINFO_H
       // Get the backtrace
       void* buffer[20];
-      _M_n_filled = backtrace(buffer, 20);
+      n_filled_ = backtrace(buffer, 20);
       
       // Split the first 2
-      _M_n_filled -= 2;
+      n_filled_ -= 2;
       
       // Convert to symbols
-      _M_trace = backtrace_symbols(buffer + 2, _M_n_filled);
+      trace_ = backtrace_symbols(buffer + 2, n_filled_);
 
       // Check for out of memory
-      if (not _M_trace)
+      if (not trace_)
 	throw std::bad_alloc();
 #endif
     }
@@ -80,20 +80,20 @@ namespace ttcl {
 	@param _line_no Exception source line number
     */
     exception(boost::format _message, std::string _file, uint _line_no) :
-      _M_message(_message.str()), _M_file(_file), _M_line_no(_line_no) {
+      message_(_message.str()), file_(_file), line_no_(_line_no) {
 #ifdef _EXECINFO_H
       // Get the backtrace
       void* buffer[20];
-      _M_n_filled = backtrace(buffer, 20);
+      n_filled_ = backtrace(buffer, 20);
       
       // Split the first 2
-      _M_n_filled -= 2;
+      n_filled_ -= 2;
       
       // Convert to symbols
-      _M_trace = backtrace_symbols(buffer + 2, _M_n_filled);
+      trace_ = backtrace_symbols(buffer + 2, n_filled_);
 
       // Check for out of memory
-      if (not _M_trace)
+      if (not trace_)
 	throw std::bad_alloc();
 #endif
     }
@@ -103,27 +103,27 @@ namespace ttcl {
     /** @param _other Source exception
      */
     exception(const exception& _other) :
-      std::exception(_other), _M_message(_other._M_message),
-      _M_file(_other._M_file), _M_line_no(_other._M_line_no) {
+      std::exception(_other), message_(_other.message_),
+      file_(_other.file_), line_no_(_other.line_no_) {
 #ifdef _EXECINFO_H
       // Reserve memory for the trace
-      _M_n_filled = _other._M_n_filled;
-      _M_trace    =
-	reinterpret_cast<char**>(std::malloc(_M_n_filled * sizeof(char*)));
+      n_filled_ = _other.n_filled_;
+      trace_    =
+	reinterpret_cast<char**>(std::malloc(n_filled_ * sizeof(char*)));
 
       // Check for out of memory
-      if (not _M_trace)
+      if (not trace_)
 	throw std::bad_alloc();
 
       // Copy the trace
-      std::memcpy(_M_trace, _other._M_trace, _M_n_filled * sizeof(char*));
+      std::memcpy(trace_, _other.trace_, n_filled_ * sizeof(char*));
 #endif
     }
 
     /// Destructor
     ~exception() throw () {
 #ifdef _EXECINFO_H
-      std::free(_M_trace);
+      std::free(trace_);
 #endif
     }
     
@@ -131,10 +131,10 @@ namespace ttcl {
     /** @param _os Target ostream
      */
     void display(std::ostream& _os) const {
-      _os << _M_message << " in " << _M_file << ":" << _M_line_no << std::endl;
+      _os << message_ << " in " << file_ << ":" << line_no_ << std::endl;
 #ifdef _EXECINFO_H
-      for (int i = 0; i < _M_n_filled; ++i)
-	_os << " from " << _M_trace[i] << std::endl;
+      for (int i = 0; i < n_filled_; ++i)
+	_os << " from " << trace_[i] << std::endl;
 #endif
     }
   };
