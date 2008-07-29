@@ -126,6 +126,11 @@ namespace ttcl {
       std::free(trace_);
 #endif
     }
+
+    /// Get the message
+    const std::string& message() const {
+      return message_;
+    }
     
     /// Write to an ostream
     /** @param _os Target ostream
