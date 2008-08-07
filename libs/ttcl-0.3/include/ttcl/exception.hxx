@@ -28,8 +28,8 @@
 namespace ttcl {
 
   /// Exception
-  class exception : std::exception {
-  private:
+  class exception : public std::exception {
+  protected:
     /// Description message
     std::string message_;
     
@@ -121,7 +121,7 @@ namespace ttcl {
     }
 
     /// Destructor
-    ~exception() throw () {
+    virtual ~exception() throw () {
 #ifdef _EXECINFO_H
       std::free(trace_);
 #endif
@@ -131,12 +131,23 @@ namespace ttcl {
     const std::string& message() const {
       return message_;
     }
-    
+
+    /// Get the file
+    const std::string& file() const {
+      return file_;
+    }
+
+    /// Get the line number
+    uint line_no() const {
+      return line_no_;
+    }
+
     /// Write to an ostream
     /** @param _os Target ostream
      */
-    void display(std::ostream& _os) const {
-      _os << message_ << " in " << file_ << ":" << line_no_ << std::endl;
+    virtual void display(std::ostream& _os) const {
+      _os << message_ << " in " << file_
+	  << ":" << line_no_ << std::endl;
 #ifdef _EXECINFO_H
       for (int i = 0; i < n_filled_; ++i)
 	_os << " from " << trace_[i] << std::endl;
