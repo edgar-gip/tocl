@@ -22,6 +22,10 @@
 #include <boost/format.hpp>
 #endif
 
+#ifndef TTCL_WHAT_SIZE
+#define TTCL_WHAT_SIZE 1024
+#endif
+
 #include <ttcl/types.hxx>
 
 /// TTCL Namespace
@@ -152,6 +156,24 @@ namespace ttcl {
       for (int i = 0; i < n_filled_; ++i)
 	_os << " from " << trace_[i] << std::endl;
 #endif
+    }
+
+    /// Description
+    virtual const char* what() const
+      throw() {
+      static char buffer[TTCL_WHAT_SIZE];
+      int printed = snprintf(buffer, TTCL_WHAT_SIZE - 1, "%s in %s:%d",
+			     message_.c_str(), file_.c_str(), line_no_);
+#ifdef _EXECINFO_H
+      int i = 0;
+      while (printed < TTCL_WHAT_SIZE - 1 and
+	     i < n_filled_) {
+	printed += snprintf(buffer + printed, TTCL_WHAT_SIZE - printed,
+			    " from %s", trace_[i]);
+	++i;
+      }
+#endif
+      return buffer;
     }
   };
 }
