@@ -1,15 +1,14 @@
-#ifndef _TTCL_EX_BZSTREAM_HXX
-#define _TTCL_EX_BZSTREAM_HXX
+#ifndef _TTCL_IO_GZSTREAM_HXX
+#define _TTCL_IO_GZSTREAM_HXX
 
 // TTCL: The Template Clustering Library
 
 /** @file
-    External Code - Bzlib-Based Streams
-    Adapted from Zlib-Based Streams
-    @author Edgar Gonzalez i Pellicer
+    Input/Output - Zlib-Based Streams
+    @author Deepak Bandyopadhyay, Lutz Kettner, Edgar Gonzalez i Pellicer
 */
 
-#include <bzlib.h>
+#include <zlib.h>
 
 #include <cstring>
 #include <iostream>
@@ -18,11 +17,11 @@
 /// TTCL Namespace
 namespace ttcl {
 
-  /// External Code Namespace
-  namespace ex {
+  /// Input/Output Namespace
+  namespace io {
 
-    /// Bzlib Stream Buffer
-    class bzstreambuf :
+    /// Zlib Stream Buffer
+    class gzstreambuf :
       public std::streambuf {
     private:
       /// Size of data buffer
@@ -31,7 +30,7 @@ namespace ttcl {
       static const int bufferSize = 47 + 256;
 
       /// File handle for compressed file
-      BZFILE* file_;
+      gzFile file_;
 
       /// Data buffer
       char buffer_[bufferSize];
@@ -47,7 +46,7 @@ namespace ttcl {
 	// Separate the writing of the buffer from overflow() and
 	// sync() operation.
 	int w = pptr() - pbase();
-	if (BZ2_bzwrite(file_, pbase(), w) != w)
+	if (gzwrite(file_, pbase(), w) != w)
 	  return EOF;
 	pbump(-w);
 	return w;
@@ -55,7 +54,7 @@ namespace ttcl {
 
     public:
       /// Constructor
-      bzstreambuf() :
+      gzstreambuf() :
 	opened_(0) {
         setp(buffer_, buffer_ + (bufferSize-1));
         setg(buffer_ + 4,     // Beginning of putback area
@@ -64,7 +63,7 @@ namespace ttcl {
       }
 
       /// Destructor
-      ~bzstreambuf() {
+      ~gzstreambuf() {
 	close();
       }
 
@@ -74,7 +73,7 @@ namespace ttcl {
       }
 
       /// Open
-      bzstreambuf* open(const char* _name, int _open_mode) {
+      gzstreambuf* open(const char* _name, int _open_mode) {
 	// Not open before
 	if (is_open())
 	  return 0;
@@ -94,7 +93,7 @@ namespace ttcl {
 	  *fmodeptr++ = 'w';
 	*fmodeptr++ = 'b';
 	*fmodeptr = '\0';
-	file_ = BZ2_bzopen(_name, fmode);
+	file_ = gzopen(_name, fmode);
 	if (file_ == 0)
 	  return 0;
 	opened_ = 1;
@@ -104,13 +103,13 @@ namespace ttcl {
       }
 
       /// Close
-      bzstreambuf* close() {
+      gzstreambuf* close() {
 	// Sync and close
 	if (is_open()) {
 	  sync();
 	  opened_ = 0;
-	  BZ2_bzclose(file_);
-	  return this;
+	  if (gzclose(file_) == Z_OK)
+            return this;
 	}
 
 	// Return null
@@ -154,7 +153,7 @@ namespace ttcl {
 	std::memcpy(buffer_ + (4 - n_putback), gptr() - n_putback, n_putback);
 
 	// ERROR or EOF
-	int num = BZ2_bzread(file_, buffer_+4, bufferSize-4);
+	int num = gzread(file_, buffer_+4, bufferSize-4);
 	if (num <= 0)
 	  return EOF;
 
@@ -181,28 +180,28 @@ namespace ttcl {
     };
     
 
-    /// Bzlib Stream Base
-    class bzstreambase :
+    /// Zlib Stream Base
+    class gzstreambase :
       virtual public std::ios {
     protected:
       /// Stream buffer
-      bzstreambuf buf_;
+      gzstreambuf buf_;
 
     public:
       /// Empty Constructor
-      bzstreambase() {
+      gzstreambase() {
 	// Initialize
 	init(&buf_);
       }
 
       /// Constructor
-      bzstreambase(const char* _name, int _open_mode) {
+      gzstreambase(const char* _name, int _open_mode) {
 	init(&buf_);
 	open(_name, _open_mode);
       }
 
       /// Destructor
-      ~bzstreambase() {
+      ~gzstreambase() {
 	buf_.close();
       }
 
@@ -225,60 +224,60 @@ namespace ttcl {
       }
 
       /// Buffer
-      bzstreambuf* rdbuf() {
+      gzstreambuf* rdbuf() {
 	return &buf_;
       }
     };
 
 
-    /// Input Bzlib Stream
-    class ibzstream :
-      public bzstreambase, public std::istream {
+    /// Input Zlib Stream
+    class igzstream :
+      public gzstreambase, public std::istream {
     public:
       /// Empty Constructor
-      ibzstream() :
+      igzstream() :
 	std::istream(&buf_) {
       }
 
       /// Constructor
-      ibzstream(const char* _name, int _open_mode = std::ios::in) :
-	bzstreambase(_name, _open_mode), std::istream(&buf_) {
+      igzstream(const char* _name, int _open_mode = std::ios::in) :
+	gzstreambase(_name, _open_mode), std::istream(&buf_) {
       }
 
       /// Buffer
-      bzstreambuf* rdbuf() {
-	return bzstreambase::rdbuf();
+      gzstreambuf* rdbuf() {
+	return gzstreambase::rdbuf();
       }
 
       /// Open
       void open(const char* _name, int _open_mode = std::ios::in) {
-        bzstreambase::open(_name, _open_mode);
+        gzstreambase::open(_name, _open_mode);
       }
     };
 
 
-    //// Output Bzlib Stream
-    class obzstream :
-      public bzstreambase, public std::ostream {
+    //// Output Zlib Stream
+    class ogzstream :
+      public gzstreambase, public std::ostream {
     public:
       /// Empty Constructor
-      obzstream() :
+      ogzstream() :
 	std::ostream(&buf_) {
       }
 
       /// Constructor
-      obzstream(const char* _name, int _open_mode = std::ios::out)
-        : bzstreambase(_name, _open_mode), std::ostream(&buf_) {
+      ogzstream(const char* _name, int _open_mode = std::ios::out)
+        : gzstreambase(_name, _open_mode), std::ostream(&buf_) {
       }
 
       /// Buffer
-      bzstreambuf* rdbuf() {
-	return bzstreambase::rdbuf();
+      gzstreambuf* rdbuf() {
+	return gzstreambase::rdbuf();
       }
 
       /// Open
       void open(const char* _name, int _open_mode = std::ios::out) {
-        bzstreambase::open(_name, _open_mode);
+        gzstreambase::open(_name, _open_mode);
       }
     };
   }
