@@ -1,5 +1,5 @@
-#ifndef _TTCL_TYPES_HXX
-#define _TTCL_TYPES_HXX
+#ifndef TTCL_TYPES_HXX
+#define TTCL_TYPES_HXX
 
 // TTCL: The Template Clustering Library
 

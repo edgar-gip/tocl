@@ -1,5 +1,5 @@
-#ifndef _TTCL_EXCEPTION_HXX
-#define _TTCL_EXCEPTION_HXX
+#ifndef TTCL_EXCEPTION_HXX
+#define TTCL_EXCEPTION_HXX
 
 // TTCL: The Template Clustering Library
 

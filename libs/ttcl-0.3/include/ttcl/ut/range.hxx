@@ -1,5 +1,5 @@
-#ifndef _TTCL_UT_RANGE_HXX
-#define _TTCL_UT_RANGE_HXX
+#ifndef TTCL_UT_RANGE_HXX
+#define TTCL_UT_RANGE_HXX
 
 // TTCL: The Template Clustering Library
 

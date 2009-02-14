@@ -1,5 +1,5 @@
-#ifndef _TTCL_IO_GZSTREAM_HXX
-#define _TTCL_IO_GZSTREAM_HXX
+#ifndef TTCL_IO_GZSTREAM_HXX
+#define TTCL_IO_GZSTREAM_HXX
 
 // TTCL: The Template Clustering Library
 
