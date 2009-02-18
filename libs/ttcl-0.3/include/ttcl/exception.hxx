@@ -18,9 +18,7 @@
 #include <iostream>
 #include <string>
 
-#ifndef TTCL_NO_USE_BOOST
 #include <boost/format.hpp>
-#endif
 
 #ifndef TTCL_WHAT_SIZE
 #define TTCL_WHAT_SIZE 1024
@@ -76,10 +74,8 @@ namespace ttcl {
 #endif
     }
 
-#ifndef TTCL_NO_USE_BOOST
     /// Constructor from a boost::format
-    /** Disabled if TTCL_NO_USE_BOOST is defined
-	@param _message Description message
+    /** @param _message Description message
 	@param _file    Exception source file
 	@param _line_no Exception source line number
     */
@@ -101,7 +97,6 @@ namespace ttcl {
 	throw std::bad_alloc();
 #endif
     }
-#endif
 
     /// Copy Constructor
     /** @param _other Source exception
