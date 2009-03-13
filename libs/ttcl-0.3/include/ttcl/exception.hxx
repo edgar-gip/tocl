@@ -12,6 +12,8 @@
 #include <execinfo.h>
 #endif
 
+#include <cstdarg>
+#include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <exception>
@@ -24,6 +26,7 @@
 #define TTCL_WHAT_SIZE 1024
 #endif
 
+#include <ttcl/global.hxx>
 #include <ttcl/types.hxx>
 
 /// TTCL Namespace
@@ -51,37 +54,68 @@ namespace ttcl {
 
   public:
     /// Constructor
-    /** @param _message Description message
-	@param _file    Exception source file
+    /** @param _file    Exception source file
 	@param _line_no Exception source line number
+	@param _message Description message
     */
-    exception(std::string _message, std::string _file, uint _line_no) :
+    exception(const std::string& _file, uint _line_no,
+	      const std::string& _message) :
       message_(_message), file_(_file), line_no_(_line_no) {
 #ifdef _EXECINFO_H
       // Get the backtrace
-      void* buffer[20];
-      n_filled_ = backtrace(buffer, 20);
-      
-      // Split the first 2
-      n_filled_ -= 2;
-      
-      // Convert to symbols
-      trace_ = backtrace_symbols(buffer + 2, n_filled_);
-
-      // Check for out of memory
-      if (not trace_)
-	throw std::bad_alloc();
+      get_backtrace();
 #endif
     }
 
     /// Constructor from a boost::format
-    /** @param _message Description message
-	@param _file    Exception source file
+    /** @param _file    Exception source file
 	@param _line_no Exception source line number
+	@param _message Description message
     */
-    exception(boost::format _message, std::string _file, uint _line_no) :
+    exception(const std::string& _file, uint _line_no,
+	      const boost::format& _message) :
       message_(_message.str()), file_(_file), line_no_(_line_no) {
 #ifdef _EXECINFO_H
+      // Get the backtrace
+      get_backtrace();
+#endif
+    }
+
+    /// Constructor from a char* and a variable argument list
+    /** printf-style interpolation
+     */
+    exception(const std::string& _file, uint _line_no,
+	      const char* _format, ...) ttcl_printf_check(4, 5) :
+      message_(), file_(_file), line_no_(_line_no) {
+#ifdef _EXECINFO_H
+      // Get the backtrace
+      get_backtrace();
+#endif
+
+      // Create the list
+      std::va_list args;
+      va_start(args, _format);
+
+      // Call
+      fill_printf(_format, args);
+
+      // End
+      va_end(args);
+    }
+
+  protected:
+    /// Non-message specifying constructor
+    exception(const std::string& _file, uint _line_no) :
+      message_(), file_(_file), line_no_(_line_no) {
+#ifdef _EXECINFO_H
+      // Get the backtrace
+      get_backtrace();
+#endif
+    }
+
+#ifdef _EXECINFO_H
+    /// Get the backtrace
+    void get_backtrace() {
       // Get the backtrace
       void* buffer[20];
       n_filled_ = backtrace(buffer, 20);
@@ -95,9 +129,22 @@ namespace ttcl {
       // Check for out of memory
       if (not trace_)
 	throw std::bad_alloc();
+    }
 #endif
+
+    /// Fill printf-style
+    void fill_printf(const char* _format, std::va_list _args) {
+      // Buffer
+      char buffer[TTCL_WHAT_SIZE];
+
+      // Print to the buffer
+      std::vsnprintf(buffer, TTCL_WHAT_SIZE, _format, _args);
+
+      // Save the message
+      message_ = buffer;
     }
 
+  public:
     /// Copy Constructor
     /** @param _other Source exception
      */
@@ -129,6 +176,11 @@ namespace ttcl {
     /// Get the message
     const std::string& message() const {
       return message_;
+    }
+
+    /// Get a c message
+    const char* c_message() const {
+      return message_.c_str();
     }
 
     /// Get the file
@@ -174,10 +226,8 @@ namespace ttcl {
 }
 
 /// Throw an exception
-/** @param _message Description message
- */
-#define ttcl_fire(_message)\
-  throw ttcl::exception(_message, __FILE__, __LINE__)
+#define ttcl_fire(...)						\
+  throw ttcl::exception(__FILE__, __LINE__, __VA_ARGS__)
 
 #endif
 
