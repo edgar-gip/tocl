@@ -174,18 +174,31 @@ namespace ttcl {
     }
 
     /// Get the message
+    /** As a string
+     */
     const std::string& message() const {
       return message_;
     }
 
-    /// Get a c message
+    /// Get the message 
+    /** As a char*
+     */
     const char* c_message() const {
       return message_.c_str();
     }
 
     /// Get the file
+    /** As a string
+     */
     const std::string& file() const {
       return file_;
+    }
+
+    /// Get the file
+    /** As a char*
+     */
+    const char* c_file() const {
+      return file_.c_str();
     }
 
     /// Get the line number
