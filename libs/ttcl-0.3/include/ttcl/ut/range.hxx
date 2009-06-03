@@ -143,16 +143,20 @@ namespace ttcl {
       /// Value
       result_type value_;
 
+      /// Increment
+      result_type incr_;
+
     public:
       /// Constructor
-      range_generator(const result_type& _value = result_type()) :
+      range_generator(const result_type& _value = result_type(),
+		      const result_type& _incr  = result_type(1)) :
 	value_(_value) {
       }
 
       /// Invocation
       result_type operator()() {
 	result_type result = value_;
-	++value_;
+	value_ += incr_;
 	return result;
       }
     };
