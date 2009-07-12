@@ -8,6 +8,9 @@
     @author Edgar Gonzàlez i Pellicer
 */
 
+/// Null pointer
+#define ttcl_nullptr (void*)(0)
+
 /// printf()-like Format Check
 #ifdef __GNUC__
 #define ttcl_printf_check(str_idx, par_idx)		\
