@@ -242,5 +242,9 @@ namespace ttcl {
 #define ttcl_fire(...)						\
   throw ttcl::exception(__FILE__, __LINE__, __VA_ARGS__)
 
+/// TODO
+#define ttcl_todo\
+  ttcl_fire("%s not implemented", __PRETTY_FUNCTION__);
+
 #endif
 
