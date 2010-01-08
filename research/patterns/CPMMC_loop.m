@@ -16,7 +16,7 @@ function [ expec, model, info ] = CPMMC_loop(data, opts)
   [ n_dims, n_data ] = size(data);
 
   % Sum of the data
-  sum_data = full(sum(data, 2));
+  sum_data = full(sum(data, 2)); % n_dims * 1
 
 
   %%%%%%%%%%%%%%%%%%
@@ -41,17 +41,28 @@ function [ expec, model, info ] = CPMMC_loop(data, opts)
   [ constraint, violation ] = CPMMC_mvc(data, omega, b);
 
   % Add first constraint
-  W   = constraint;
-  c_k = mean(constraint, 1);
+  W     = constraint;
+  avg_W = mean(constraint, 1);
 
   % Loop
   iterations = 0;
   finish     = 0;
   while ~finish
     % Solve the non-convex optimization problem via CCCP
-    [ omega, b, xi, obj, its ] = ...
-	CPMMC_CCCP_dual(data, omega, b, xi, W, opts.C, opts.l, ...
-			opts.per_quit, sum_data, c_k, iterations, violation);
+    if opts.use_dual
+      [ omega, b, xi, obj, its ] = ...
+	  CPMMC_CCCP_dual(data, omega, b, xi, W, opts.C, opts.l, ...
+			  opts.per_quit, sum_data, avg_W, iterations, ...
+			  violation, opts.verbose);
+    else
+      [ omega, b, xi, obj, its ] = ...
+	  CPMMC_CCCP(data, omega, b, xi, W, opts.C, opts.l, ...
+		     opts.per_quit, sum_data, avg_W, iterations, ...
+		     violation, opts.verbose);
+    end
+
+    % Add the iterations
+    iterations = iterations + its;
 
     % Find the most violated constraint in the original problem
     [ constraint, violation ] = CPMMC_mvc(data, omega, b);
@@ -60,18 +71,20 @@ function [ expec, model, info ] = CPMMC_loop(data, opts)
     if violation <= xi * (1 + opts.epsilon)
       finish = 1;
     else
-      W   = [ W, constraint ];
-      c_k = [ c_k, mean(constraint, 1) ];
-    end;
-  end;
+      W     = [ W, constraint ];
+      avg_W = [ avg_W, mean(constraint, 1) ];
+    end
+  end
 
   % Display final output
-  fprintf(2, ' %6d %4d %8g %8g %8g\n', iterations, size(W, 2), ...
-          obj, xi, violation);
+  if opts.verbose
+    fprintf(2, " %6d %4d %8g %8g %8g\n", iterations, size(W, 2), ...
+            obj, xi, violation);
+  end
 
   % Expectation
-  clusters = 2 * sign(omega' * data + b) + 1;
-  expec    = sparse(clusters, 1:n_data, ones(1, n_data));
+  clusters = sign(omega' * data + b) / 2 + 1.5;
+  expec    = sparse(clusters, 1 : n_data, ones(1, n_data), 2, n_data);
 
   % Model
   model       = struct();

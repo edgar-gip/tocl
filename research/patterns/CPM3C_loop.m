@@ -55,7 +55,7 @@ function [ expec, model, info ] = CPM3C_loop(data, k, opts)
     % Solve the non-convex optimization problem via CCCP
     [ omega, xi, obj, its ] = ...
 	CPM3C_CCCP(data, omega, xi, W, opts.C, opts.l, opts.per_quit,
-		   sum_data, z, iterations, violation);
+		   sum_data, z, iterations, violation, opts.verbose);
  
     % Add the iterations
     iterations = iterations + its;
@@ -72,12 +72,14 @@ function [ expec, model, info ] = CPM3C_loop(data, k, opts)
       active   = full(sum(constraint));
       W{2,n_W} = sparse(1:n_data, 1:n_data, active, n_data, n_data);
       W{3,n_W} = sum(active) / n_data;
-    end;
-  end;
+    end
+  end
 
   % Display final output
-  fprintf(2, ' %6d %4d %8g %8g %8g\n', iterations, size(W, 2), ...
-          obj, xi, violation);
+  if opts.verbose
+    fprintf(2, " %6d %4d %8g %8g %8g\n", iterations, size(W, 2), ...
+            obj, xi, violation);
+  end
 
   % Classify
   clusters = CPM3C_cluster(data, omega);

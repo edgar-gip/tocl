@@ -8,7 +8,7 @@
 
 function [ omega, xi, obj, its ] = ...
       CPM3C_CCCP(data, omega, xi, W, C, l, per_quit, sum_data, z, ...
-		 iterations, violation)
+		 iterations, violation, verbose)
 
   % Sizes
   [ n_dims, n_data ] = size(data);
@@ -44,8 +44,8 @@ function [ omega, xi, obj, its ] = ...
       Ain(cidx, (pw+1):(pw+n_dims)) =  sum_data;
       Ain(cidx, (qw+1):(qw+n_dims)) = -sum_data;
       % bub(cidx)                     = +l;
-    end;
-  end;
+    end
+  end
 
   % Equalities:
   Aeq = [];
@@ -63,12 +63,14 @@ function [ omega, xi, obj, its ] = ...
   obj = CPM3C_cost(omega, xi, C);
   
   % Display
-  if rem(iterations + 1, 10) == 0
-    fprintf(2, '+ %6d %4d %8g %8g %8g\n', iterations + 1, nConstraints, ...
-	    obj, xi, violation);
-  else
-    fprintf(2, '+');
-  end;
+  if verbose
+    if rem(iterations + 1, 10) == 0
+      fprintf(2, "+ %6d %4d %8g %8g %8g\n", iterations + 1, nConstraints, ...
+	      obj, xi, violation);
+    else
+      fprintf(2, "+");
+    end
+  end
 
   % Loop
   its    = 1;
@@ -93,7 +95,7 @@ function [ omega, xi, obj, its ] = ...
       xcidx = xcidx + 1;
       Ain(xcidx, :) = [ reshape(coeffs, 1, n_weights), -1 ];
       bub(xcidx)    = sum(sum(constraint .* z)) / n_data - mean_active;
-    end;
+    end
 
     % Solve
     [ x, obj ] = qp(startx, H, f, Aeq, beq, lb, ub, blb, Ain, bub);
@@ -103,12 +105,14 @@ function [ omega, xi, obj, its ] = ...
     xi    = x(n_weights + 1);
 
     % Display
-    if rem(iterations + its + 1, 10) == 0
-      fprintf(2, '. %6d %4d %8g %8g %8g\n', iterations + its + 1, ...
-	      n_constraints, obj, xi, violation);
-    else
-      fprintf(2, '.');
-    end;
+    if verbose
+      if rem(iterations + its + 1, 10) == 0
+	fprintf(2, ". %6d %4d %8g %8g %8g\n", iterations + its + 1, ...
+		n_constraints, obj, xi, violation);
+      else
+	fprintf(2, ".");
+      end
+    end
 
     % Finish?
     if old_obj - obj >= 0 && old_obj - obj < per_quit * old_obj
@@ -120,11 +124,11 @@ function [ omega, xi, obj, its ] = ...
 
       % Start from here
       startx = x;
-    end;
+    end
 
     % One more iteration
     its = its + 1;
-  end;
+  end
   
 % Local Variables:
 % mode:octave

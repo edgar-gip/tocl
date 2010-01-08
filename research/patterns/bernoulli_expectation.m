@@ -18,7 +18,6 @@ function [ expec, log_like ] = bernoulli_expectation(data, model)
 
   % Log-likelihood
   log_like = sum(sum_expec);
-end;
 
 % Local Variables:
 % mode:octave

@@ -8,7 +8,7 @@
 
 function [ omega, b, xi, obj, its ] = ...
       CPMMC_CCCP_dual(data, omega, b, xi, W, C, l, per_quit, x_k, c_k, ...
-		      iterations, violation);
+		      iterations, violation, verbose);
 
   % Sizes
   [ n_data, n_constraints ] = size(W);
@@ -18,12 +18,14 @@ function [ omega, b, xi, obj, its ] = ...
   obj = CPM3C_cost(omega, xi, C);
   
   % Display
-  if rem(iterations + 1, 10) == 0
-    fprintf(2, '+ %6d %4d %8g %8g %8g\n', iterations + 1, n_constraints, ...
-	    obj, xi, violation);
-  else
-    fprintf(2, '+');
-  end;
+  if verbose
+    if rem(iterations + 1, 10) == 0
+      fprintf(2, "+ %6d %4d %8g %8g %8g\n", iterations + 1, n_constraints, ...
+	      obj, xi, violation);
+    else
+      fprintf(2, "+");
+    end
+  end
 
   % Objective function
   % H = <changing>
@@ -80,18 +82,24 @@ function [ omega, b, xi, obj, its ] = ...
     obj = -obj;
 
     % Find primal variables
-    omega = x_mat * x
-    xi    = (obj - 0.5 * omega' * omega) / C
-    SVs   = find(x(1 : n_constraints) > 0)
-    b     = (c_k(SVs(1)) - xi - omega' * z_k(:,SVs(1))) / s_k(SVs(1));
+    omega = x_mat * x;
+    xi    = (obj - 0.5 * omega' * omega) / C;
+    SVs   = x(1 : n_constraints) > 0;
+    if any(SVs)
+      b   = mean((c_k(SVs) - xi - omega' * z_k(:, SVs)) ./ s_k(SVs));
+    else
+      b   = 0;
+    end
 
     % Display
-    if rem(iterations + its + 1, 10) == 0
-      fprintf(2, '. %6d %4d %8g %8g %8g\n', iterations + its + 1, ...
-	      n_constraints, obj, xi, violation);
-    else
-      fprintf(2, '.');
-    end;
+    if verbose
+      if rem(iterations + its + 1, 10) == 0
+	fprintf(2, ". %6d %4d %8g %8g %8g\n", iterations + its + 1, ...
+		n_constraints, obj, xi, violation);
+      else
+	fprintf(2, ".");
+      end
+    end
 
     % Finish?
     if old_obj - obj >= 0 && old_obj - obj < per_quit * old_obj
@@ -100,11 +108,11 @@ function [ omega, b, xi, obj, its ] = ...
     else
       % Start from here
       startx = x;
-    end;
+    end
 
     % One more iteration
     its = its + 1;
-  end;
+  end
 
 % Local Variables:
 % mode:octave
