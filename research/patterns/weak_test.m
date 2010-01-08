@@ -39,9 +39,11 @@ test_truth_sizes = full(sum(test_truth_expec, 2));
 
 % Accumulated scores
 train_berni_scores = zeros(1, n_train);
+train_kmean_scores = zeros(1, n_train);
 train_svm_scores   = zeros(1, n_train);
 train_cpmmc_scores = zeros(1, n_train);
 test_berni_scores  = zeros(1, n_test);
+test_kmean_scores  = zeros(1, n_test);
 test_svm_scores    = zeros(1, n_test);
 test_cpmmc_scores  = zeros(1, n_test);
 
@@ -59,6 +61,8 @@ for r = 1 : repeats
     ++seed2;
   end
 
+  % Seed expectation
+  seed_expec = sparse([ 1, 2 ], [ seed1, seed2 ], [ 1, 1 ], 2, n_train);
 
   %%%%%%%%%%%%%
   % Bernoulli %
@@ -66,7 +70,7 @@ for r = 1 : repeats
 
   % Find the model
   berni_opts         = struct();
-  berni_opts.expec_0 = sparse([ 1, 2 ], [ seed1, seed2 ], [ 1, 1 ], 2, n_train);
+  berni_opts.expec_0 = seed_expec;
   [ berni_expec, berni_model, berni_info ] = ...
       bernoulli_clustering(train_data, 2, berni_opts);
 
@@ -81,6 +85,32 @@ for r = 1 : repeats
   % Update test scores
   test_berni_expec   = bernoulli_expectation(test_data, berni_model);
   test_berni_scores += berni_scores * test_berni_expec;
+
+  % Log
+  fprintf(2, "    - Updated scores\n");
+
+
+  %%%%%%%%%%%
+  % k-Means %
+  %%%%%%%%%%%
+
+  % Find k-Means
+  kmean_opts    = struct();
+  kmean_expec_0 = seed_expec();
+  [ kmean_expec, kmean_model, kmean_info ] = ...
+      kmeans_clustering(train_data, 2, kmean_opts);
+
+  % Log
+  fprintf(2, "    k-Means clustering in %d iterations (Sum-sq=%g)\n", ...
+	  kmean_info.iterations, kmean_info.sum_sq);
+
+  % Update train scores
+  kmean_scores        = sum(kmean_expec, 2)';
+  train_kmean_scores += kmean_scores * kmean_expec;
+  
+  % Update test scores
+  test_kmean_expec   = kmeans_expectation(test_data, kmean_model);
+  test_kmean_scores += kmean_scores * test_kmean_expec;
 
   % Log
   fprintf(2, "    - Updated scores\n");
@@ -156,6 +186,12 @@ end
 berni_roc = diag(1 ./ test_truth_sizes) * ...
             full(cumsum(test_truth_expec(:,test_sorted_berni_indices), 2));
 
+% Sort test samples by k-Means score
+[ test_sorted_kmean_scores, test_sorted_kmean_indices ] = ...
+    sort(test_kmean_scores, 'descend');
+kmean_roc = diag(1 ./ test_truth_sizes) * ...
+            full(cumsum(test_truth_expec(:,test_sorted_kmean_indices), 2));
+
 % Sort test samples by SVM score
 [ test_sorted_svm_scores, test_sorted_svm_indices ] = ...
     sort(test_svm_scores, 'descend');
@@ -170,6 +206,7 @@ cpmmc_roc = diag(1 ./ test_truth_sizes) * ...
 
 % Plot
 plot(berni_roc(1,:), berni_roc(2,:), 'r-;Bernoulli;', ...
+     kmean_roc(1,:), kmean_roc(2,:), 'c-;k-Means;', ...
      svm_roc  (1,:), svm_roc  (2,:), 'g-;SVM;', ...
      cpmmc_roc(1,:), cpmmc_roc(2,:), 'b-;CPMMC;', ...
      [ 0, 1 ],       [ 0, 1 ],       'm-;Random;');
