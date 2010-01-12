@@ -28,7 +28,7 @@ Read a sparse matrix from a file\n\
     if (args.length() < 1 or args.length() > 2 or nargout < 1 or nargout > 2)
       throw (const char*)0;
 
-    // Get the first argument
+    // Check the first argument
     if (not args(0).is_string())
       throw "@var{file} should be a string";
 
@@ -128,6 +128,11 @@ Read a sparse matrix from a file\n\
       error(_error);
     else
       print_usage();
+  }
+  // Was there an exception?
+  catch (ttcl::exception& _e) {
+    // Display the error
+    error(_e.c_message());
   }
 
   // That's all!

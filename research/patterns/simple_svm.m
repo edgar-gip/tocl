@@ -20,14 +20,14 @@ function [ model, info ] = simple_svm(data, classes, opts)
     usage("classes must be of size 1 * n_data");
   end
 
-  % Are the options given?
+  % Defaults
   if nargin() < 3
     opts = struct();
   elseif ~isstruct(opts)
     usage("opts must be a structure if present");
   end
 
-  % Use default values
+  % use_dual: use or not dual
   if ~isfield(opts, "use_dual")
     opts.use_dual = true();
   end

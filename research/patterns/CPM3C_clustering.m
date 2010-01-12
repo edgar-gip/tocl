@@ -16,6 +16,8 @@ function [ expec, model, info ] = CPM3C_clustering(data, k, opts)
   % Defaults
   if nargin() < 3
     opts = struct();
+  elseif ~isstruct(opts)
+    usage("opts must be a structure if present");
   end
 
   % C: same as in SVM
