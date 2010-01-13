@@ -59,9 +59,10 @@ struct redo_info {
 // Read a redo file
 DEFUN_DLD(read_redo, args, nargout,
           "-*- texinfo -*-\n\
-@deftypefn {Loadable Function} {[ @var{info} ] =} read_sparse(@var{file}, @var{header})\n\
+@deftypefn {Loadable Function} {[ @var{info} ] =}\
+ read_redo(@var{file}, @var{header})\n\
 \n\
-Read a sparse matrix from a file\n\
+Read a the contents of a redo file section from a file\n\
 @end deftypefn") {
   // Result
   octave_value_list result;

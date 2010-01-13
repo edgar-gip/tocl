@@ -16,7 +16,8 @@ using namespace std;
 // Read a sparse matrix from a file
 DEFUN_DLD(read_sparse, args, nargout,
           "-*- texinfo -*-\n\
-@deftypefn {Loadable Function} {[ @var{data}, @var{truth} ] =} read_sparse(@var{file}, @var{has_truth} = false)\n\
+@deftypefn {Loadable Function} {[ @var{data}, @var{truth} ] =}\
+ read_sparse(@var{file}, @var{has_truth} = false)\n\
 \n\
 Read a sparse matrix from a file\n\
 @end deftypefn") {

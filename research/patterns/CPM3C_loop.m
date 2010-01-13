@@ -1,69 +1,69 @@
-% Cutting Plane Multiclass Maximum Margin Clustering Algorithm (CPM3C)
-% Main loop
+%% Cutting Plane Multiclass Maximum Margin Clustering Algorithm (CPM3C)
+%% Main loop
 
-% Author: Edgar Gonzalez
+%% Author: Edgar Gonzalez
 
-% Based in CPMMC.m
-% Author: Bin Zhao
+%% Based in CPMMC.m
+%% Author: Bin Zhao
 
 function [ expec, model, info ] = CPM3C_loop(data, k, opts)
 
-  %%%%%%%%%%%%%%%%%%%
-  % Data statistics %
-  %%%%%%%%%%%%%%%%%%%
+  %%%%%%%%%%%%%%%%%%%%%
+  %% Data statistics %%
+  %%%%%%%%%%%%%%%%%%%%%
 
-  % Sizes
+  %% Sizes
   [ n_dims, n_data ] = size(data);
 
-  % Sum of the data
+  %% Sum of the data
   sum_data = full(sum(data, 2));
 
 
-  %%%%%%%%%%%%%%%%%%
-  % Initial values %
-  %%%%%%%%%%%%%%%%%%
+  %%%%%%%%%%%%%%%%%%%%
+  %% Initial values %%
+  %%%%%%%%%%%%%%%%%%%%
 
-  % omega
+  %% omega
   omega = opts.omega_0;
     
-  % xi
+  %% xi
   xi = opts.xi_0;
 
-  % Constraint set
+  %% Constraint set
   W   = {}; 
   n_W = 0;
 
 
-  %%%%%%%%%
-  % Solve %
-  %%%%%%%%%
+  %%%%%%%%%%%
+  %% Solve %%
+  %%%%%%%%%%%
 
-  % Find the most violated constraint in the original problem
+  %% Find the most violated constraint in the original problem
   [ constraint, violation, z ] = CPM3C_mvc(data, omega);
 
-  % Add first constraint
+  %% Add first constraint
   n_W = n_W + 1;
   W{1,n_W} = constraint;
   active   = full(sum(constraint));
   W{2,n_W} = sparse(1:n_data, 1:n_data, active, n_data, n_data);
   W{3,n_W} = sum(active) / n_data;
 
-  % Loop
+  %% Loop
   iterations = 0;
   finish     = 0;
   while ~finish
-    % Solve the non-convex optimization problem via CCCP
+    %% Solve the non-convex optimization problem via CCCP
     [ omega, xi, obj, its ] = ...
 	CPM3C_CCCP(data, omega, xi, W, opts.C, opts.l, opts.per_quit,
 		   sum_data, z, iterations, violation, opts.verbose);
  
-    % Add the iterations
+    %% Add the iterations
     iterations = iterations + its;
 
-    % Find the most violated constraint in the original problem
+    %% Find the most violated constraint in the original problem
     [ constraint, violation, z ] = CPM3C_mvc(data, omega);
 
-    % Finish?
+    %% Finish?
     if violation <= xi * (1 + opts.epsilon)
       finish = 1;
     else
@@ -75,21 +75,21 @@ function [ expec, model, info ] = CPM3C_loop(data, k, opts)
     end
   end
 
-  % Display final output
+  %% Display final output
   if opts.verbose
     fprintf(2, " %6d %4d %8g %8g %8g\n", iterations, size(W, 2), ...
             obj, xi, violation);
   end
 
-  % Classify
+  %% Classify
   clusters = CPM3C_cluster(data, omega);
   expec    = sparse(1 + clusters, 1:n_data, ones(1, n_data));
 
-  % Model
+  %% Model
   model       = struct();
   model.omega = omega;
 
-  % Information
+  %% Information
   info             = opts;
   info.xi          = xi;
   info.W           = W;
@@ -98,6 +98,6 @@ function [ expec, model, info ] = CPM3C_loop(data, k, opts)
   info.constraints = size(W, 2);
   info.violation   = violation;
 
-% Local Variables:
-% mode:octave
-% End:
+%% Local Variables:
+%% mode:octave
+%% End:

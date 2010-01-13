@@ -1,12 +1,34 @@
+// Copyright (C) 2010 Edgar Gonzàlez i Pellicer <edgar.gip@gmail.com>
+//
+// This file is part of liboctave-0.1.
+//
+// liboctave is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the
+// Free Software Foundation; either version 3 of the License, or (at your
+// option) any later version.
+//
+// liboctave is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+// for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with liboctave; see the file COPYING.  If not, see
+// <http://www.gnu.org/licenses/>.
+
+
+#include <exception>
+
 #include <octave/oct.h>
+
 
 /****************/
 /* Append cells */
 /****************/
 
-DEFUN_DLD(cellcat, args, nargout,
+DEFUN_DLD(cell_cat, args, nargout,
           "-*- texinfo -*-\n\
-@deftypefn {Loadable Function} {[ @var{cell} ] =} cellcat(@var{cell}, ...)\n\
+@deftypefn {Loadable Function} {[ @var{cell} ] =} cell_cat(@var{cell}, ...)\n\
 \n\
 Append cells\n\
 @end deftypefn") {
@@ -62,9 +84,9 @@ Append cells\n\
 /* Push to a cell */
 /******************/
 
-DEFUN_DLD(cellpush, args, nargout,
+DEFUN_DLD(cell_push, args, nargout,
           "-*- texinfo -*-\n\
-@deftypefn {Loadable Function} {[ @var{cell} ] =} cellcat(@var{cell}, ...)\n\
+@deftypefn {Loadable Function} {[ @var{cell} ] =} cell_push(@var{cell}, ...)\n\
 \n\
 Push to a cell\n\
 @end deftypefn") {
@@ -114,9 +136,9 @@ Push to a cell\n\
 /* Tail of a cell */
 /******************/
 
-DEFUN_DLD(celltail, args, nargout,
+DEFUN_DLD(cell_tail, args, nargout,
           "-*- texinfo -*-\n\
-@deftypefn {Loadable Function} {[ @var{cell} ] =} celltail(@var{cell})\n\
+@deftypefn {Loadable Function} {[ @var{cell} ] =} cell_tail(@var{cell})\n\
 \n\
 Tail of a cell\n\
 @end deftypefn") {

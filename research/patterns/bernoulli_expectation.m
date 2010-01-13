@@ -1,24 +1,24 @@
-% Bernoulli distribution clustering
-% Expectation
+%% Bernoulli distribution clustering
+%% Expectation
 
-% Author: Edgar Gonzalez
+%% Author: Edgar Gonzalez
 
 function [ expec, log_like ] = bernoulli_expectation(data, model)
-  % Number of data
+  %% Number of data
   n_data = size(data, 2);
 
-  % Find the expectation
+  %% Find the expectation
   expec = model.alpha_ctheta * ones(1, n_data) .+ ...
           model.theta        * data;
 
-  % Normalize
+  %% Normalize
   max_expec = max(expec);
   sum_expec = max_expec .+ log(sum(exp(expec .- ones(model.k, 1) * max_expec)));
   expec     = exp(expec .- ones(model.k, 1) * sum_expec );
 
-  % Log-likelihood
+  %% Log-likelihood
   log_like = sum(sum_expec);
 
-% Local Variables:
-% mode:octave
-% End:
+%% Local Variables:
+%% mode:octave
+%% End:

@@ -12,7 +12,9 @@
 
 DEFUN_DLD(CPM3C_mvc, args, nargout,
           "-*- texinfo -*-\n\
-@deftypefn {Loadable Function} {[ @var{constraint}, @var{violation}, @var{z}, @var{product} ] =} CPM3C_mvc(@var{data}, @var{omega})\n\
+@deftypefn {Loadable Function}\
+ {[ @var{constraint}, @var{violation}, @var{z}, @var{product} ] =}\
+ CPM3C_mvc(@var{data}, @var{omega})\n\
 \n\
 Find the CPM3C most violated constraint\n\
 @end deftypefn") {
@@ -164,7 +166,7 @@ Find the CPM3C most violated constraint\n\
 
 DEFUN_DLD(CPM3C_z, args, nargout,
           "-*- texinfo -*-\n\
-@deftypefn {Loadable Function} {@var{z} =} CPM3C_z(@var{data}, @var{omega})\n \
+@deftypefn {Loadable Function} {@var{z} =} CPM3C_z(@var{data}, @var{omega})\n\
 \n\
 Find the CPM3C z matrix\n\
 @end deftypefn") {
@@ -263,7 +265,8 @@ Find the CPM3C z matrix\n\
 
 DEFUN_DLD(CPM3C_cluster, args, nargout,
           "-*- texinfo -*-\n\
-@deftypefn {Loadable Function} {@var{clustering} =} CPM3C_cluster(@var{data}, @var{omega})\n\
+@deftypefn {Loadable Function} {@var{clustering} =}\
+ CPM3C_cluster(@var{data}, @var{omega})\n\
 \n\
 Find the CPM3C clustering\n\
 @end deftypefn") {

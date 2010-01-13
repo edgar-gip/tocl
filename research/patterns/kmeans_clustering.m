@@ -1,88 +1,88 @@
-% k-Means clustering
-% Main procedure
+%% k-Means clustering
+%% Main procedure
 
-% Author: Edgar Gonzalez
+%% Author: Edgar Gonzalez
 
 function [ expec, model, info ] = kmeans_clustering(data, k, opts)
 
-  % Data and k must be given
+  %% Data and k must be given
   if nargin() < 2 || nargin() > 3
     usage("[ expec, model, info ] = kmeans_clustering(data, k [, opts ])");
   end
 
-  % Size
+  %% Size
   [ n_dims, n_data ] = size(data);
 
-  % Are the options given?
+  %% Are the options given?
   if nargin() < 3
     opts = struct();
   elseif ~isstruct(opts)
     usage("opts must be a structure if present");
   end
 
-  % Starting expectation
+  %% Starting expectation
   if ~isfield(opts, "expec_0")
-    % Take it at random
+    %% Take it at random
     expec_0   = rand(k, n_data);
     expec_0 ./= ones(k, 1) * sum(expec_0);
     opts.expec_0 = expec_0;
   else
-    % Check the size
+    %% Check the size
     [ expec_0_r, expec_0_c ] = size(opts.expec_0);
     if expec_0_r ~= k || expec_0_c ~= n_data
       usage("opts.expec_0 must be of size k x n_data if present");
     end
   end
 
-  % Maximum number of iterations
+  %% Maximum number of iterations
   if ~isfield(opts, "em_iterations")
-    % Default -> 100
+    %% Default -> 100
     opts.em_iterations = 100;
   end
 
-  % Variance threshold
+  %% Variance threshold
   if ~isfield(opts, "em_threshold")
-    % Default -> 1e-6
+    %% Default -> 1e-6
     opts.em_threshold = 1e-6;
   end
 
-  % Verbose
+  %% Verbose
   if ~isfield(opts, "verbose")
-    % Default -> false
+    %% Default -> false
     opts.verbose = false();
   end
 
-  % Auto-dot-product matrix
+  %% Auto-dot-product matrix
   auto_data = sum(data .* data); % 1 * n_data
 
-  % First maximization
+  %% First maximization
   model           = struct();
   model.centroids = data * opts.expec_0' / n_data; % n_dims * k
 
-  % First expectation
+  %% First expectation
   prev_sum_sq       = Inf;
   [ expec, sum_sq ] = kmeans_expectation(data, model, auto_data);
   change            = Inf;
 
-  % Info
+  %% Info
   if opts.verbose
     fprintf(2, "+");
   end
 
-  % Loop
+  %% Loop
   i = 2;
   while i <= opts.em_iterations && change >= opts.em_threshold
-    % Maximization
+    %% Maximization
     model.centroids = data * expec' / n_data; % n_dims * k
 
-    % Expectation
+    %% Expectation
     prev_sum_sq         = sum_sq;
     [ expec, sum_sq ] = kmeans_expectation(data, model, auto_data);
 
-    % Change
+    %% Change
     change = (prev_sum_sq - sum_sq) / sum_sq;
 
-    % Display
+    %% Display
     if opts.verbose
       if rem(i, 10) == 0
 	fprintf(2, ". %6d %8g %8g\n", i, sum_sq, change);
@@ -91,16 +91,16 @@ function [ expec, model, info ] = kmeans_clustering(data, k, opts)
       end
     end
 
-    % Next iteration
+    %% Next iteration
     ++i;
   end
 
-  % Display final output
+  %% Display final output
   if opts.verbose
     fprintf(2, " %6d %8g %8g %8g\n", i, sum_sq, change);
   end
 
-  % Return the information
+  %% Return the information
   info               = struct();
   info.expec_0       = opts.expec_0;
   info.em_iterations = opts.em_iterations;
@@ -110,6 +110,6 @@ function [ expec, model, info ] = kmeans_clustering(data, k, opts)
   info.prev_sum_sq   = prev_sum_sq;
   info.change        = change;
 
-% Local Variables:
-% mode:octave
-% End:
+%% Local Variables:
+%% mode:octave
+%% End:

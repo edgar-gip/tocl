@@ -1,4 +1,24 @@
+// Copyright (C) 2010 Edgar Gonzàlez i Pellicer <edgar.gip@gmail.com>
+//
+// This file is part of liboctave-0.1.
+//
+// liboctave is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the
+// Free Software Foundation; either version 3 of the License, or (at your
+// option) any later version.
+//
+// liboctave is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+// for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with liboctave; see the file COPYING.  If not, see
+// <http://www.gnu.org/licenses/>.
+
+
 #include <exception>
+#include <iostream>
 #include <string>
 
 #include <octave/oct.h>
@@ -12,7 +32,8 @@
 
 DEFUN_DLD(regex_match, args, nargout,
           "-*- texinfo -*-\n\
-@deftypefn {Loadable Function} {[ @var{match}, @var{submatch}, ... ] =} regex_match(@var{target}, @var{regex})\n\
+@deftypefn {Loadable Function} {[ @var{match}, @var{submatch}, ... ] =}\
+ regex_match(@var{target}, @var{regex})\n\
 \n\
 Match regular expression @var{regex} to @var{target}\n\
 @end deftypefn") {
@@ -84,7 +105,8 @@ Match regular expression @var{regex} to @var{target}\n\
 
 DEFUN_DLD(regex_search, args, nargout,
           "-*- texinfo -*-\n\
-@deftypefn {Loadable Function} {[ @var{match}, @var{submatch}, ... ] =} regex_search(@var{target}, @var{regex})\n\
+@deftypefn {Loadable Function} {[ @var{match}, @var{submatch}, ... ] =}\
+ regex_search(@var{target}, @var{regex})\n\
 \n\
 Search regular expression @var{regex} in @var{target}\n\
 @end deftypefn") {
