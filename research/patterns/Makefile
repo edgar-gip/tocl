@@ -15,7 +15,7 @@ read_sparse_OCTFLAGS = -I$(HOME)/devel/libs/ttcl-0.3/include
 
 # Module specific libs
 # <module>_LIBS = ...
-read_redo_LIBS   = -lbz2 -lz
+read_redo_LIBS   = -lbz2 -lz -lboost_regex
 read_sparse_LIBS = -lbz2 -lz
 
 # Objects and targets

@@ -31,20 +31,19 @@ Read a sparse matrix from a file\n\
 
     // Check the first argument
     if (not args(0).is_string())
-      throw "@var{file} should be a string";
+      throw "file should be a string";
 
     // Get the second argument
     bool has_truth = false;
     if (args.length() > 1) {
       if (not args(1).is_bool_type())
-	throw "@var{has_truth} should be a boolean if present";
+	throw "has_truth should be a boolean if present";
       has_truth = args(1).bool_value();
     }
 
     // Not has truth and two outputs?
     if (not has_truth and nargout == 2)
-      throw "@var{truth} is only defined for files with "
-	    "@var{has_truth} set to true";
+      throw "truth is only defined for files with has_truth set to true";
 
     // Open the file
     auto_ptr<istream> is

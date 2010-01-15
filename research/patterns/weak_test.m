@@ -3,6 +3,9 @@
 %% Author: Edgar Gonzàlez i Pellicer
 
 
+%% Path
+addpath("~/devel/libs/liboctave-0.1/base")
+
 %%%%%%%%%%%
 % Helpers %
 %%%%%%%%%%%
@@ -54,13 +57,19 @@ function plot_curves(title, xidx, x_label, yidx, y_label, curves, ...
   ylabel(y_label);
 endfunction
 
+%% Empty curve (constant)
+EMPTY_CURVE = zeros(6, 1);
+
+%% Dump output format(constant)
+DUMP_FORMAT = "%d %f %f %f %f %f\n";
+
+%% Field information
+enum SAMPLES NEGATIVES RECALL PRECISION F1;
+
 
 %%%%%%%%%%%%%
 %% Startup %%
 %%%%%%%%%%%%%
-
-%% Path
-addpath("~/devel/libs/liboctave-0.1/base")
 
 %% Default options
 def_opts            = struct();
@@ -69,6 +78,10 @@ def_opts.runs       = 1;
 def_opts.repeats    = 100;
 def_opts.seed       = [];
 def_opts.max_tries  = 10;
+def_opts.threshold  = 10;
+def_opts.train      = "apw2000";
+def_opts.test       = "ace0Xall_c";
+def_opts.rfnce_head = "Base-Soft-Siz";
 def_opts.do_berni   = false();
 def_opts.do_kmean   = false();
 def_opts.do_svm     = false();
@@ -93,6 +106,10 @@ def_opts.do_roc     = false();
 		"repeats=i",         "repeats",    ...
 		"seed=f",            "seed",       ...
 		"max-tries=i",       "max_tries",  ...
+		"threshold=i",       "threshold",  ...
+		"train=s",           "train",      ...
+		"test=s",            "test",       ...
+		"reference-header=s","rfnce_head", ...
 		"do-bernoulli!",     "do_berni",   ...
 		"do-kmeans!",        "do_kmean",   ...
 		"do-svm!",           "do_svm",     ...
@@ -118,8 +135,8 @@ def_opts.do_roc     = false();
 		"plot-none~",        @set_all_plot);
 
 %% Chek number of arguments
-if length(cmd_args) != 2
-  error("Missing arguments");
+if length(cmd_args) != 1 && length(cmd_args) != 3
+  error("Wrong number of arguments (should be 1 or 3)");
 endif
 
 %% Check some task is defined
@@ -127,10 +144,6 @@ if ~cmd_opts.do_dump && ...
    ~cmd_opts.do_f1 && ~cmd_opts.do_prc_rec && ~cmd_opts.do_roc
   error("No task specified");
 endif
-
-%% Get'em
-pair = (cmd_args()){1};
-feat = (cmd_args()){2};
 
 %% Set a seed
 if isempty(cmd_opts.seed)
@@ -142,17 +155,50 @@ endif
 %% Data %%
 %%%%%%%%%%
 
+%% Get arguments
+if length(cmd_args) == 1
+  %% Get it
+  data_dir = (cmd_args()){1};
+
+  %% Split
+  if ~([ match, base_dir, pair, feat ] =
+       regex_match(data_dir, '(.+)/([A-Za-z\-]+)/([sdlm]+)/?'))
+    %% Warn (and leave the dummy empty values)
+    warning("Directory %s is not splitable", data_dir);
+  endif
+
+else % length(cmd_args) == 3
+  %% Get them
+  base_dir = (cmd_args()){1};
+  pair     = (cmd_args()){2};
+  feat     = (cmd_args()){3};
+
+  %% Format the data dir
+  data_dir = sprintf("%s/%s/%s", base_dir, pair, feat);
+endif
+
+%% Infix  
+if cmd_opts.threshold == 1
+  th_infix = "";
+else
+  th_infix = sprintf(".t%d", cmd_opts.threshold);
+endif
+
 %% Files
-train = sprintf("../cldata/%s/%s/apw2000.t10.matrix.gz",    pair, feat);
-test  = sprintf("../cldata/%s/%s/ace0Xall_c.t10.matrix.gz", pair, feat);
+train_file = sprintf("%s/%s%s.matrix.gz", data_dir, cmd_opts.train, th_infix);
+test_file  = sprintf("%s/%s%s.matrix.gz", data_dir, cmd_opts.test,  th_infix);
 
 %% Prepare seed
-fprintf(2, "        Using %d as random seed...\n", cmd_opts.seed);
+fprintf(2, "        Using %d as random seed\n", cmd_opts.seed);
 rand("seed", cmd_opts.seed);
 
-%% Read data
-train_data                = read_sparse(train);
-[ test_data, test_truth ] = read_sparse(test, true());
+%% Read training data
+train_data = read_sparse(train_file);
+fprintf(2, "        Read train file %s\n", train_file);
+
+%% Read test data
+[ test_data, test_truth ] = read_sparse(test_file, true());
+fprintf(2, "        Read test file %s\n", test_file);
 
 %% Number of samples
 [ n_train_feats, n_train ] = size(train_data);
@@ -167,44 +213,6 @@ endif
 test_truth_expec = ...
     sparse(test_truth / 2 + 1.5, 1 : n_test, ones(1, n_test));
 test_truth_sizes = full(sum(test_truth_expec, 2));
-
-
-%%%%%%%%%%%%%%%
-%% Reference %%
-%%%%%%%%%%%%%%%
-
-if cmd_opts.do_rfnce
-  %% Reference
-  rfnce = ...
-      sprintf("../cldata/%s/%s/combi.t10/r0/apw2000.redo.nx.gz", pair, feat);
-  rfnce_header = ...
-      sprintf("Base-Soft-Siz ../cldata/%s/%s/ace0Xall_c.t10.matrix.gz", ...
-	      pair, feat);
-  rfnce_info = read_redo(rfnce, rfnce_header);
-
-  %% Found it?
-  if isempty(rfnce_info)
-    error("Reference information not available");
-  endif
-
-  %% Curves
-  rfnce_length = size(rfnce_info, 1);
-
-  %% ROC and total
-  rfnce_roc   = rfnce_info(:, [ 5, 4 ])';
-  rfnce_total = sum(rfnce_roc, 1);
-  rfnce_roc ./= rfnce_roc(:, rfnce_length) * ones(1, rfnce_length);
-
-  %% Precision
-  rfnce_prc   = rfnce_info(:, [ 4 ])' ./ rfnce_total;
-
-  %% F1
-  rfnce_f1    = 2 * (rfnce_prc .* rfnce_roc(2,:)) ./ ...
-                (rfnce_prc .+ rfnce_roc(2,:));
-
-  %% Curve
-  rfnce_cur   = [ rfnce_total ; rfnce_roc ; rfnce_prc ; rfnce_f1 ];
-endif
 
 
 %%%%%%%%%%%%%%
@@ -373,7 +381,7 @@ for run = 1 : cmd_opts.runs
       svm_opts          = struct();
       svm_opts.use_dual = false();
       [ svm_model, svm_info ] = ...
-	  simple_svm(train_data(:, [ seed1, seed2 ]), [ +1, -1 ], svm_opts);
+	  twopoint_svm(train_data(:, [ seed1, seed2 ]), svm_opts);
 
       %% Log
       fprintf(2, "        SVM fitted in %d iterations (obj=%g)\n", ...
@@ -450,8 +458,7 @@ for run = 1 : cmd_opts.runs
       ksvm_opts.radial = false();
       ksvm_opts.kernel = @(x) (x .+ 1) .^ 2;
       [ ksvm_model, ksvm_info ] = ...
-	  simple_kernel_svm(train_data(:, [ seed1, seed2 ]), [ +1, -1 ], ...
-			    ksvm_opts);
+	  twopoint_kernel_svm(train_data(:, [ seed1, seed2 ]), ksvm_opts);
 
       %% Log
       fprintf(2, "        Quadratic SVM fitted in %d iterations (obj=%g)\n", ...
@@ -530,8 +537,7 @@ for run = 1 : cmd_opts.runs
       rbf_opts.radial = true();
       rbf_opts.kernel = @(x) exp(-x);
       [ rbf_model, rbf_info ] = ...
-	  simple_kernel_svm(train_data(:, [ seed1, seed2 ]), [ +1, -1 ], ...
-			    rbf_opts);
+	  twopoint_kernel_svm(train_data(:, [ seed1, seed2 ]), rbf_opts);
 
       %% Log
       fprintf(2, "        RBF SVM fitted in %d iterations (obj=%g)\n", ...
@@ -746,7 +752,7 @@ for run = 1 : cmd_opts.runs
       cpmmc_cur = evaluation_curves(test_cpmmc_scores, test_truth_expec, ...
 				    test_truth_sizes);
     else
-      cpmmc_cur = [ 0 ; 0 ; 0 ];
+      cpmmc_cur = EMPTY_CURVE;
     endif
   endif
   if cmd_opts.do_smmc
@@ -754,10 +760,67 @@ for run = 1 : cmd_opts.runs
       smmc_cur = evaluation_curves(test_smmc_scores, test_truth_expec, ...
 				   test_truth_sizes);
     else
-      smmc_cur = [ 0 ; 0 ; 0 ];
+      smmc_cur = EMPTY_CURVE;
     endif
   endif
+
+
+  %%%%%%%%%%%%%%%
+  %% Reference %%
+  %%%%%%%%%%%%%%%
+
   if cmd_opts.do_rfnce
+    try
+      %% Reference
+      rfnce_file = ...
+	  sprintf("%s/combi%s/r%d/%s.redo.nx.gz", data_dir, th_infix, ...
+		  run - 1, cmd_opts.train);
+      rfnce_header = ...
+	  sprintf("%s .+/%s%s.matrix.gz", cmd_opts.rfnce_head, ...
+		  cmd_opts.test, th_infix)
+      rfnce_info = read_redo(rfnce_file, rfnce_header);
+      fprintf(2, "%2d:     Read reference file %s\n", run, rfnce_file);
+
+      %% Found it?
+      if isempty(rfnce_info)
+	%% Not found!
+	fprintf(2, "        Reference information not available for %s\n", ...
+		cmd_opts.rfnce_head);
+	
+	%% Empty curve
+	rfnce_cur = EMPTY_CURVE;
+
+      else
+	%% Curves
+	rfnce_length = size(rfnce_info, 1);
+
+	%% ROC and total
+	rfnce_roc   = rfnce_info(:, [ 5, 4 ])';
+	rfnce_total = sum(rfnce_roc, 1);
+	rfnce_roc ./= rfnce_roc(:, rfnce_length) * ones(1, rfnce_length);
+
+	%% Precision
+	rfnce_prc   = rfnce_info(:, 4)' ./ rfnce_total;
+
+	%% F1
+	rfnce_f1    = 2 * (rfnce_prc .* rfnce_roc(2, :)) ./ ...
+                      (rfnce_prc .+ rfnce_roc(2, :));
+
+	%% Scores
+	rfnce_sco   = rfnce_info(:, 10)';
+
+	%% Curve
+	rfnce_cur   = [ rfnce_total ; rfnce_roc ; rfnce_prc ; ...
+		        rfnce_f1 ; rfnce_sco ];
+      endif
+
+    catch
+      %% Error reading
+      fprintf(2, "%2d:     Could not read reference file %s", run, rfnce_file);
+
+      %% Empty curve
+      rfnce_cur = EMPTY_CURVE;
+    end_try_catch
   endif
 
 
@@ -775,47 +838,47 @@ for run = 1 : cmd_opts.runs
     %% Print
     if cmd_opts.do_berni
       printf("# Bernoulli #%d\n", run);
-      printf("%d %f %f %f %f\n", berni_cur); printf("\n\n");
+      printf(DUMP_FORMAT, berni_cur); printf("\n\n");
     endif
     if cmd_opts.do_kmean
       printf("# k-Means #%d\n", run);
-      printf("%d %f %f %f %f\n", kmean_cur); printf("\n\n");
+      printf(DUMP_FORMAT, kmean_cur); printf("\n\n");
     endif
     if cmd_opts.do_svm
       printf("# SVM #%d\n", run);
-      printf("%d %f %f %f %f\n", svm_cur); printf("\n\n");
+      printf(DUMP_FORMAT, svm_cur); printf("\n\n");
     endif
     if cmd_opts.do_ssvm
       printf("# Soft SVM #%d\n", run);
-      printf("%d %f %f %f %f\n", ssvm_cur); printf("\n\n");
+      printf(DUMP_FORMAT, ssvm_cur); printf("\n\n");
     endif
     if cmd_opts.do_ksvm
       printf("# Quadratic SVM #%d\n", run);
-      printf("%d %f %f %f %f\n", ksvm_cur); printf("\n\n");
+      printf(DUMP_FORMAT, ksvm_cur); printf("\n\n");
     endif
     if cmd_opts.do_sksvm
       printf("# Soft Quadratic SVM #%d\n", run);
-      printf("%d %f %f %f %f\n", sksvm_cur); printf("\n\n");
+      printf(DUMP_FORMAT, sksvm_cur); printf("\n\n");
     endif
     if cmd_opts.do_rbf
       printf("# RBF SVM #%d\n", run);
-      printf("%d %f %f %f %f\n", rbf_cur); printf("\n\n");
+      printf(DUMP_FORMAT, rbf_cur); printf("\n\n");
     endif
     if cmd_opts.do_srbf
       printf("# Soft RBF SVM #%d\n", run)
-      printf("%d %f %f %f %f\n", srbf_cur); printf("\n\n");
+      printf(DUMP_FORMAT, srbf_cur); printf("\n\n");
     endif
     if cmd_opts.do_cpmmc
       printf("# CPMMC #%d\n", run);
-      printf("%d %f %f %f %f\n", cpmmc_cur); printf("\n\n");
+      printf(DUMP_FORMAT, cpmmc_cur); printf("\n\n");
     endif
     if cmd_opts.do_smmc
       printf("# Soft CPMMC #%d\n", run);
-      printf("%d %f %f %f %f\n", smmc_cur); printf("\n\n");
+      printf(DUMP_FORMAT, smmc_cur); printf("\n\n");
     endif
     if cmd_opts.do_rfnce
       printf("# Reference #%d\n", run);
-      printf("%d %f %f %f %f\n", rfnce_cur); printf("\n\n");
+      printf(DUMP_FORMAT, rfnce_cur); printf("\n\n");
     endif
   endif
 
@@ -880,14 +943,15 @@ for run = 1 : cmd_opts.runs
     %% Plot each
     title = sprintf("Run %d", run);
     if cmd_opts.do_f1
-      plot_curves(title, 1, "samples", 5, "f1", curves, labels, "northeast");
+      plot_curves(title, SAMPLES(), "samples", F1(), "f1", ...
+		  curves, labels, "northeast");
     endif
     if cmd_opts.do_prc_rec
-      plot_curves(title, 3, "recall", 4, "precision", ...
+      plot_curves(title, RECALL(), "recall", PRECISION(), "precision", ...
 		  curves, labels, "northeast");
     endif
     if cmd_opts.do_roc
-      plot_curves(title, 2, "negatives", 3, "positives", ...
+      plot_curves(title, NEGATIVES(), "negatives", RECALL(), "positives", ...
 		  curves, labels, "southeast");
     endif
 

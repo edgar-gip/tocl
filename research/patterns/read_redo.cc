@@ -7,6 +7,8 @@
 #include <utility>
 #include <vector>
 
+#include <boost/regex.hpp>
+
 #include <ttcl/io/anystream.hxx>
 
 #include <octave/oct.h>
@@ -32,7 +34,8 @@ struct redo_info {
     // For each field
     string::size_type st = 0;
     int                f = 0;
-    for (; f < n_fields; ++f) {
+    bool          finish = false;
+    for (; not finish and f < n_fields; ++f) {
       // Find a space
       string::size_type end = _line.find(' ', st);
 
@@ -42,7 +45,7 @@ struct redo_info {
       // Found?
       if (end == string::npos) {
 	// End!
-	break;
+	finish = true;
       }
       else {
 	// Move
@@ -60,7 +63,7 @@ struct redo_info {
 DEFUN_DLD(read_redo, args, nargout,
           "-*- texinfo -*-\n\
 @deftypefn {Loadable Function} {[ @var{info} ] =}\
- read_redo(@var{file}, @var{header})\n\
+ read_redo(@var{file}, @var{header_re})\n\
 \n\
 Read a the contents of a redo file section from a file\n\
 @end deftypefn") {
@@ -74,18 +77,18 @@ Read a the contents of a redo file section from a file\n\
 
     // Check the first argument
     if (not args(0).is_string())
-      throw "@var{file} should be a string";
+      throw "file should be a string";
 
     // Check the second argument
     if (not args(1).is_string())
-      throw "@var{header} should be a string";
+      throw "header_re should be a string";
 
     // Open the file
     auto_ptr<istream> is
       (ttcl::io::ianystream::open(args(0).string_value().c_str()));
 
     // Target Header
-    string target_header = "# " + args(1).string_value();
+    boost::regex target_header_re("^# " + args(1).string_value());
 
     // Information
     vector<redo_info> information;
@@ -105,7 +108,7 @@ Read a the contents of a redo file section from a file\n\
 	  }
 	  else {
 	    // We are inside if we enter the target header
-	    inside = line == target_header;
+	    inside = boost::regex_match(line, target_header_re);
 	  }
 	}
 	// Regular line -> Are we inside?

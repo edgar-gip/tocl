@@ -45,9 +45,10 @@ function [ model, info ] = simple_kernel_svm(data, classes, opts)
   if opts.radial
     %% Radial kernel
     %% | x - y |^2 = x \cdot x + y \cdot y - 2 \cdot x \cdot y
-    K  = full(data' * data);
-    Kd = diag(K, 0);
-    K  = opts.kernel(Kd * ones(1, n_data) + ones(n_data, 1) * Kd' - 2 * K);
+    K         = full(data' * data);
+    self_data = diag(K, 0);
+    K         = opts.kernel(self_data * ones(1, n_data) + ...
+			    ones(n_data, 1) * self_data' - 2 * K);
   else
     %% Non-radial kernel
     K  = opts.kernel(full(data' * data));
@@ -86,6 +87,7 @@ function [ model, info ] = simple_kernel_svm(data, classes, opts)
 
   %% Store them in the model
   model        = struct();
+  model.radial = opts.radial;
   model.kernel = opts.kernel;
   model.alpha  = diag((alpha .* classes')(SVs));
   model.SV     = data(:, SVs)';
@@ -98,9 +100,14 @@ function [ model, info ] = simple_kernel_svm(data, classes, opts)
   neg_idx = negSVs(1 + floor(size(negSVs, 1) * rand()));
 
   %% Find it
-  model.b = -.5 * sum(model.alpha * ...
-		      (model.kernel(model.SV * data(:, pos_idx)) + ...
-		       model.kernel(model.SV * data(:, neg_idx))), 1);
+  model.b = -.5 * sum(model.alpha * sum(K(SVs, [ pos_idx, neg_idx ]), 2), 1);
+
+  %% A radial kernel?
+  if model.radial
+    %% Add self product and number of SVs
+    model.SV_self = self_data(SVs); % n_SV * 1 
+    model.n_SV    = size(model.SV, 1);
+  endif
 
   %% The function is negated
   fval = -fval;
@@ -108,7 +115,6 @@ function [ model, info ] = simple_kernel_svm(data, classes, opts)
   %% Information
   info            = struct();
   info.iterations = in_info.solveiter;
-  info.kernel     = opts.kernel;
   info.obj        = fval;
 
 %% Local Variables:

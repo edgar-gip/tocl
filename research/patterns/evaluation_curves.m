@@ -22,7 +22,7 @@ function [ curves ] = evaluation_curves(scores, truth, sizes)
   f1    = 2 * (prc .* roc(2,:)) ./ (prc .+ roc(2,:));
 
   %% Join the curves
-  curves = [ total ; roc ; prc ; f1 ];
+  curves = [ total ; roc ; prc ; f1 ; sorted_scores ];
 
 %% Local Variables:
 %% mode:octave
