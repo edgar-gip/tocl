@@ -1,3 +1,5 @@
+%% -*- mode: octave; -*-
+
 %% Support Vector Machines (Revisited)
 %% Simple version -> Only separable data allowed, but with kernels
 %% Distance to hyperplane
@@ -10,6 +12,7 @@ function [ distances ] = simple_kernel_svm_distances(data, model)
   if model.radial
     %% Radial kernel
     %% | x - y |^2 = x \cdot x + y \cdot y - 2 \cdot x \cdot y
+    n_data    = size(data, 2);
     product   = full(model.SV * data);
     self_data = full(sum(data .^ 2, 1)); % 1 * n_data
     K         = model.kernel(model.SV_self * ones(1, n_data) + 
@@ -17,11 +20,8 @@ function [ distances ] = simple_kernel_svm_distances(data, model)
   else
     %% Non-radial kernel
     K  = model.kernel(full(model.SV * data));
-  end
+  endif
 
   %% Multiply and add offset
   distances = sum(model.alpha * K, 1) + model.b;
-
-%% Local Variables:
-%% mode:octave
-%% End:
+endfunction

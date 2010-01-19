@@ -1,3 +1,5 @@
+%% -*- mode: octave; -*-
+
 %% Cutting Plane Maximum Margin Clustering Algorithm (CPMMC)
 %% Find the most violated constraint
 
@@ -17,7 +19,4 @@ function [ constraint, violation ] = CPMMC_mvc(data, omega, b);
   %% Find the most violated constraint in the original problem
   constraint = prod < 1;
   violation  = sum((1 - prod)(constraint)) / n_data;
-
-%% Local Variables:
-%% mode:octave
-%% End:
+endfunction

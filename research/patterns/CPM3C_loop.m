@@ -1,3 +1,5 @@
+%% -*- mode: octave; -*-
+
 %% Cutting Plane Multiclass Maximum Margin Clustering Algorithm (CPM3C)
 %% Main loop
 
@@ -72,14 +74,14 @@ function [ expec, model, info ] = CPM3C_loop(data, k, opts)
       active   = full(sum(constraint));
       W{2,n_W} = sparse(1:n_data, 1:n_data, active, n_data, n_data);
       W{3,n_W} = sum(active) / n_data;
-    end
-  end
+    endif
+  endwhile
 
   %% Display final output
   if opts.verbose
     fprintf(2, " %6d %4d %8g %8g %8g\n", iterations, size(W, 2), ...
             obj, xi, violation);
-  end
+  endif
 
   %% Classify
   clusters = CPM3C_cluster(data, omega);
@@ -97,7 +99,4 @@ function [ expec, model, info ] = CPM3C_loop(data, k, opts)
   info.iterations  = iterations;
   info.constraints = size(W, 2);
   info.violation   = violation;
-
-%% Local Variables:
-%% mode:octave
-%% End:
+endfunction

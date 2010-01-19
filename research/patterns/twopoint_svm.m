@@ -1,3 +1,5 @@
+%% -*- mode: octave; -*-
+
 %% Support Vector Machines (Revisited)
 %% Simple version -> Two points only
 %% Main procedure
@@ -22,7 +24,7 @@ function [ model, info ] = twopoint_svm(data, opts)
     opts = struct();
   elseif ~isstruct(opts)
     usage("opts must be a structure if present");
-  end
+  endif
 
   %% Adapt the quadratic programming dual problem
   %% see twopoint_kernel_svm.m
@@ -48,7 +50,4 @@ function [ model, info ] = twopoint_svm(data, opts)
   info            = struct();
   info.iterations = 0;
   info.obj        = alpha; % fval
-
-%% Local Variables:
-%% mode:octave
-%% End:
+endfunction

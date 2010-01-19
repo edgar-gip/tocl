@@ -1,3 +1,5 @@
+%% -*- mode: octave; -*-
+
 %% Support Vector Machines (Revisited)
 %% Simple version -> Only separable data allowed, but with kernels
 %% Main procedure
@@ -9,7 +11,7 @@ function [ model, info ] = simple_kernel_svm(data, classes, opts)
   %% Data and classes should be given
   if nargin() < 2 || nargin() > 3
     usage("[ model, info ] = simple_kernel_svm(data, classes [, opts ] ])");
-  end
+  endif
 
   %% Size
   [ n_dims, n_data ] = size(data);
@@ -18,24 +20,24 @@ function [ model, info ] = simple_kernel_svm(data, classes, opts)
   [ classes_r, classes_c ] = size(classes);
   if classes_r ~= 1 || classes_c ~= n_data
     usage("classes must be of size 1 * n_data");
-  end
+  endif
 
   %% Defaults
   if nargin() < 3
     opts = struct();
   elseif ~isstruct(opts)
     usage("opts must be a structure if present");
-  end
+  endif
 
   %% radial: is the kernel radial?
   if ~isfield(opts, "radial")
     opts.radial = false();
-  end
+  endif
 
   %% kernel: kernel function
   if ~isfield(opts, "kernel")
     opts.kernel = @(x) (x .+ 1) .^ 2;
-  end
+  endif
 
   %% Create the quadratic programming dual problem
   
@@ -52,7 +54,7 @@ function [ model, info ] = simple_kernel_svm(data, classes, opts)
   else
     %% Non-radial kernel
     K  = opts.kernel(full(data' * data));
-  end
+  endif
 
   %% Objective function: Maximize
   %% \frac{1}{2} \cdot -\sum_{i=1}^{n_data} \sum_{j=1}^{n_data}
@@ -83,7 +85,7 @@ function [ model, info ] = simple_kernel_svm(data, classes, opts)
   negSVs = find(SVs & classes' == -1);
   if isempty(posSVs) || isempty(negSVs)
     error("Found empty SV set for one (or both) of the classes");
-  end
+  endif
 
   %% Store them in the model
   model        = struct();
@@ -116,7 +118,4 @@ function [ model, info ] = simple_kernel_svm(data, classes, opts)
   info            = struct();
   info.iterations = in_info.solveiter;
   info.obj        = fval;
-
-%% Local Variables:
-%% mode:octave
-%% End:
+endfunction

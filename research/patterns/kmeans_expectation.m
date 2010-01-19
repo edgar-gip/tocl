@@ -1,3 +1,5 @@
+%% -*- mode: octave; -*-
+
 %% k-Means clustering
 %% Expectation
 
@@ -12,7 +14,7 @@ function [ expec, sum_dist ] = kmeans_expectation(data, model, auto_data)
   %% Is the auto-dot-product matrix given?
   if nargin() < 3
     auto_data = sum(data .* data); % 1 * n_data
-  end;
+  endif
 
   %% Find the auto-dot-product matrix for the centroids
   centroids      = model.centroids;
@@ -28,7 +30,4 @@ function [ expec, sum_dist ] = kmeans_expectation(data, model, auto_data)
   %% R
   expec    = sparse(min_cl, 1 : n_data, ones(1, n_data), k, n_data);
   sum_dist = sum(min_dist);
-  
-%% Local Variables:
-%% mode:octave
-%% End:
+endfunction

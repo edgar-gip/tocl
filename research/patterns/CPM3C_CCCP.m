@@ -1,3 +1,5 @@
+%% -*- mode: octave; -*-
+
 %% Cutting Plane Multiclass Maximum Margin Clustering Algorithm (CPM3C)
 %% Inner CCCP procedure
 
@@ -44,8 +46,8 @@ function [ omega, xi, obj, its ] = ...
       Ain(cidx, (pw+1):(pw+n_dims)) =  sum_data;
       Ain(cidx, (qw+1):(qw+n_dims)) = -sum_data;
       %% bub(cidx)                     = +l;
-    end
-  end
+    endfor
+  endfor
 
   %% Equalities:
   Aeq = [];
@@ -69,8 +71,8 @@ function [ omega, xi, obj, its ] = ...
 	      obj, xi, violation);
     else
       fprintf(2, "+");
-    end
-  end
+    endif
+  endif
 
   %% Loop
   its    = 1;
@@ -95,7 +97,7 @@ function [ omega, xi, obj, its ] = ...
       xcidx = xcidx + 1;
       Ain(xcidx, :) = [ reshape(coeffs, 1, n_weights), -1 ];
       bub(xcidx)    = sum(sum(constraint .* z)) / n_data - mean_active;
-    end
+    endfor
 
     %% Solve
     [ x, obj ] = qp(startx, H, f, Aeq, beq, lb, ub, blb, Ain, bub);
@@ -111,8 +113,8 @@ function [ omega, xi, obj, its ] = ...
 		n_constraints, obj, xi, violation);
       else
 	fprintf(2, ".");
-      end
-    end
+      endif
+    endif
 
     %% Finish?
     if old_obj - obj >= 0 && old_obj - obj < per_quit * old_obj
@@ -124,12 +126,9 @@ function [ omega, xi, obj, its ] = ...
 
       %% Start from here
       startx = x;
-    end
+    endif
 
     %% One more iteration
     its = its + 1;
-  end
-  
-%% Local Variables:
-%% mode:octave
-%% End:
+  endwhile
+endfunction

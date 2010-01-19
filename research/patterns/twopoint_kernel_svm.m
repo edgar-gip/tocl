@@ -1,3 +1,5 @@
+%% -*- mode: octave; -*-
+
 %% Support Vector Machines (Revisited)
 %% Simple version -> Two points only, but with kernels
 %% Main procedure
@@ -22,17 +24,17 @@ function [ model, info ] = twopoint_kernel_svm(data, opts)
     opts = struct();
   elseif ~isstruct(opts)
     usage("opts must be a structure if present");
-  end
+  endif
 
   %% radial: is the kernel radial?
   if ~isfield(opts, "radial")
     opts.radial = false();
-  end
+  endif
 
   %% kernel: kernel function
   if ~isfield(opts, "kernel")
     opts.kernel = @(x) (x .+ 1) .^ 2;
-  end
+  endif
 
   %% Adapt the quadratic programming dual problem
   
@@ -49,7 +51,7 @@ function [ model, info ] = twopoint_kernel_svm(data, opts)
   else
     %% Non-radial kernel
     K  = opts.kernel(full(data' * data));
-  end
+  endif
 
   %% Given there is only two datapoints, and that c_1 = -c_2:
   %%   \alpha_1 = \alpha_2 = \alpha
@@ -89,7 +91,4 @@ function [ model, info ] = twopoint_kernel_svm(data, opts)
   info            = struct();
   info.iterations = 0;
   info.obj        = alpha; % fval
-
-%% Local Variables:
-%% mode:octave
-%% End:
+endfunction

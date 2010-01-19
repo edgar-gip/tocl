@@ -1,3 +1,5 @@
+%% -*- mode: octave; -*-
+
 %% Bernoulli distribution clustering
 %% Maximization
 
@@ -32,7 +34,4 @@ function model = bernoulli_maximization(data, expec)
   model.alpha        = log(cl_sizes);            % k * 1
   model.alpha_ctheta = model.alpha .+ cl_ctheta; % k * 1
   model.theta        = cl_theta';                % k * n_dims
-
-%% Local Variables:
-%% mode:octave
-%% End:
+endfunction

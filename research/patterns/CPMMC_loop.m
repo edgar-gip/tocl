@@ -1,3 +1,5 @@
+%% -*- mode: octave; -*-
+
 %% Cutting Plane Maximum Margin Clustering Algorithm (CPMMC)
 %% Main loop
 
@@ -59,7 +61,7 @@ function [ expec, model, info ] = CPMMC_loop(data, opts)
 	  CPMMC_CCCP(data, omega, b, xi, W, opts.C, opts.l, ...
 		     opts.per_quit, sum_data, avg_W, iterations, ...
 		     violation, opts.verbose);
-    end
+    endif
 
     %% Add the iterations
     iterations = iterations + its;
@@ -73,14 +75,14 @@ function [ expec, model, info ] = CPMMC_loop(data, opts)
     else
       W     = [ W, constraint ];
       avg_W = [ avg_W, mean(constraint, 1) ];
-    end
-  end
+    endif
+  endwhile
 
   %% Display final output
   if opts.verbose
     fprintf(2, " %6d %4d %8g %8g %8g\n", iterations, size(W, 2), ...
             obj, xi, violation);
-  end
+  endif
 
   %% Expectation
   clusters = sign(omega' * data + b) / 2 + 1.5;
@@ -99,7 +101,4 @@ function [ expec, model, info ] = CPMMC_loop(data, opts)
   info.iterations  = iterations;
   info.constraints = size(W, 2);
   info.violation   = violation;
-
-%% Local Variables:
-%% mode:octave
-%% End:
+endfunction

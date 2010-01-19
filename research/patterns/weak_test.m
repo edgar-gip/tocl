@@ -1,3 +1,5 @@
+%% -*- mode: octave; -*-
+
 %% Weak classifiers test
 
 %% Author: Edgar Gonzàlez i Pellicer
@@ -961,7 +963,3 @@ for run = 1 : cmd_opts.runs
     endif
   endif
 endfor
-
-%% Local Variables:
-%% mode:octave
-%% End:

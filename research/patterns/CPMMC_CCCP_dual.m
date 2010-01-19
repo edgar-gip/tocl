@@ -1,3 +1,5 @@
+%% -*- mode: octave; -*-
+
 %% Cutting Plane Maximum Margin Clustering Algorithm (CPMMC)
 %% Inner CCCP procedure
 
@@ -24,8 +26,8 @@ function [ omega, b, xi, obj, its ] = ...
 	      obj, xi, violation);
     else
       fprintf(2, "+");
-    end
-  end
+    endif
+  endif
 
   %% Objective function
   %% H = <changing>
@@ -89,7 +91,7 @@ function [ omega, b, xi, obj, its ] = ...
       b   = mean((c_k(SVs) - xi - omega' * z_k(:, SVs)) ./ s_k(SVs));
     else
       b   = 0;
-    end
+    endif
 
     %% Display
     if verbose
@@ -98,8 +100,8 @@ function [ omega, b, xi, obj, its ] = ...
 		n_constraints, obj, xi, violation);
       else
 	fprintf(2, ".");
-      end
-    end
+      endif
+    endif
 
     %% Finish?
     if old_obj - obj >= 0 && old_obj - obj < per_quit * old_obj
@@ -108,12 +110,9 @@ function [ omega, b, xi, obj, its ] = ...
     else
       %% Start from here
       startx = x;
-    end
+    endif
 
     %% One more iteration
     its = its + 1;
-  end
-
-%% Local Variables:
-%% mode:octave
-%% End:
+  endwhile
+endfunction

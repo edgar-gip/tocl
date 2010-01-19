@@ -1,3 +1,5 @@
+%% -*- mode: octave; -*-
+
 %% Bernoulli distribution clustering
 %% Expectation
 
@@ -18,7 +20,4 @@ function [ expec, log_like ] = bernoulli_expectation(data, model)
 
   %% Log-likelihood
   log_like = sum(sum_expec);
-
-%% Local Variables:
-%% mode:octave
-%% End:
+endfunction

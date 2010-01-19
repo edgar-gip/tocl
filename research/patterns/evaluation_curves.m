@@ -1,3 +1,5 @@
+%% -*- mode: octave; -*-
+
 %% Find evaluation curves
 
 %% Author: Edgar Gonzalez
@@ -23,7 +25,4 @@ function [ curves ] = evaluation_curves(scores, truth, sizes)
 
   %% Join the curves
   curves = [ total ; roc ; prc ; f1 ; sorted_scores ];
-
-%% Local Variables:
-%% mode:octave
-%% End:
+endfunction
