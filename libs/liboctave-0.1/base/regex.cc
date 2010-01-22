@@ -20,6 +20,7 @@
 #include <exception>
 #include <iostream>
 #include <string>
+#include <vector>
 
 #include <octave/oct.h>
 
@@ -99,9 +100,9 @@ Match regular expression @var{regex} to @var{target}\n\
 }
 
 
-/******************************/
+/*******************************/
 /* Search a Regular Expression */
-/******************************/
+/*******************************/
 
 DEFUN_DLD(regex_search, args, nargout,
           "-*- texinfo -*-\n\
@@ -152,6 +153,75 @@ Search regular expression @var{regex} in @var{target}\n\
       for (int i = 1; i < nargout; ++i)
 	result(i) = "";
     }
+  }
+  // Was there an error?
+  catch (const char* _error) {
+    // Display the error or the usage
+    if (_error)
+      error(_error);
+    else
+      print_usage();
+  }
+  // Was there an exception
+  catch (std::exception& _excep) {
+    // Display the error
+    error(_excep.what());
+  }
+
+  // Return the result
+  return result;
+}
+
+
+/*********************************/
+/* Split by a Regular Expression */
+/*********************************/
+
+DEFUN_DLD(regex_split, args, nargout,
+          "-*- texinfo -*-\n\
+@deftypefn {Loadable Function} {[ @var{fields} ] =}\
+ regex_split(@var{target}, @var{regex})\n\
+\n\
+Split @var{target} by regular expression @var{regex}\n\
+@end deftypefn") {
+  // Result
+  octave_value_list result;
+
+  try {
+    // Check the number of parameters
+    if (args.length() != 2 or nargout != 1)
+      throw (const char*)0;
+	
+    // Get target
+    if (not args(0).is_string())
+      throw "target should be a string";
+    std::string target = args(0).string_value();
+    
+    // Check regex
+    if (not args(1).is_string())
+      throw "regex should be a string";
+    
+    // Create the regular expression
+    boost::regex re(args(1).string_value());
+
+    // Fields
+    std::vector<std::string> fields;
+
+    // Match it!
+    boost::sregex_token_iterator i =
+      boost::make_regex_token_iterator(target, re, -1);
+    boost::sregex_token_iterator end;
+    while (i != end)
+      fields.push_back(*i++);
+
+    // Set
+    Cell c(1, fields.size());
+    for (int f = 0; f < fields.size(); ++f)
+      c(f) = fields[f];
+
+    // Result
+    result.resize(1);
+    result(0) = c;
   }
   // Was there an error?
   catch (const char* _error) {

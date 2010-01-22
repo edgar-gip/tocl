@@ -1,5 +1,5 @@
 # Subdirs
-SUBDIRS = base tests
+SUBDIRS = base io tests
 
 # Target
 all: subdirs
