@@ -1,3 +1,8 @@
 2010-01-13  Edgar Gonzàlez i Pellicer <edgar.gip@gmail.com>
 
 	* liboctave: Started version 0.1 of the library
+
+2010-02-05  Edgar Gonzàlez i Pellicer <edgar.gip@gmail.com>
+
+	* liboctave: Switched to an autotools-based package
+

@@ -40,6 +40,8 @@ octave_c_pointer_static(std::istream, "std_istream");
 /* Open a istream */
 /******************/
 
+// PKG_ADD: autoload('istream_open', which('istream'));
+
 DEFUN_DLD(istream_open, args, nargout,
           "-*- texinfo -*-\n\
 @deftypefn {Loadable Function} {[ @var{istream} ] =} istream_open(@var{file})\n\
@@ -88,6 +90,8 @@ Open a istream\n\
 /******************************/
 /* Read a line from a istream */
 /******************************/
+
+// PKG_ADD: autoload('istream_readline', which('istream'));
 
 DEFUN_DLD(istream_readline, args, nargout,
           "-*- texinfo -*-\n\

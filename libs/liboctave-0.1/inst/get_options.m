@@ -26,7 +26,7 @@ function [ args, opts ] = get_options(varargin)
     usage("Option list cannot be empty");
   endif
 
-  %% Is first a struct?option?
+  %% Is first a struct?
   if isstruct(varargin{1})
     opts     = varargin{1};
     varargin = cell_tail(varargin);
@@ -218,6 +218,11 @@ function [ args, opts ] = get_options(varargin)
 
   %% Now, get the arguments
   inargs = argv();
+
+  %% Usually, nasty case where no arguments were given
+  if length(inargs) == 1 && strcmp(inargs{1}, program_name())
+    inargs = {};
+  endif
 
   %% While some remain
   while ~isempty(inargs)

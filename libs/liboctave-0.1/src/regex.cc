@@ -31,6 +31,8 @@
 /* Match a Regular Expression */
 /******************************/
 
+// PKG_ADD: autoload('regex_match, which('regex'));
+
 DEFUN_DLD(regex_match, args, nargout,
           "-*- texinfo -*-\n\
 @deftypefn {Loadable Function} {[ @var{match}, @var{submatch}, ... ] =}\
@@ -104,6 +106,8 @@ Match regular expression @var{regex} to @var{target}\n\
 /* Search a Regular Expression */
 /*******************************/
 
+// PKG_ADD: autoload('regex_search, which('regex'));
+
 DEFUN_DLD(regex_search, args, nargout,
           "-*- texinfo -*-\n\
 @deftypefn {Loadable Function} {[ @var{match}, @var{submatch}, ... ] =}\
@@ -176,6 +180,8 @@ Search regular expression @var{regex} in @var{target}\n\
 /*********************************/
 /* Split by a Regular Expression */
 /*********************************/
+
+// PKG_ADD: autoload('regex_split, which('regex'));
 
 DEFUN_DLD(regex_split, args, nargout,
           "-*- texinfo -*-\n\

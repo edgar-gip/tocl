@@ -24,6 +24,8 @@
 /* Is the object a function handle? */
 /************************************/
 
+// PKG_ADD: autoload('isfunctionhandle, which('misc'));
+
 DEFUN_DLD(isfunctionhandle, args, nargout,
           "-*- texinfo -*-\n\
 @deftypefn {Loadable Function} {[ @var{is}, ] =}\
