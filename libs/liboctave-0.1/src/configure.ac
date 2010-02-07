@@ -4,6 +4,7 @@
 AC_INIT([liboctave], [0.1], [egonzalez@lsi.upc.edu])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_SRCDIR([cell.cc])
+AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE
 
 # Checks for programs.
@@ -41,10 +42,13 @@ AC_CHECK_HEADERS([ttcl/io/anystream.hxx],
 
 # Checks for library functions.
 
+# Octave checks
+OCTAVE_RESIZE_AND_FILL
+
 # Conditionals
 AM_CONDITIONAL([ISTREAM_MODULE],
 	       [test x$has_libbz2 = xtrue -a x$has_libz = xtrue -a x$has_ttcl_io_anystream = xtrue])
-AM_CONDITIONAL([QUADPROG_CGAL],
+AM_CONDITIONAL([QUADPROG_CGAL_MODULE],
 	       [test x$has_cgal_qp_models = xtrue])
 AM_CONDITIONAL([REGEX_MODULE],
 	       [test x$has_boost_regex_hpp = xtrue])

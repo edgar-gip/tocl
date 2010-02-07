@@ -25,7 +25,7 @@
 
 #include <ttcl/io/anystream.hxx>
 
-#include <octave_c_ptr_value.h>
+#include "octave_c_ptr_value.h"
 
 
 /************************/

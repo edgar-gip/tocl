@@ -14,6 +14,7 @@ endif
 if QUADPROG_CGAL_MODULE
 noinst_DATA += quadprog_cgal.oct
 quadprog_cgal_LDADD = -lCGAL
+quadprog_cgal_SOURCES = quadprog_common.cc
 endif
 
 if REGEX_MODULE
@@ -22,4 +23,4 @@ regex_LDADD  = -lboost_regex
 endif
 
 .cc.oct:
-	$(MKOCTFILE) $(CPPFLAGS) $(CXXFLAGS) $($*_OCTFLAGS) $^ $($*_SOURCES) $($*_LDADD)
+	$(MKOCTFILE) $(CPPFLAGS) $($*_OCTFLAGS) $(DEFS) $^ $($*_SOURCES) $(LDFLAGS) $($*_LDADD)
