@@ -54,7 +54,7 @@ void parse_quadprog_args(const octave_value_list& args,
   if (args(1).is_real_scalar()) {
     if (n_vars != 1)
       throw "f should be a column vector with the same rows as H";
-    f.RESIZE_AND_FILL(1, args(1).scalar_value());
+    f.RESIZE_AND_FILL(1, 1, args(1).scalar_value());
   }
   else if (args(1).is_real_matrix()) {
     if (args(1).columns() != 1 or args(1).rows() != n_vars)
@@ -93,7 +93,7 @@ void parse_quadprog_args(const octave_value_list& args,
   else if (args(3).is_real_scalar()) {
     if (n_ineq != 1)
       throw "bineq should be a column vector with the same rows as Aineq";
-    bineq.RESIZE_AND_FILL(1, args(3).scalar_value());
+    bineq.RESIZE_AND_FILL(1, 1, args(3).scalar_value());
   }
   else if (args(3).is_real_matrix()) {
     if (args(3).columns() != 1 or args(3).rows() != n_ineq)
@@ -134,7 +134,7 @@ void parse_quadprog_args(const octave_value_list& args,
   else if (args(5).is_real_scalar()) {
     if (n_eq != 1)
       throw "beq should be a column vector with the same rows as Aeq";
-    beq.RESIZE_AND_FILL(1, args(5).scalar_value());
+    beq.RESIZE_AND_FILL(1, 1, args(5).scalar_value());
   }
   else if (args(5).is_real_matrix()) {
     if (args(5).columns() != 1 or args(5).rows() != n_eq)
@@ -149,12 +149,12 @@ void parse_quadprog_args(const octave_value_list& args,
 
   // Get lb
   if (args.length() <= 6 or args(6).is_zero_by_zero()) {
-    lb.RESIZE_AND_FILL(n_vars, -INFINITY);
+    lb.RESIZE_AND_FILL(n_vars, 1, -INFINITY);
   }
   else if (args(6).is_real_scalar()) {
     if (n_vars != 1)
       throw "lb should be a column vector with the same rows as H";
-    lb.RESIZE_AND_FILL(n_vars, args(6).scalar_value());
+    lb.RESIZE_AND_FILL(n_vars, 1, args(6).scalar_value());
   }
   else if (args(6).is_real_matrix()) {
     if (args(6).columns() != 1 or args(6).rows() != n_vars)
@@ -167,12 +167,12 @@ void parse_quadprog_args(const octave_value_list& args,
 
   // Get ub
   if (args.length() <= 7 or args(7).is_zero_by_zero()) {
-    ub.RESIZE_AND_FILL(n_vars, INFINITY);
+    ub.RESIZE_AND_FILL(n_vars, 1, INFINITY);
   }
   else if (args(7).is_real_scalar()) {
     if (n_vars != 1)
       throw "ub should be a column vector with the same rows as H";
-    ub.RESIZE_AND_FILL(n_vars, args(7).scalar_value());
+    ub.RESIZE_AND_FILL(n_vars, 1, args(7).scalar_value());
   }
   else if (args(7).is_real_matrix()) {
     if (args(7).columns() != 1 or args(7).rows() != n_vars)
@@ -187,12 +187,12 @@ void parse_quadprog_args(const octave_value_list& args,
 
   // Get x0
   if (args.length() <= 8 or args(8).is_zero_by_zero()) {
-    x.RESIZE_AND_FILL(n_vars, 0.0);
+    x.RESIZE_AND_FILL(n_vars, 1, 0.0);
   }
   else if (args(8).is_real_scalar()) {
     if (n_vars != 1)
       throw "x0 should be a column vector with the same rows as H";
-    x.RESIZE_AND_FILL(n_vars, args(8).scalar_value());
+    x.RESIZE_AND_FILL(n_vars, 1, args(8).scalar_value());
   }
   else if (args(8).is_real_matrix()) {
     if (args(8).columns() != 1 or args(8).rows() != n_vars)
