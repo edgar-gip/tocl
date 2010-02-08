@@ -21,7 +21,8 @@ function [ curves ] = evaluation_curves(scores, truth, sizes)
   prc   = accum(2,:) ./ total;
 
   %% F1
-  f1    = 2 * (prc .* roc(2,:)) ./ (prc .+ roc(2,:));
+  f1            = 2 * (prc .* roc(2,:)) ./ (prc .+ roc(2,:));
+  f1(isnan(f1)) = 0.0;
 
   %% Join the curves
   curves = [ total ; roc ; prc ; f1 ; sorted_scores ];

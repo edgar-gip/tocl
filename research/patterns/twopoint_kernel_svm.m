@@ -33,7 +33,11 @@ function [ model, info ] = twopoint_kernel_svm(data, opts)
 
   %% kernel: kernel function
   if ~isfield(opts, "kernel")
-    opts.kernel = @(x) (x .+ 1) .^ 2;
+    if opts.radial
+      opts.kernel = @(x) exp(-x);
+    else
+      opts.kernel = @(x) (x .+ 1) .^ 2;
+    endif
   endif
 
   %% Adapt the quadratic programming dual problem
@@ -41,17 +45,7 @@ function [ model, info ] = twopoint_kernel_svm(data, opts)
   %% http://en.wikipedia.org/wiki/Support_vector_machine
 
   %% Kernel matrix
-  if opts.radial
-    %% Radial kernel
-    %% | x - y |^2 = x \cdot x + y \cdot y - 2 \cdot x \cdot y
-    K         = full(data' * data);
-    self_data = diag(K, 0);
-    K         = opts.kernel(self_data * ones(1, n_data) + ...
-			    ones(n_data, 1) * self_data' - 2 * K);
-  else
-    %% Non-radial kernel
-    K  = opts.kernel(full(data' * data));
-  endif
+  [ K, self_data ] = kernel_matrix(data, opts.radial, opts.kernel);
 
   %% Given there is only two datapoints, and that c_1 = -c_2:
   %%   \alpha_1 = \alpha_2 = \alpha

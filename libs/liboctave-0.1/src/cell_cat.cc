@@ -26,8 +26,6 @@
 /* Append cells */
 /****************/
 
-// PKG_ADD: autoload('cell_cat, which('cell'));
-
 DEFUN_DLD(cell_cat, args, nargout,
           "-*- texinfo -*-\n\
 @deftypefn {Loadable Function} {[ @var{cell} ] =} cell_cat(@var{cell}, ...)\n\
@@ -86,7 +84,7 @@ Append cells\n\
 /* Push to a cell */
 /******************/
 
-// PKG_ADD: autoload('cell_push, which('cell'));
+// PKG_ADD: autoload('cell_push', which('cell_cat'));
 
 DEFUN_DLD(cell_push, args, nargout,
           "-*- texinfo -*-\n\
@@ -140,7 +138,7 @@ Push to a cell\n\
 /* Tail of a cell */
 /******************/
 
-// PKG_ADD: autoload('cell_tail, which('cell'));
+// PKG_ADD: autoload('cell_tail', which('cell_cat'));
 
 DEFUN_DLD(cell_tail, args, nargout,
           "-*- texinfo -*-\n\

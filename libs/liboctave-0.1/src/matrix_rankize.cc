@@ -28,12 +28,10 @@
 /* Rankize a matrix */
 /********************/
 
-// PKG_ADD: autoload('matrix_rankize, which('matrix'));
-
 DEFUN_DLD(matrix_rankize, args, nargout,
           "-*- texinfo -*-\n\
 @deftypefn {Loadable Function} {[ @var{matrix} ] =}\
- matrix_rankize(@var{matrix}, [@var{dimension)], [@var{mode}])\n\
+ matrix_rankize(@var{matrix}, [@var{dimension}], [@var{mode}])\n\
 \n\
 Rankize a matrix\n\
 @end deftypefn") {
@@ -195,7 +193,7 @@ Rankize a matrix\n\
 /* Blockize a matrix */
 /*********************/
 
-// PKG_ADD: autoload('matrix_blockize, which('matrix'));
+// PKG_ADD: autoload('matrix_blockize', which('matrix_rankize'));
 
 DEFUN_DLD(matrix_blockize, args, nargout,
           "-*- texinfo -*-\n\

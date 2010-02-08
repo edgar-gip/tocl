@@ -36,7 +36,11 @@ function [ model, info ] = simple_kernel_svm(data, classes, opts)
 
   %% kernel: kernel function
   if ~isfield(opts, "kernel")
-    opts.kernel = @(x) (x .+ 1) .^ 2;
+    if opts.radial
+      opts.kernel = @(x) exp(-x);
+    else
+      opts.kernel = @(x) (x .+ 1) .^ 2;
+    endif
   endif
 
   %% Create the quadratic programming dual problem
@@ -44,17 +48,7 @@ function [ model, info ] = simple_kernel_svm(data, classes, opts)
   %% http://en.wikipedia.org/wiki/Support_vector_machine
 
   %% Kernel matrix
-  if opts.radial
-    %% Radial kernel
-    %% | x - y |^2 = x \cdot x + y \cdot y - 2 \cdot x \cdot y
-    K         = full(data' * data);
-    self_data = diag(K, 0);
-    K         = opts.kernel(self_data * ones(1, n_data) + ...
-			    ones(n_data, 1) * self_data' - 2 * K);
-  else
-    %% Non-radial kernel
-    K  = opts.kernel(full(data' * data));
-  endif
+  [ K, self_data ] = kernel_matrix(data, opts.radial, opts.kernel);
 
   %% Objective function: Maximize
   %% \frac{1}{2} \cdot -\sum_{i=1}^{n_data} \sum_{j=1}^{n_data}

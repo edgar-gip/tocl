@@ -43,9 +43,6 @@ endfunction
 %% Dump output format(constant)
 DUMP_FORMAT = "%d %f %f %f %f %f\n";
 
-%% Field information
-enum SAMPLES NEGATIVES RECALL PRECISION F1;
-
 
 %%%%%%%%%%%%%
 %% Startup %%

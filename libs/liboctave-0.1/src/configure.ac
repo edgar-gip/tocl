@@ -3,7 +3,7 @@
 # Initialize
 AC_INIT([liboctave], [0.1], [egonzalez@lsi.upc.edu])
 AC_CONFIG_AUX_DIR(config)
-AC_CONFIG_SRCDIR([cell.cc])
+AC_CONFIG_SRCDIR([cell_cat.cc])
 AC_CONFIG_HEADERS([config.h])
 AM_INIT_AUTOMAKE
 
