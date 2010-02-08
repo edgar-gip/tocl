@@ -1,3 +1,21 @@
+// Copyright (C) 2010 Edgar Gonzàlez i Pellicer <edgar.gip@gmail.com>
+//
+// This file is part of octopus-0.1.
+//
+// octopus is free software; you can redistribute it and/or modify it
+// under the terms of the GNU General Public License as published by the
+// Free Software Foundation; either version 3 of the License, or (at your
+// option) any later version.
+//
+// octopus is distributed in the hope that it will be useful, but WITHOUT
+// ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+// FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+// for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with octopus; see the file COPYING.  If not, see
+// <http://www.gnu.org/licenses/>.
+
 #include <cmath>
 #include <exception>
 #include <vector>
@@ -196,8 +214,8 @@ Solve quadratic programming problems using CGAL\n\
 	   MP_Float());
       }
     }
-  
-    // X
+
+    // Set X
     ColumnVector x(_n_vars);
     int v = 0;
     for (Quadratic_program_solution<MP_Float>::Variable_value_iterator
@@ -208,6 +226,16 @@ Solve quadratic programming problems using CGAL\n\
     // Objective function
     double fval = to_double(solution.objective_value());
 
+    // Extract the fields
+    Octave_map info;
+    info.assign("iterations", solution.number_of_iterations());
+    switch (solution.status()) {
+    case QP_OPTIMAL:    info.assign("status", "optimal");    break;
+    case QP_INFEASIBLE: info.assign("status", "infeasible"); break;
+    case QP_UNBOUNDED:  info.assign("status", "unbounded");  break;
+    case QP_UPDATE:     info.assign("status", "update");     break;
+    }
+
     // Delete the indices
     delete[] A_index;
     delete[] H_index;
@@ -216,7 +244,7 @@ Solve quadratic programming problems using CGAL\n\
     output.resize(3);
     output(0) = x;
     output(1) = fval;
-    output(2) = true;
+    output(2) = info;
   }
   // Was there an error?
   catch (const char* _error) {

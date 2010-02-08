@@ -1,6 +1,6 @@
 %% -*- mode: octave; -*-
 
-%% Weak classifiers test
+%% Strong classifiers test
 
 %% Author: Edgar Gonzàlez i Pellicer
 
@@ -27,17 +27,17 @@ endfunction
 function [ opts ] = set_all_do(opts, value)
   opts.do_berni = opts.do_kmean = opts.do_svm = opts.do_ssvm = ...
       opts.do_qsvm = opts.do_sqsvm = opts.do_rbf = opts.do_srbf = ...
-      opts.do_cpmmc = opts.do_smmc = opts.do_rfnce = value;
+      opts.do_rfnce = value;
 endfunction
 
 %% Set all hard's function
 function [ opts ] = set_all_hard(opts, value)
-  opts.do_svm = opts.do_qsvm = opts.do_rbf = opts.do_cpmmc = value;
+  opts.do_svm = opts.do_qsvm = opts.do_rbf = value;
 endfunction
 
 %% Set all soft's function
 function [ opts ] = set_all_soft(opts, value)
-  opts.do_ssvm = opts.do_sqsvm = opts.do_srbf = opts.do_smmc = value;
+  opts.do_ssvm = opts.do_sqsvm = opts.do_srbf = value;
 endfunction
 
 %% Dump output format(constant)
@@ -49,37 +49,39 @@ DUMP_FORMAT = "%d %f %f %f %f %f\n";
 %%%%%%%%%%%%%
 
 %% Default options
-def_opts            = struct();
-def_opts.soft_alpha = [ 0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0 ];
-def_opts.rbf_gamma  = [ 0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0 ];
-def_opts.runs       = 1;
-def_opts.repeats    = 100;
-def_opts.seed       = [];
-def_opts.max_tries  = 10;
-def_opts.threshold  = 10;
-def_opts.train      = "apw2000";
-def_opts.test       = "ace0Xall_c";
-def_opts.rfnce_head = "Base-Soft-NSiz";
-def_opts.do_berni   = false();
-def_opts.do_kmean   = false();
-def_opts.do_svm     = false();
-def_opts.do_ssvm    = false();
-def_opts.do_qsvm    = false();
-def_opts.do_sqsvm   = false();
-def_opts.do_rbf     = false();
-def_opts.do_srbf    = false();
-def_opts.do_cpmmc   = false();
-def_opts.do_smmc    = false();
-def_opts.do_rfnce   = false();
+def_opts              = struct();
+def_opts.soft_alpha   = [ 0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0 ];
+def_opts.rbf_gamma    = [ 0.1, 0.2, 0.5, 1.0, 2.0, 5.0, 10.0 ];
+def_opts.svm_c        = 1.0;
+def_opts.runs         = 1;
+def_opts.repeats      = 100;
+def_opts.seed         = [];
+def_opts.max_clusters = 100;
+def_opts.max_tries    = 10;
+def_opts.threshold    = 10;
+def_opts.train        = "apw2000";
+def_opts.test         = "ace0Xall_c";
+def_opts.rfnce_head   = "Base-Soft-NSiz";
+def_opts.do_berni     = false();
+def_opts.do_kmean     = false();
+def_opts.do_svm       = false();
+def_opts.do_ssvm      = false();
+def_opts.do_qsvm      = false();
+def_opts.do_sqsvm     = false();
+def_opts.do_rbf       = false();
+def_opts.do_srbf      = false();
+def_opts.do_rfnce     = false();
 
 %% Parse options
 [ cmd_args, cmd_opts ] = ...
     get_options(def_opts, ...
 		"soft-alpha=s",      @set_soft_alpha, ...
 		"rbf-gamma=s",       @set_rbf_gamma,  ...
+		"svm-c=f",           "svm_c",         ...
 		"runs=i",            "runs",          ...
 		"repeats=i",         "repeats",       ...
 		"seed=f",            "seed",          ...
+		"max-clusters=i",    "max_clusters",  ...
 		"max-tries=i",       "max_tries",     ...
 		"threshold=i",       "threshold",     ...
 		"train=s",           "train",         ...
@@ -93,8 +95,6 @@ def_opts.do_rfnce   = false();
 		"do-soft-quad-svm!", "do_sqsvm",      ...
 		"do-rbf-svm!",       "do_rbf",        ...
 		"do-soft-rbf-svm!",  "do_srbf",       ...
-		"do-cpmmc!",         "do_cpmmc",      ...
-		"do-soft-cpmmc!",    "do_smmc",       ...
 		"do-reference!",     "do_rfnce",      ...
 		"do-all",            @set_all_do,     ...
 		"do-none~",          @set_all_do,     ...
@@ -181,6 +181,11 @@ test_truth_expec = ...
     sparse(test_truth / 2 + 1.5, 1 : n_test, ones(1, n_test));
 test_truth_sizes = full(sum(test_truth_expec, 2));
 
+%% Correct the number of classes
+if cmd_opts.max_clusters > n_train
+  cmd_opts.max_clusters = n_train
+endif
+
 
 %%%%%%%%%%%%%%
 %% Run Loop %%
@@ -264,22 +269,6 @@ for run = 1 : cmd_opts.runs
     endfor
   endif
 
-  %% CPMMC
-  if cmd_opts.do_cpmmc
-    %% train_cpmmc_scores = zeros(1, n_train);
-    test_cpmmc_scores  = zeros(1, n_test);
-  endif
-
-  %% Soft CPMMC
-  if cmd_opts.do_smmc
-    %% train_smmc_scores = cell(1, n_alpha);
-    test_smmc_scores  = cell(1, n_alpha);
-    for i = 1 : n_alpha
-      %% train_smmc_scores{i} = zeros(1, n_train);
-      test_smmc_scores {i} = zeros(1, n_test);
-    endfor
-  endif
-
 
   %%%%%%%%%%%%%%%%%
   %% Repeat Loop %%
@@ -292,15 +281,19 @@ for run = 1 : cmd_opts.runs
     %% Seeds %%
     %%%%%%%%%%%
 
-    %% Select the two seeds
-    seed1 = 1 + floor( n_train      * rand());
-    seed2 = 1 + floor((n_train - 1) * rand());
-    if seed2 >= seed1
-      ++seed2;
-    endif
+    %% Select the number of classes and seeds
+    k     = floor(2 + (cmd_opts.max_clusters - 1) * rand());
+    seeds = sort(randperm(n_train)(1:k));
 
+    %% Seed parts
+    seed_data    = train_data(:, seeds);
+    seed_classes = 1 : k;
+    
     %% Seed expectation
-    seed_expec = sparse([ 1, 2 ], [ seed1, seed2 ], [ 1, 1 ], 2, n_train);
+    seed_expec   = sparse(seed_classes, seeds, ones(1, k), k, n_train);
+
+    %% Log
+    fprintf(2, "%2d:%3d: Selected %d seeds\n", run, repeat, k);
 
 
     %%%%%%%%%%%%%%%
@@ -313,12 +306,12 @@ for run = 1 : cmd_opts.runs
       berni_opts         = struct();
       berni_opts.expec_0 = seed_expec;
       [ berni_expec, berni_model, berni_info ] = ...
-	  bernoulli_clustering(train_data, 2, berni_opts);
+	  bernoulli_clustering(train_data, k, berni_opts);
 
       %% Log
       fprintf(2, ...
-	      "%2d:%3d: Bernoulli clustering in %d iterations (Log-like=%g)\n", ...
-	      run, repeat, berni_info.iterations, berni_info.log_like);
+	      "        Bernoulli clustering in %d iterations (Log-like=%g)\n", ...
+	      berni_info.iterations, berni_info.log_like);
 
       %% Update train scores
       berni_scores        = sum(berni_expec, 2)';
@@ -342,10 +335,9 @@ for run = 1 : cmd_opts.runs
 
       %% Find k-Means
       kmean_opts         = struct();
-      %% @todo: Uncomment. Commented for compatibility.
-      %% kmean_opts.expec_0 = seed_expec;
+      kmean_opts.expec_0 = seed_expec;
       [ kmean_expec, kmean_model, kmean_info ] = ...
-	  kmeans_clustering(train_data, 2, kmean_opts);
+	  kmeans_clustering(train_data, k, kmean_opts);
 
       %% Log
       fprintf(2, "        k-Means clustering in %d iterations (Sum-sq=%g)\n", ...
@@ -369,41 +361,38 @@ for run = 1 : cmd_opts.runs
     %% SVM %%
     %%%%%%%%%
     
-    if cmd_opts.do_svm || cmd_opts.do_ssvm || ...
-	  (cpmmc_works && (cmd_opts.do_cpmmc || cmd_opts.do_smmc))
+    if cmd_opts.do_svm || cmd_opts.do_ssvm
 
       %% Find SVM
-      svm_opts          = struct();
-      svm_opts.use_dual = false();
+      svm_opts        = struct();
+      svm_opts.radial = false();
+      svm_opts.kernel = @(x) x;
+      svm_opts.C      = cmd_opts.svm_c;
       [ svm_model, svm_info ] = ...
-	  twopoint_svm(train_data(:, [ seed1, seed2 ]), svm_opts);
+	  multiclass_kernel_svm(seed_data, seed_classes, svm_opts);
 
       %% Log
       fprintf(2, "        SVM fitted in %d iterations (obj=%g)\n", ...
 	      svm_info.iterations, svm_info.obj);
 
       %% Apply to train
-      train_svm_dist = svm_model.omega' * train_data + svm_model.b;
+      train_svm_dist = multiclass_kernel_svm_distances(train_data, svm_model);
 
       %% Apply to test
-      test_svm_dist  = svm_model.omega' * test_data + svm_model.b;
+      test_svm_dist  = multiclass_kernel_svm_distances(test_data,  svm_model);
 
       %% Clear
-      clear svm_opts svm_info
+      clear svm_opts svm_model svm_info
 
       if cmd_opts.do_svm
 
 	%% Apply to train
-	train_svm_expec   = ...
-	    sparse(sign(train_svm_dist) / 2 + 1.5, 1 : n_train, ...
-		   ones(1, n_train), 2, n_train);
+	train_svm_expec   = distance_winner(train_svm_dist);
 	svm_scores        = sum(train_svm_expec, 2)';
 	%% train_svm_scores += svm_scores * train_svm_expec;
 
 	%% Apply to test
-	test_svm_expec   = ...
-	    sparse(sign(test_svm_dist) / 2 + 1.5, 1 : n_test, ...
-		   ones(1, n_test), 2, n_test);
+	test_svm_expec   = distance_winner(test_svm_dist);
 	test_svm_scores += svm_scores * test_svm_expec;
 
 	%% Clear
@@ -421,22 +410,13 @@ for run = 1 : cmd_opts.runs
 
 	  %% Apply to train
 	  train_ssvm_expec = ...
-	      [ exp( cmd_opts.soft_alpha(i) * train_svm_dist) ./ ...
-	       (exp( cmd_opts.soft_alpha(i) * train_svm_dist) +  ...
-		exp(-cmd_opts.soft_alpha(i) * train_svm_dist)) ; ...
-	        exp(-cmd_opts.soft_alpha(i) * train_svm_dist) ./ ...
-	       (exp( cmd_opts.soft_alpha(i) * train_svm_dist) +  ...
-		exp(-cmd_opts.soft_alpha(i) * train_svm_dist)) ];
+	      distance_probability(cmd_opts.soft_alpha(i), train_svm_dist);
 	  ssvm_scores = sum(train_ssvm_expec, 2)';
+	  %% train_ssvm_scores{i} += ssvm_scores * train_ssvm_expec;
 
 	  %% Apply to test
 	  test_ssvm_expec = ...
-	      [ exp( cmd_opts.soft_alpha(i) * test_svm_dist) ./ ...
-	       (exp( cmd_opts.soft_alpha(i) * test_svm_dist) +  ...
-		exp(-cmd_opts.soft_alpha(i) * test_svm_dist)) ; ...
-	        exp(-cmd_opts.soft_alpha(i) * test_svm_dist) ./ ...
-	       (exp( cmd_opts.soft_alpha(i) * test_svm_dist) +  ...
-		exp(-cmd_opts.soft_alpha(i) * test_svm_dist)) ];
+	      distance_probability(cmd_opts.soft_alpha(i), test_svm_dist);
 	  test_ssvm_scores{i} += ssvm_scores * test_ssvm_expec;
 	  
 	  %% Log
@@ -471,19 +451,19 @@ for run = 1 : cmd_opts.runs
       qsvm_opts        = struct();
       qsvm_opts.radial = false();
       qsvm_opts.kernel = @(x) (x .+ 1) .^ 2;
+      qsvm_opts.C      = cmd_opts.svm_c;
       [ qsvm_model, qsvm_info ] = ...
-	  twopoint_kernel_svm(train_data(:, [ seed1, seed2 ]), qsvm_opts);
+	  multiclass_kernel_svm(seed_data, seed_classes, qsvm_opts);
 
       %% Log
       fprintf(2, "        Quadratic SVM fitted in %d iterations (obj=%g)\n", ...
 	      qsvm_info.iterations, qsvm_info.obj);
 
       %% Apply to train
-      train_qsvm_dist = ...
-	  simple_kernel_svm_distances(train_data, qsvm_model);
+      train_qsvm_dist = multiclass_kernel_svm_distances(train_data, qsvm_model);
 
       %% Apply to test
-      test_qsvm_dist  = simple_kernel_svm_distances(test_data, qsvm_model);
+      test_qsvm_dist  = multiclass_kernel_svm_distances(test_data,  qsvm_model);
 
       %% Clear
       clear qsvm_opts qsvm_model qsvm_info
@@ -491,16 +471,12 @@ for run = 1 : cmd_opts.runs
       if cmd_opts.do_qsvm
 
 	%% Apply to train
-	train_qsvm_expec   = ...
-	    sparse(sign(train_qsvm_dist) / 2 + 1.5, 1 : n_train, ...
-		   ones(1, n_train), 2, n_train);
+	train_qsvm_expec   = distance_winner(train_qsvm_dist);
 	qsvm_scores        = sum(train_qsvm_expec, 2)';
-	%% train_qsvm_scores += qsvm_scores * train_qsvm_expec;
+	%% train_qsvm_scores += svm_scores * train_svm_expec;
 
 	%% Apply to test
-	test_qsvm_expec   = ...
-	    sparse(sign(test_qsvm_dist) / 2 + 1.5, 1 : n_test, ...
-		   ones(1, n_test), 2, n_test);
+	test_qsvm_expec   = distance_winner(test_qsvm_dist);
 	test_qsvm_scores += qsvm_scores * test_qsvm_expec;
 
 	%% Clear
@@ -518,22 +494,13 @@ for run = 1 : cmd_opts.runs
 
 	  %% Apply to train
 	  train_sqsvm_expec = ...
-	      [ exp( cmd_opts.soft_alpha(i) * train_qsvm_dist) ./ ...
-	       (exp( cmd_opts.soft_alpha(i) * train_qsvm_dist) +  ...
-		exp(-cmd_opts.soft_alpha(i) * train_qsvm_dist)) ; ...
-	        exp(-cmd_opts.soft_alpha(i) * train_qsvm_dist) ./ ...
-	       (exp( cmd_opts.soft_alpha(i) * train_qsvm_dist) +  ...
-		exp(-cmd_opts.soft_alpha(i) * train_qsvm_dist)) ];
+	      distance_probability(cmd_opts.soft_alpha(i), train_qsvm_dist);
 	  sqsvm_scores = sum(train_sqsvm_expec, 2)';
-	  
+	  %% train_sqsvm_scores{i} += sqsvm_scores * train_sqvm_expec;
+
 	  %% Apply to test
 	  test_sqsvm_expec = ...
-	      [ exp( cmd_opts.soft_alpha(i) * test_qsvm_dist) ./ ...
-	       (exp( cmd_opts.soft_alpha(i) * test_qsvm_dist) +  ...
-		exp(-cmd_opts.soft_alpha(i) * test_qsvm_dist)) ; ...
-	        exp(-cmd_opts.soft_alpha(i) * test_qsvm_dist) ./ ...
-	       (exp( cmd_opts.soft_alpha(i) * test_qsvm_dist) +  ...
-		exp(-cmd_opts.soft_alpha(i) * test_qsvm_dist)) ];
+	      distance_probability(cmd_opts.soft_alpha(i), test_qsvm_dist);
 	  test_sqsvm_scores{i} += sqsvm_scores * test_sqsvm_expec;
 	  
 	  %% Log
@@ -570,18 +537,19 @@ for run = 1 : cmd_opts.runs
 	rbf_opts        = struct();
 	rbf_opts.radial = true();
 	rbf_opts.kernel = @(x) exp(-cmd_opts.rbf_gamma(j) * x);
+	rbf_opts.C      = cmd_opts.svm_c;
 	[ rbf_model, rbf_info ] = ...
-	    twopoint_kernel_svm(train_data(:, [ seed1, seed2 ]), rbf_opts);
+	    multiclass_kernel_svm(seed_data, seed_classes, rbf_opts);
 
 	%% Log
 	fprintf(2, "        RBF SVM fitted in %d iterations for gamma=%g (obj=%g)\n", ...
 		rbf_info.iterations, cmd_opts.rbf_gamma(j), rbf_info.obj);
 
 	%% Apply to train
-	train_rbf_dist = simple_kernel_svm_distances(train_data, rbf_model);
+	train_rbf_dist = multiclass_kernel_svm_distances(train_data, rbf_model);
 
 	%% Apply to test
-	test_rbf_dist  = simple_kernel_svm_distances(test_data, rbf_model);
+	test_rbf_dist  = multiclass_kernel_svm_distances(test_data, rbf_model);
 
 	%% Clear
 	clear rbf_opts rbf_model rbf_info
@@ -589,16 +557,12 @@ for run = 1 : cmd_opts.runs
 	if cmd_opts.do_rbf
 
 	  %% Apply to train
-	  train_rbf_expec   = ...
-	      sparse(sign(train_rbf_dist) / 2 + 1.5, 1 : n_train, ...
-		     ones(1, n_train), 2, n_train);
+	  train_rbf_expec   = distance_winner(train_rbf_dist);
 	  rbf_scores        = sum(train_rbf_expec, 2)';
 	  %% train_rbf_scores += rbf_scores * train_rbf_expec;
 	  
 	  %% Apply to test
-	  test_rbf_expec   = ...
-	      sparse(sign(test_rbf_dist) / 2 + 1.5, 1 : n_test, ...
-		     ones(1, n_test), 2, n_test);
+	  test_rbf_expec      = distance_winner(test_rbf_dist);
 	  test_rbf_scores{j} += rbf_scores * test_rbf_expec;
 
 	  %% Clear
@@ -616,22 +580,12 @@ for run = 1 : cmd_opts.runs
 
 	    %% Apply to train
 	    train_srbf_expec = ...
-		[ exp( cmd_opts.soft_alpha(i) * train_rbf_dist) ./ ...
-		 (exp( cmd_opts.soft_alpha(i) * train_rbf_dist) +  ...
-		  exp(-cmd_opts.soft_alpha(i) * train_rbf_dist)) ; ...
-		  exp(-cmd_opts.soft_alpha(i) * train_rbf_dist) ./ ...
-		 (exp( cmd_opts.soft_alpha(i) * train_rbf_dist) +  ...
-		  exp(-cmd_opts.soft_alpha(i) * train_rbf_dist)) ];
+		distance_probability(cmd_opts.soft_alpha(i), train_rbf_dist);
 	    srbf_scores = sum(train_srbf_expec, 2)';
 
 	    %% Apply to test
 	    test_srbf_expec = ...
-		[ exp( cmd_opts.soft_alpha(i) * test_rbf_dist) ./ ...
-		 (exp( cmd_opts.soft_alpha(i) * test_rbf_dist) +  ...
-		  exp(-cmd_opts.soft_alpha(i) * test_rbf_dist)) ; ...
-		  exp(-cmd_opts.soft_alpha(i) * test_rbf_dist) ./ ...
-		 (exp( cmd_opts.soft_alpha(i) * test_rbf_dist) +  ...
-		  exp(-cmd_opts.soft_alpha(i) * test_rbf_dist)) ];
+		distance_probability(cmd_opts.soft_alpha(i), test_rbf_dist);
 	    test_srbf_scores{j,i} += srbf_scores * test_srbf_expec;
 
 	    %% Log
@@ -655,130 +609,8 @@ for run = 1 : cmd_opts.runs
 	clear train_rbf_dist test_rbf_dist
       endfor
     endif
-
-
-    %%%%%%%%%%%
-    %% CPMMC %%
-    %%%%%%%%%%%
-
-    if cpmmc_works && (cmd_opts.do_cpmmc || cmd_opts.do_smmc)
-
-      %% Find CPMMC
-      cpmmc_opts         = struct();
-      cpmmc_opts.omega_0 = svm_model.omega;
-      cpmmc_opts.b_0     = svm_model.b;
-
-      %% Try it
-      cpmmc_end   = false();
-      cpmmc_tries = 0;
-      while ~cpmmc_end
-	try 
-	  %% Try
-	  ++cpmmc_tries;
-	  [ cpmmc_expec, cpmmc_model, cpmmc_info ] = ...
-	      CPM3C_clustering(train_data, 2, cpmmc_opts);
-
-          %% Log
-	  fprintf(2, "        CPMMC clustering in %d iterations (obj=%g, try=#%d)\n", ...
-		  cpmmc_info.iterations, cpmmc_info.obj, cpmmc_tries);
-
-          %% Apply to train
-	  train_cpmmc_dist = cpmmc_model.omega' * train_data + cpmmc_model.b;
-	  test_cpmmc_dist  = cpmmc_model.omega' * test_data  + cpmmc_model.b;
-
-	  %% Clear
-	  clear cpmmc_model cpmmc_info
-
-	  if cmd_opts.do_cpmmc
-
-            %% Apply to train
-	    cpmmc_scores        = sum(cpmmc_expec, 2)';
-	    %% train_cpmmc_scores += cpmmc_scores * cpmmc_expec;
-	    
-            %% Apply to test
-	    test_cpmmc_expec   = ...
-		sparse(sign(test_cpmmc_dist) / 2 + 1.5, 1 : n_test, ...
-		       ones(1, n_test), 2, n_test);
-	    test_cpmmc_scores += cpmmc_scores * test_cpmmc_expec;
-
-	    %% Clear
-	    clear cpmmc_scores test_cpmmc_expec
-	  endif
-
-	  %% Clear
-	  clear cpmmc_expec
-
-
-	  %%%%%%%%%%%%%%%%
-	  %% Soft CPMMC %%
-	  %%%%%%%%%%%%%%%%
-
-	  if cmd_opts.do_smmc
-
-	    for i = 1 : n_alpha
-
-	      %% Apply to train
-	      train_smmc_expec   = ...
-		  [ exp( cmd_opts.soft_alpha(i) * train_cpmmc_dist) ./ ...
-		   (exp( cmd_opts.soft_alpha(i) * train_cpmmc_dist) +  ...
-		    exp(-cmd_opts.soft_alpha(i) * train_cpmmc_dist)) ; ...
-	            exp(-cmd_opts.soft_alpha(i) * train_cpmmc_dist) ./ ...
-		   (exp( cmd_opts.soft_alpha(i) * train_cpmmc_dist) +  ...
-		    exp(-cmd_opts.soft_alpha(i) * train_cpmmc_dist)) ];
-	      smmc_scores        = sum(train_smmc_expec, 2)';
-	      %% train_smmc_scores += smmc_scores * train_smmc_expec;
-
-	      %% Apply to test
-	      test_smmc_expec   = ...
-		  [ exp( cmd_opts.soft_alpha(i) * test_cpmmc_dist) ./ ...
-		   (exp( cmd_opts.soft_alpha(i) * test_cpmmc_dist) +  ...
-		    exp(-cmd_opts.soft_alpha(i) * test_cpmmc_dist)) ; ...
-	            exp(-cmd_opts.soft_alpha(i) * test_cpmmc_dist) ./ ...
-		   (exp( cmd_opts.soft_alpha(i) * test_cpmmc_dist) +  ...
-		    exp(-cmd_opts.soft_alpha(i) * test_cpmmc_dist)) ];
-	      test_smmc_scores{i} += smmc_scores * test_smmc_expec;
-
-	      %% Log
-	      if i == 1
-		fprintf(2, "        Softened CPMMC decision for alpha=%.3f", ...
-			cmd_opts.soft_alpha(i));
-	      else
-		fprintf(2, ",%.3f", ...
-			cmd_opts.soft_alpha(i));
-	      endif
-	    endfor
-	    
-	    %% Newline
-	    fprintf(2, "\n");
-
-	    %% Clear
-	    clear train_smmc_expec smmc_scores test_smmc_expec
-	  endif
-
-	  %% It worked!
-	  cpmmc_end = true();
-
-	catch
-	  %% Fail
-	  fprintf(2, "        CPMMC clustering failed '%s' (try=#%d)\n", ...
-		  lasterr(), cpmmc_tries);
-
-	  %% Too many?
-	  if cpmmc_tries == cmd_opts.max_tries
-	    fprintf(2, ...
-		    "        Unable to make CPMMC work after %d tries, skipping\n", ...
-		    cmd_opts.max_tries);
-	    cpmmc_works = false();
-	    cpmmc_end   = true();
-	  endif
-	end_try_catch
-      endwhile
-
-      %% Clear
-      clear svm_model cpmmc_end cpmmc_tries cpmmc_opts
-    endif
   endfor
-  
+
 
   %%%%%%%%%%%%%%%%
   %% CUR & Dump %%
@@ -789,8 +621,8 @@ for run = 1 : cmd_opts.runs
     printf("# Pair: %s Feature: %s\n", pair, feat);
   endif
 
-  %% Seeds
-  printf("# Run: #%d Seeds: %d, %d\n", run, seed1, seed2);
+  %% Run
+  printf("# Run: #%d\n", run);
 
   %% Bernoulli
   if cmd_opts.do_berni
@@ -876,26 +708,6 @@ for run = 1 : cmd_opts.runs
     endfor
   endif
 
-  %% CPMMC
-  if cmd_opts.do_cpmmc && cpmmc_works
-    printf("# CPMMC #%d\n", run);
-    printf(DUMP_FORMAT, ...
-	   evaluation_curves(test_cpmmc_scores, test_truth_expec, ...
-			     test_truth_sizes));
-    printf("\n\n");
-  endif
-  
-  %% Soft CPMMC
-  if cmd_opts.do_smmc && cpmmc_works
-    for i = 1 : n_alpha
-      printf("# Soft CPMMC %.3f #%d\n", cmd_opts.soft_alpha(i), run);
-      printf(DUMP_FORMAT, ...
-	     evaluation_curves(test_smmc_scores{i}, test_truth_expec, ...
-			       test_truth_sizes));
-      printf("\n\n");
-    endfor
-  endif
-    
 
   %%%%%%%%%%%%%%%
   %% Reference %%

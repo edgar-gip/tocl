@@ -87,7 +87,8 @@ function [ model, info ] = multiclass_kernel_svm(data, classes, opts)
 
   %% Subject to
   %% \forall i, r \tau_{ir} \leq \delta(y_i, r)
-  ub  = full(flat_classes);
+  lb = -inf * ones(n_vars, 1);
+  ub = full(flat_classes);
   
   %% \forall i \sum_{r=1}^{n_classes} \tau_{ir} = 0
   Aeq = matrix_blockize(diag(ones(1, n_data)), 1, n_classes);
@@ -97,14 +98,40 @@ function [ model, info ] = multiclass_kernel_svm(data, classes, opts)
   Ain = zeros(0, n_classes * n_data);
 
   %% Optimize
-  [ tau, fval, in_info ] = ...
-      quadprog_cgal(H, f, Aeq, beq, [], [], -inf * ones(n_vars, 1), ub)
+  %% Should be: qp([], H, f, Aeq, beq, lb, ub, [], Ain, [])
+  %% but it just doesn't work... Buggy octave...
+  [ raw_tau, fval, in_info ] = ...
+      quadprog_cgal(H, f, Aeq, beq, [], [], lb, ub);
 
+  %% Restructure tau
+  tau = reshape(raw_tau, n_classes, n_data);
+
+  %% Keep those samples that have some tau different from zero
+  SVs = find(any(tau));
+  if isempty(SVs)
+    error("Found empty SV set");
+  endif
+
+  %% Store them in the model
+  model        = struct();
+  model.radial = opts.radial;
+  model.kernel = opts.kernel;
+  model.tau    = sparse(tau(:, SVs));
+  model.SV     = data(:, SVs)';
+
+  %% A radial kernel?
+  if model.radial
+    %% Add self product and number of SVs
+    model.SV_self = self_data(SVs); % n_SV * 1 
+    model.n_SV    = size(model.SV, 1);
+  endif
+  
   %% The function is negated
   fval = -fval;
 
   %% Information
   info            = struct();
-  info.iterations = in_info;
+  info.iterations = in_info.iterations;
   info.obj        = fval;
+  info.status     = in_info.status();
 endfunction

@@ -1,0 +1,9 @@
+Name: octopus
+Version: 0.1
+Date: 2010-02-08
+Author: Edgar Gonzàlez i Pellicer <edgar.gip@gmail.com>
+Maintainer: Edgar Gonzàlez i Pellicer <edgar.gip@gmail.com>
+Title: A library for Octave
+Description: A library for Octave
+Categories: misc
+License: GPL version 3 or later

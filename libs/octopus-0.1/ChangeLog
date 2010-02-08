@@ -6,3 +6,6 @@
 
 	* liboctave: Switched to an autotools-based package
 
+2010-02-08  Edgar Gonzàlez i Pellicer <edgar.gip@gmail.com>
+
+	* octopus: Changed name from liboctave to octopus

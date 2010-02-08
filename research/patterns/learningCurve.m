@@ -5,11 +5,11 @@
 %% Author: Edgar Gonzàlez i Pellicer
 
 
-%% Path
-addpath("~/devel/libs/liboctave-0.1/base")
+%% Octopus
+pkg load octopus
 
 %% Errors
-warning error Octave:divide-by-zero;
+warning error Octave:divide-by-zero
 
 
 %%%%%%%%%%%

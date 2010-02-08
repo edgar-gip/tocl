@@ -1,13 +1,12 @@
 %% -*- mode: octave; -*-
 
 %% Support Vector Machines (Revisited)
-%% Simple version -> Only separable data allowed, but with kernels
+%% Multiclass kernel SVM with slack variables
 %% Distance to hyperplane
 
 %% Author: Edgar Gonzalez
 
-function [ distances ] = simple_kernel_svm_distances(data, model)
-
+function [ distances ] = multiclass_kernel_svm_distances(data, model)
   %% Kernel matrix
   if model.radial
     %% Radial kernel
@@ -23,5 +22,5 @@ function [ distances ] = simple_kernel_svm_distances(data, model)
   endif
 
   %% Multiply and add offset
-  distances = sum(model.alpha * K, 1) + model.b;
+  distances = full(model.tau * K);
 endfunction
