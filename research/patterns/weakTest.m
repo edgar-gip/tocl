@@ -909,7 +909,7 @@ for run = 1 : cmd_opts.runs
 		  run - 1, cmd_opts.train);
       rfnce_header = ...
 	  sprintf("%s .+/%s%s.matrix.gz", cmd_opts.rfnce_head, ...
-		  cmd_opts.test, th_infix)
+		  cmd_opts.test, th_infix);
       rfnce_info = read_redo(rfnce_file, rfnce_header);
       fprintf(2, "%2d:     Read reference file %s\n", run, rfnce_file);
 
