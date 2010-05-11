@@ -5,7 +5,7 @@ MKOCTFILE = mkoctfile
 OCTFLAGS = -Wall -Wextra
 
 # Modules
-MODULES = CPM3C read_redo read_seeds read_sparse
+MODULES = CPM3C dirichlet_estimation read_redo read_seeds read_sparse
 
 # Module specific flags
 # <module>_OCTFLAGS = ...
@@ -16,9 +16,10 @@ read_sparse_OCTFLAGS = -I$(HOME)/devel/libs/ttcl-0.3/include
 
 # Module specific libs
 # <module>_LIBS = ...
-read_redo_LIBS   = -lbz2 -lz -lboost_regex
-read_seeds_LIBS  = -lbz2 -lz -lboost_regex
-read_sparse_LIBS = -lbz2 -lz
+dirichlet_estimation_LIBS = -lRmath
+read_redo_LIBS            = -lbz2 -lz -lboost_regex
+read_seeds_LIBS           = -lbz2 -lz -lboost_regex
+read_sparse_LIBS          = -lbz2 -lz
 
 # Objects and targets
 OBJECTS = $(addsuffix .o,   $(MODULES))

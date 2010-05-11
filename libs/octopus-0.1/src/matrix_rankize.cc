@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <exception>
+#include <string>
 #include <utility>
 #include <vector>
 

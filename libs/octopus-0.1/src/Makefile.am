@@ -8,7 +8,7 @@ SUFFIXES = .oct
 # Modules
 noinst_DATA = array_zip.oct cell_cat.oct \
 	      isfunctionhandle.oct matrix_rankize.oct
-EXTRA_DATA  = istream_open.oct quadprog_cgal.oct regex_match.oct
+EXTRA_DATA  = istream_open.oct psi.oct quadprog_cgal.oct regex_match.oct
 
 
 # Generic
@@ -20,6 +20,13 @@ EXTRA_DATA  = istream_open.oct quadprog_cgal.oct regex_match.oct
 if ISTREAM_MODULE
 noinst_DATA  += istream_open.oct
 istream_open_LDADD = -lbz2 -lz
+endif
+
+
+# psi
+if PSI_MODULE
+noinst_DATA += psi.oct
+psi_LDADD = -lRmath
 endif
 
 

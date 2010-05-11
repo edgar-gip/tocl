@@ -310,8 +310,8 @@ for run = 1 : cmd_opts.runs
     %%%%%%%%%%%%%%%%
 
     %% Evaluation curve
-    cur = evaluation_curves(test_scores, test_truth_expec, ...
-			    test_truth_sizes);
+    cur = binary_evaluation_curves(test_scores, test_truth_expec, ...
+				   test_truth_sizes);
 
     %% Find the maximum F1 points
     [ sorted_f1, sorted_i ] = sort(cur(F1, :), 'descend');
@@ -358,8 +358,8 @@ for run = 1 : cmd_opts.runs
     %% Curve
     printf("%s\n", DUMP_HEADER);
     printf(DUMP_FORMAT, ...
-	   evaluation_curves(test_scores, test_truth_expec, ...
-			     test_truth_sizes));
+	   binary_evaluation_curves(test_scores, test_truth_expec, ...
+				    test_truth_sizes));
     printf("\n\n");
   endif
 endfor

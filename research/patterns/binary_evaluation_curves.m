@@ -1,10 +1,11 @@
 %% -*- mode: octave; -*-
 
-%% Find evaluation curves
+%% Find binary evaluation curves
+%% Output: <total> <neg_rec> <rec> <prc> <f1> <score>
 
 %% Author: Edgar Gonzalez
 
-function [ curves ] = evaluation_curves(scores, truth, sizes)
+function [ curves ] = binary_evaluation_curves(scores, truth, sizes)
   %% Sort scores
   [ sorted_scores, sorted_indices ] = sort(scores, 'descend');
 

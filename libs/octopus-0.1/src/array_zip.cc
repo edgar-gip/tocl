@@ -16,10 +16,7 @@
 // along with octopus; see the file COPYING.  If not, see
 // <http://www.gnu.org/licenses/>.
 
-#include <algorithm>
 #include <exception>
-#include <utility>
-#include <vector>
 
 #include <octave/oct.h>
 #include <octave/ov-fcn.h>

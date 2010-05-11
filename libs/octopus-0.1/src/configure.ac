@@ -23,7 +23,8 @@ AC_CHECK_LIB([bz2],[BZ2_bzopen],
 	     [has_libbz2=true])
 AC_CHECK_LIB([z],[gzopen],
 	     [has_libz=true])
-
+AC_CHECK_LIB([Rmath],[psigamma],
+	     [has_librmath=true],[],[-lm])
 
 # C++
 AC_LANG(C++)
@@ -37,6 +38,10 @@ AC_CHECK_HEADERS([CGAL/QP_models.h],
 	         [has_cgal_qp_models=true])
 AC_CHECK_HEADERS([ttcl/io/anystream.hxx],
 		 [has_ttcl_io_anystream=true])
+AC_CHECK_HEADERS([Rmath.h],
+                 [has_rmath_h=true],[],
+		 [#define MATHLIB_STANDALONE
+		 ])
 
 # Checks for typedefs, structures, and compiler characteristics.
 
@@ -52,6 +57,8 @@ AM_CONDITIONAL([QUADPROG_CGAL_MODULE],
 	       [test x$has_cgal_qp_models = xtrue])
 AM_CONDITIONAL([REGEX_MODULE],
 	       [test x$has_boost_regex_hpp = xtrue])
+AM_CONDITIONAL([PSI_MODULE],
+	       [test x$has_librmath = xtrue -a x$has_rmath_h = xtrue])
 
 # Output
 AC_CONFIG_FILES([Makefile])

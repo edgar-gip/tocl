@@ -797,8 +797,8 @@ for run = 1 : cmd_opts.runs
     %% Dump
     printf("# Bernoulli #%d\n", run);
     printf(DUMP_FORMAT, ...
-	   evaluation_curves(test_berni_scores, test_truth_expec, ...
-			     test_truth_sizes));
+	   binary_evaluation_curves(test_berni_scores, test_truth_expec, ...
+				    test_truth_sizes));
     printf("\n\n");
   endif
 
@@ -806,8 +806,8 @@ for run = 1 : cmd_opts.runs
   if cmd_opts.do_kmean
     printf("# k-Means #%d\n", run);
     printf(DUMP_FORMAT, ...
-	   evaluation_curves(test_kmean_scores, test_truth_expec, ...
-			     test_truth_sizes));
+	   binary_evaluation_curves(test_kmean_scores, test_truth_expec, ...
+				    test_truth_sizes));
     printf("\n\n");
   endif
 
@@ -815,8 +815,8 @@ for run = 1 : cmd_opts.runs
   if cmd_opts.do_svm
     printf("# SVM #%d\n", run);
     printf(DUMP_FORMAT, ...
-	   evaluation_curves(test_svm_scores, test_truth_expec, ...
-			     test_truth_sizes));
+	   binary_evaluation_curves(test_svm_scores, test_truth_expec, ...
+				    test_truth_sizes));
     printf("\n\n");
   endif
 
@@ -825,8 +825,8 @@ for run = 1 : cmd_opts.runs
     for i = 1 : n_alpha
       printf("# Soft SVM %.3f #%d\n", cmd_opts.soft_alpha(i), run);
       printf(DUMP_FORMAT, ...
-	     evaluation_curves(test_ssvm_scores{i}, test_truth_expec, ...
-			       test_truth_sizes));
+	     binary_evaluation_curves(test_ssvm_scores{i}, test_truth_expec, ...
+				      test_truth_sizes));
       printf("\n\n");
     endfor
   endif
@@ -835,8 +835,8 @@ for run = 1 : cmd_opts.runs
   if cmd_opts.do_qsvm
     printf("# Quadratic SVM #%d\n", run);
     printf(DUMP_FORMAT, ...
-	   evaluation_curves(test_qsvm_scores,  test_truth_expec, ...
-			     test_truth_sizes));
+	   binary_evaluation_curves(test_qsvm_scores,  test_truth_expec, ...
+				    test_truth_sizes));
     printf("\n\n");
   endif
 
@@ -845,8 +845,8 @@ for run = 1 : cmd_opts.runs
     for i = 1 : n_alpha
       printf("# Soft Quadratic SVM %.3f #%d\n", cmd_opts.soft_alpha(i), run);
       printf(DUMP_FORMAT, ...
-	     evaluation_curves(test_sqsvm_scores{i}, test_truth_expec, ...
-			       test_truth_sizes));
+	     binary_evaluation_curves(test_sqsvm_scores{i}, ...
+				      test_truth_expec, test_truth_sizes));
       printf("\n\n");
     endfor
   endif
@@ -856,8 +856,8 @@ for run = 1 : cmd_opts.runs
     for j = 1 : n_gamma
       printf("# RBF SVM %.3f #%d\n", cmd_opts.rbf_gamma(j), run);
       printf(DUMP_FORMAT, ...
-	     evaluation_curves(test_rbf_scores{j}, test_truth_expec, ...
-			       test_truth_sizes));
+	     binary_evaluation_curves(test_rbf_scores{j}, test_truth_expec, ...
+				      test_truth_sizes));
       printf("\n\n");
     endfor
   endif
@@ -869,8 +869,8 @@ for run = 1 : cmd_opts.runs
 	printf("# Soft RBF SVM %.3f %.3f #%d\n", ...
 	       cmd_opts.rbf_gamma(j), cmd_opts.soft_alpha(i), run)
 	printf(DUMP_FORMAT, ...
-	       evaluation_curves(test_srbf_scores{j,i}, test_truth_expec, ...
-				 test_truth_sizes));
+	       binary_evaluation_curves(test_srbf_scores{j, i}, ...
+					test_truth_expec, test_truth_sizes));
 	printf("\n\n");
       endfor
     endfor
@@ -880,8 +880,8 @@ for run = 1 : cmd_opts.runs
   if cmd_opts.do_cpmmc && cpmmc_works
     printf("# CPMMC #%d\n", run);
     printf(DUMP_FORMAT, ...
-	   evaluation_curves(test_cpmmc_scores, test_truth_expec, ...
-			     test_truth_sizes));
+	   binary_evaluation_curves(test_cpmmc_scores, test_truth_expec, ...
+				    test_truth_sizes));
     printf("\n\n");
   endif
   
@@ -890,8 +890,8 @@ for run = 1 : cmd_opts.runs
     for i = 1 : n_alpha
       printf("# Soft CPMMC %.3f #%d\n", cmd_opts.soft_alpha(i), run);
       printf(DUMP_FORMAT, ...
-	     evaluation_curves(test_smmc_scores{i}, test_truth_expec, ...
-			       test_truth_sizes));
+	     binary_evaluation_curves(test_smmc_scores{i}, test_truth_expec, ...
+				      test_truth_sizes));
       printf("\n\n");
     endfor
   endif
