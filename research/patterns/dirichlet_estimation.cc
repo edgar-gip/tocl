@@ -1,5 +1,6 @@
 #include <cmath>
 #include <exception>
+// #include <iostream>
 
 #include <octave/oct.h>
 
@@ -58,7 +59,7 @@ static double digamma_inv(double y) {
    (Minka, 2003; Formula 9)
  */
 static void
-dirichlet_estimate(Matrix& _alpha, Matrix& _z,
+dirichlet_estimate(Matrix& _alpha, Matrix& _log_z,
 		   const Matrix& _suff,
 		   octave_idx_type _cl, octave_idx_type _bl,
 		   octave_idx_type _start, octave_idx_type _end) {
@@ -96,11 +97,17 @@ dirichlet_estimate(Matrix& _alpha, Matrix& _z,
       break;
   }
 
-  // Find the normalization factor
-  double prod_gamma = 1.0;
+  // Display it
+  // std::cerr << "( " << _alpha(_cl, _start);
+  // for (int j = _start + 1; j < _end; ++j)
+  //   std::cerr << ", " << _alpha(_cl, j);
+  // std::cerr << " )" << std::endl;
+  
+  // Find the log normalization factor
+  double log_norm = 0.0;
   for (int j = _start; j < _end; ++j)
-    prod_gamma *= gammafn(_alpha(_cl, j));
-  _z(_cl, _bl) = prod_gamma / gammafn(sum_alpha);
+    log_norm += lgammafn(_alpha(_cl, j));
+  _log_z(_cl, _bl) = log_norm - lgammafn(sum_alpha);
 }
 
 // Octave callback
@@ -142,7 +149,7 @@ Estimate the alpha parameters in Dirichlet clusters\n\
 
     // Output
     Matrix alpha(k, n_dims);
-    Matrix z    (k, n_blocks);
+    Matrix log_z(k, n_blocks);
 
     // For each cluster
     for (octave_idx_type cl = 0; cl < k; ++cl) {
@@ -150,7 +157,8 @@ Estimate the alpha parameters in Dirichlet clusters\n\
       octave_idx_type start = 0;
       for (octave_idx_type bl = 0; bl < blocks.length(); ++bl) {
 	// Estimate from suff(k, start : start + blocks(bl) - 1)
-	dirichlet_estimate(alpha, z, suff, cl, bl, start, start + blocks(bl));
+	dirichlet_estimate(alpha, log_z, suff, cl, bl,
+			   start, start + blocks(bl));
 
 	// Next block start
 	start += blocks(bl);
@@ -160,7 +168,7 @@ Estimate the alpha parameters in Dirichlet clusters\n\
     // Prepare output
     result.resize(2);
     result(0) = alpha;
-    result(1) = z;
+    result(1) = log_z;
   }
   // Was there an error?
   catch (const char* _error) {

@@ -5,6 +5,9 @@
 %% Author: Edgar Gonzàlez i Pellicer
 
 
+%% Warnings
+warning error Octave:divide-by-zero
+
 %% Octopus
 pkg load octopus
 
@@ -49,64 +52,150 @@ endfunction
 function do_clustering(label, scores, data, k, blocks, ...
 		       truth_expec, truth_sizes, ...
 		       bin_truth_expec, bin_truth_sizes)
+  %%%%%%%%%
+  %% Cut %%
+  %%%%%%%%%
+
   %% Find the evaluation curves
   curves = binary_evaluation_curves(scores, bin_truth_expec, bin_truth_sizes);
 
-  %% Find the optimal F1 point
-  [ max_f1, max_idx  ]           = max(curves(5, :));
-  max_prc  = curves(3, max_idx);
-  max_rec  = curves(4, max_idx);
-  th_score = curves(6, max_idx);
+  %% Number of data
+  n_data = size(scores, 2);
+
+  %% Find the score range
+  max_sco   = curves(6, 1);
+  min_sco   = curves(6, n_data);
+  sco_range = max_sco - min_sco;
+  
+  %% Find the distances
+  dists = ((0 : n_data - 1) / (n_data - 1)) .^ 2 + ...
+          ((curves(6, :) - min_sco) ./ sco_range) .^ 2;
+  [ m_dist, idx ] = min(dists);
+  det_prc         = curves(3, idx);
+  det_rec         = curves(4, idx);
+  det_f1          = curves(5, idx);
+  th_score        = curves(6, idx);
 
   %% Take only those samples above the score
-  pos_idx = find(scores > th_score);
+  pos_idx = find(scores >= th_score);
+  neg_idx = find(scores <  th_score);
   n_pos   = length(pos_idx);
+  n_neg   = length(neg_idx);
+  n_data  = n_pos + n_neg;
 
   %% Cluster
-  blocks
   [ dirich_exp, dirich_model, dirich_info ] = ...
       dirichlet_clustering(data(:, pos_idx), k, blocks);
-
-  %% Log
-  fprintf(2, "        Dirichlet model fitted in %d iterations (Log-like=%g)\n", ...
-	  dirich_info.iterations, dirich_info.log_like);
 
   %% Harden the decision
   [ max_expec, max_expec_idx ] = max(dirich_exp);
   hard_dirich_exp = sparse(max_expec_idx, 1 : n_pos, ones(1, n_pos), k, n_pos);
 
   %% Evaluate this clustering
-  [ pur_v1, ipur_v1, f1_v1 ] = ...
+  [ pur, ipur, f1 ] = ...
       classification_evaluation(hard_dirich_exp, truth_expec(:, pos_idx));
 
-  %% Take those samples really positive
-  pos_idx = find(bin_truth_expec(2, :));
+  %% Extend it to the other data
+  xhard_dirich_exp = ...
+      sparse([ max_expec_idx, (k + 1) * ones(1, n_neg) ],
+	     [ pos_idx,       neg_idx                  ],
+	     ones(1, n_data), k + 1, n_data);
+
+  %% Evaluate this other clustering
+  [ xpur, xipur, xf1 ] = ...
+      classification_evaluation(xhard_dirich_exp, truth_expec);
+
+  %% Display it
+  printf("%s Cut   %d %g %g %g %g  %g %g %g  %g %g %g\n", ...
+	 label, idx, th_score, det_rec, det_prc, det_f1, ...
+	 pur, ipur, f1, xpur, xipur, xf1); 
+
+
+  %%%%%%%%%%
+  %% Best %%
+  %%%%%%%%%%
+
+  %% Find the evaluation curves
+  %% curves = ...
+  %%    binary_evaluation_curves(scores, bin_truth_expec, bin_truth_sizes);
+
+  %% Find the optimal F1 point
+  [ det_f1, idx  ] = max(curves(5, :));
+  det_prc          = curves(3, idx);
+  det_rec          = curves(4, idx);
+  th_score         = curves(6, idx);
+
+  %% Take only those samples above the score
+  pos_idx = find(scores >= th_score);
+  neg_idx = find(scores <  th_score);
   n_pos   = length(pos_idx);
+  n_neg   = length(neg_idx);
+  n_data  = n_pos + n_neg;
 
   %% Cluster
-  pos_idx
-  full(data(:, pos_idx))
-  k
-  blocks
   [ dirich_exp, dirich_model, dirich_info ] = ...
       dirichlet_clustering(data(:, pos_idx), k, blocks);
-
-  %% Log
-  fprintf(2, "        Dirichlet model fitted in %d iterations (Log-like=%g)\n", ...
-	  dirich_info.iterations, dirich_info.log_like);
 
   %% Harden the decision
   [ max_expec, max_expec_idx ] = max(dirich_exp);
   hard_dirich_exp = sparse(max_expec_idx, 1 : n_pos, ones(1, n_pos), k, n_pos);
 
-  %% Evaluate this other clustering
-  [ pur_v2, ipur_v2, f1_v2 ] = ...
+  %% Evaluate this clustering
+  [ pur, ipur, f1 ] = ...
       classification_evaluation(hard_dirich_exp, truth_expec(:, pos_idx));
 
+  %% Extend it to the other data
+  xhard_dirich_exp = ...
+      sparse([ max_expec_idx, (k + 1) * ones(1, n_neg) ],
+	     [ pos_idx,       neg_idx                  ],
+	     ones(1, n_data), k + 1, n_data);
+
+  %% Evaluate this other clustering
+  [ xpur, xipur, xf1 ] = ...
+      classification_evaluation(xhard_dirich_exp, truth_expec);
+
   %% Display it
-  printf("%s  %d %g %g %g %g  %g %g %g  %g %g %g\n", ...
-	 label, max_idx, th_score, max_rec, max_prc, max_f1, ...
-	 pur_v1, ipur_v1, f1_v1, pur_v2, ipur_v2, f1_v2); 
+  printf("%s Best  %d %g %g %g %g  %g %g %g  %g %g %g\n", ...
+	 label, idx, th_score, det_rec, det_prc, det_f1, ...
+	 pur, ipur, f1, xpur, xipur, xf1); 
+
+
+  %%%%%%%%%%
+  %% Gold %%
+  %%%%%%%%%%
+
+  %% Take those samples really positive
+  pos_idx = find(bin_truth_expec(2, :));
+  neg_idx = find(bin_truth_expec(1, :));
+  n_pos   = length(pos_idx);
+  n_neg   = length(neg_idx);
+  % n_data  = n_pos + n_neg;
+
+  %% Cluster
+  [ dirich_exp, dirich_model, dirich_info ] = ...
+      dirichlet_clustering(data(:, pos_idx), k, blocks);
+
+  %% Harden the decision
+  [ max_expec, max_expec_idx ] = max(dirich_exp);
+  hard_dirich_exp = sparse(max_expec_idx, 1 : n_pos, ones(1, n_pos), k, n_pos);
+
+  %% Evaluate this clustering
+  [ pur, ipur, f1 ] = ...
+      classification_evaluation(hard_dirich_exp, truth_expec(:, pos_idx));
+
+  %% Extend it to the other data
+  xhard_dirich_exp = ...
+      sparse([ max_expec_idx, (k + 1) * ones(1, n_neg) ],
+	     [ pos_idx,       neg_idx                  ],
+	     ones(1, n_data), k + 1, n_data);
+
+  %% Evaluate this other clustering
+  [ xpur, xipur, xf1 ] = ...
+      classification_evaluation(xhard_dirich_exp, truth_expec);
+
+  %% Display it
+  printf("%s Gold  %d - 1.0 1.0 1.0  %g %g %g  %g %g %g\n", ...
+	 label, n_pos, pur, ipur, f1, xpur, xipur, xf1); 
 endfunction
 
 
@@ -220,7 +309,7 @@ for cl = 1 : cmd_opts.clusters
 endfor
 
 %% Read test data
-fprintf(2, "        Generated data\n");
+%% fprintf(2, "        Generated data\n");
 
 %% Truth expectation
 truth_expec = sparse(truth, 1 : n_data, ones(1, n_data));
@@ -359,8 +448,8 @@ for run = 1 : cmd_opts.runs
 	  kmeans_clustering(data, 2, kmean_opts);
 
       %% Log
-      fprintf(2, "%2d:%3d: k-Means clustering in %d iterations (Sum-sq=%g)\n", ...
-	      run, repeat, kmean_info.iterations, kmean_info.sum_sq);
+      %% fprintf(2, "%2d:%3d: k-Means clustering in %d iterations (Sum-sq=%g)\n", ...
+      %% 	      run, repeat, kmean_info.iterations, kmean_info.sum_sq);
 
       %% Update scores
       kmean_scores       = sum(kmean_expec, 2)';
@@ -386,8 +475,8 @@ for run = 1 : cmd_opts.runs
 	  twopoint_svm(data(:, [ seed1, seed2 ]), svm_opts);
 
       %% Log
-      fprintf(2, "        SVM fitted in %d iterations (obj=%g)\n", ...
-	      svm_info.iterations, svm_info.obj);
+      %% fprintf(2, "        SVM fitted in %d iterations (obj=%g)\n", ...
+      %% 	      svm_info.iterations, svm_info.obj);
 
       %% Apply to data
       svm_dist = svm_model.omega' * data + svm_model.b;
@@ -420,23 +509,23 @@ for run = 1 : cmd_opts.runs
 
 	  %% Apply to data
 	  ssvm_expec = ...
-	      distance_probability(cmd_opts.soft_alpha(i), svm_dist)
+	      distance_probability(cmd_opts.soft_alpha(i), svm_dist);
 	  ssvm_scores          = sum(ssvm_expec, 2)';
 	  data_ssvm_scores{i} += ssvm_scores * ssvm_expec;
 	  data_ssvm_class {i}  = [ data_ssvm_class{i} ; ssvm_expec ];
 	  
 	  %% Log
-	  if i == 1
-	    fprintf(2, "        Softened SVM decision for alpha=%.3f", ...
-		    cmd_opts.soft_alpha(i));
-	  else
-	    fprintf(2, ",%.3f", ...
-		    cmd_opts.soft_alpha(i));
-	  endif
+	  %% if i == 1
+	  %%   fprintf(2, "        Softened SVM decision for alpha=%.3f", ...
+	  %% 	    cmd_opts.soft_alpha(i));
+	  %% else
+	  %%   fprintf(2, ",%.3f", ...
+	  %% 	    cmd_opts.soft_alpha(i));
+	  %% endif
 	endfor
 
 	%% Newline
-	fprintf(2, "\n");
+	%% fprintf(2, "\n");
 
 	%% Clear
 	clear ssvm_expec ssvm_scores
@@ -461,8 +550,8 @@ for run = 1 : cmd_opts.runs
 	  twopoint_kernel_svm(data(:, [ seed1, seed2 ]), qsvm_opts);
 
       %% Log
-      fprintf(2, "        Quadratic SVM fitted in %d iterations (obj=%g)\n", ...
-	      qsvm_info.iterations, qsvm_info.obj);
+      %% fprintf(2, "        Quadratic SVM fitted in %d iterations (obj=%g)\n", ...
+      %% 	      qsvm_info.iterations, qsvm_info.obj);
 
       %% Apply to data
       qsvm_dist = ...
@@ -502,17 +591,17 @@ for run = 1 : cmd_opts.runs
 	  data_sqsvm_class {i}  = [ data_sqsvm_class{i} ; sqsvm_expec ];
 	  
 	  %% Log
-	  if i == 1
-	    fprintf(2, "        Softened Quadratic SVM decision for alpha=%.3f", ...
-		    cmd_opts.soft_alpha(i));
-	  else
-	    fprintf(2, ",%.3f", ...
-		    cmd_opts.soft_alpha(i));
-	  endif
+	  %% if i == 1
+	  %%   fprintf(2, "        Softened Quadratic SVM decision for alpha=%.3f", ...
+	  %% 	    cmd_opts.soft_alpha(i));
+	  %% else
+	  %%   fprintf(2, ",%.3f", ...
+	  %% 	    cmd_opts.soft_alpha(i));
+	  %% endif
 	endfor
 
 	%% Newline
-	fprintf(2, "\n");
+	%% fprintf(2, "\n");
 
 	%% Clear
 	clear sqsvm_expec sqsvm_scores
@@ -539,8 +628,8 @@ for run = 1 : cmd_opts.runs
 	    twopoint_kernel_svm(data(:, [ seed1, seed2 ]), rbf_opts);
 
 	%% Log
-	fprintf(2, "        RBF SVM fitted in %d iterations for gamma=%g (obj=%g)\n", ...
-		rbf_info.iterations, cmd_opts.rbf_gamma(j), rbf_info.obj);
+	%% fprintf(2, "        RBF SVM fitted in %d iterations for gamma=%g (obj=%g)\n", ...
+	%% 	rbf_info.iterations, cmd_opts.rbf_gamma(j), rbf_info.obj);
 
 	%% Apply to data
 	rbf_dist = simple_kernel_svm_distances(data, rbf_model);
@@ -579,17 +668,17 @@ for run = 1 : cmd_opts.runs
 	    data_srbf_class {j,i}  = [ data_srbf_class{j,i} ; srbf_expec ];
 
 	    %% Log
-	    if i == 1
-	      fprintf(2, "        Softened RBF SVM decision for alpha=%.3f", ...
-		      cmd_opts.soft_alpha(i));
-	    else
-	      fprintf(2, ",%.3f", ...
-		      cmd_opts.soft_alpha(i));
-	    endif
+	    %% if i == 1
+	    %%   fprintf(2, "        Softened RBF SVM decision for alpha=%.3f", ...
+	    %% 	      cmd_opts.soft_alpha(i));
+	    %% else
+	    %%   fprintf(2, ",%.3f", ...
+	    %% 	      cmd_opts.soft_alpha(i));
+	    %% endif
 	  endfor
 	    
 	  %% Newline
-	  fprintf(2, "\n");
+	  %% fprintf(2, "\n");
 
 	  %% Clear
 	  clear srbf_expec srbf_scores
@@ -623,8 +712,8 @@ for run = 1 : cmd_opts.runs
 	      CPM3C_clustering(data, 2, cpmmc_opts);
 
           %% Log
-	  fprintf(2, "        CPMMC clustering in %d iterations (obj=%g, try=#%d)\n", ...
-		  cpmmc_info.iterations, cpmmc_info.obj, cpmmc_tries);
+	  %% fprintf(2, "        CPMMC clustering in %d iterations (obj=%g, try=%%%d)\n", ...
+	  %% 	  cpmmc_info.iterations, cpmmc_info.obj, cpmmc_tries);
 
           %% Apply to data
 	  cpmmc_dist = cpmmc_model.omega' * data + cpmmc_model.b;
@@ -663,17 +752,17 @@ for run = 1 : cmd_opts.runs
 	      data_smmc_class {i}  = [ data_smmc_class{i} ; smmc_expec ];
 
 	      %% Log
-	      if i == 1
-		fprintf(2, "        Softened CPMMC decision for alpha=%.3f", ...
-			cmd_opts.soft_alpha(i));
-	      else
-		fprintf(2, ",%.3f", ...
-			cmd_opts.soft_alpha(i));
-	      endif
+	      %% if i == 1
+	      %% 	fprintf(2, "        Softened CPMMC decision for alpha=%.3f", ...
+	      %% 		cmd_opts.soft_alpha(i));
+	      %% else
+	      %% 	fprintf(2, ",%.3f", ...
+	      %% 		cmd_opts.soft_alpha(i));
+	      %% endif
 	    endfor
 	    
 	    %% Newline
-	    fprintf(2, "\n");
+	    %% fprintf(2, "\n");
 
 	    %% Clear
 	    clear smmc_expec smmc_scores
@@ -684,14 +773,14 @@ for run = 1 : cmd_opts.runs
 
 	catch
 	  %% Fail
-	  fprintf(2, "        CPMMC clustering failed '%s' (try=#%d)\n", ...
-		  lasterr(), cpmmc_tries);
+	  %% fprintf(2, "        CPMMC clustering failed '%s' (try=#%d)\n", ...
+	  %% 	  lasterr(), cpmmc_tries);
 
 	  %% Too many?
 	  if cpmmc_tries == cmd_opts.max_tries
-	    fprintf(2, ...
-		    "        Unable to make CPMMC work after %d tries, skipping\n", ...
-		    cmd_opts.max_tries);
+	    %% fprintf(2, ...
+	    %% 	    "        Unable to make CPMMC work after %d tries, skipping\n", ...
+	    %% 	    cmd_opts.max_tries);
 	    cpmmc_works = false();
 	    cpmmc_end   = true();
 	  endif
@@ -708,9 +797,6 @@ for run = 1 : cmd_opts.runs
   %% Clustering %%
   %%%%%%%%%%%%%%%%
 
-  %% Seeds
-  printf("# Run: #%d Seeds: %d, %d\n", run, seed1, seed2);
-
   %% k-Means
   if cmd_opts.do_kmean
     do_clustering(sprintf("k-means 0 0 %d ", run), data_kmean_scores, ...
@@ -722,52 +808,54 @@ for run = 1 : cmd_opts.runs
 
   %% SVM
   if cmd_opts.do_svm
-    # printf("# SVM #%d\n", run);
-    # printf(DUMP_FORMAT, ...
-    # 	   evaluation_curves(svm_scores, truth_expec, ...
-    # 			     truth_sizes));
-    # printf("\n\n");
+    %% printf("# SVM #%d\n", run);
+    %% printf(DUMP_FORMAT, ...
+    %% 	   evaluation_curves(svm_scores, truth_expec, ...
+    %% 			     truth_sizes));
+    %% printf("\n\n");
   endif
 
   %% Soft SVM
   if cmd_opts.do_ssvm
     for i = 1 : n_alpha
-      # printf("# Soft SVM %.3f #%d\n", cmd_opts.soft_alpha(i), run);
-      # printf(DUMP_FORMAT, ...
-      # 	     evaluation_curves(ssvm_scores{i}, truth_expec, ...
-      # 			       truth_sizes));
-      # printf("\n\n");
+      do_clustering(sprintf("ssvm - %g %d ", ...
+			    cmd_opts.soft_alpha(i), run), ...
+		    data_ssvm_scores{i}, ...
+		    data_ssvm_class{i}, cmd_opts.clusters, ...
+		    2 * ones(1, cmd_opts.repeats), ...
+		    truth_expec, truth_sizes, ...
+		    bin_truth_expec, bin_truth_sizes);
     endfor
   endif
 
   %% Quadratic SVM
   if cmd_opts.do_qsvm
-    # printf("# Quadratic SVM #%d\n", run);
-    # printf(DUMP_FORMAT, ...
-    # 	   evaluation_curves(qsvm_scores,  truth_expec, ...
-    # 			     truth_sizes));
-    # printf("\n\n");
+    %% printf("# Quadratic SVM #%d\n", run);
+    %% printf(DUMP_FORMAT, ...
+    %% 	   evaluation_curves(qsvm_scores,  truth_expec, ...
+    %% 			     truth_sizes));
+    %% printf("\n\n");
   endif
 
   %% Soft Quadratic SVM
   if cmd_opts.do_sqsvm
     for i = 1 : n_alpha
-      # printf("# Soft Quadratic SVM %.3f #%d\n", cmd_opts.soft_alpha(i), run);
-      # printf(DUMP_FORMAT, ...
-      # 	     evaluation_curves(sqsvm_scores{i}, truth_expec, ...
-      # 			       truth_sizes));
-      # printf("\n\n");
+      %% printf("# Soft Quadratic SVM %.3f #%d\n", cmd_opts.soft_alpha(i), run);
+      %% printf(DUMP_FORMAT, ...
+      %% 	     evaluation_curves(sqsvm_scores{i}, truth_expec, ...
+      %% 			       truth_sizes));
+      %% printf("\n\n");
     endfor
   endif
 
   %% RBF SVM
   if cmd_opts.do_rbf
     for j = 1 : n_gamma
-      # printf("# RBF SVM %.3f #%d\n", cmd_opts.rbf_gamma(j), run);
-      # printf(DUMP_FORMAT, ...
-      # 	     evaluation_curves(rbf_scores{j}, truth_expec, ...
-      # 			       truth_sizes));
-      # printf("\n\n");
+      %% printf("# RBF SVM %.3f #%d\n", cmd_opts.rbf_gamma(j), run);
+      %% printf(DUMP_FORMAT, ...
+      %% 	     evaluation_curves(rbf_scores{j}, truth_expec, ...
+      %% 			       truth_sizes));
+      %% printf("\n\n");
     endfor
   endif
 
@@ -789,21 +877,21 @@ for run = 1 : cmd_opts.runs
 
   %% CPMMC
   if cmd_opts.do_cpmmc && cpmmc_works
-    # printf("# CPMMC #%d\n", run);
-    # printf(DUMP_FORMAT, ...
-    # 	   evaluation_curves(cpmmc_scores, truth_expec, ...
-    # 			     truth_sizes));
-    # printf("\n\n");
+    %% printf("# CPMMC #%d\n", run);
+    %% printf(DUMP_FORMAT, ...
+    %% 	   evaluation_curves(cpmmc_scores, truth_expec, ...
+    %% 			     truth_sizes));
+    %% printf("\n\n");
   endif
   
   %% Soft CPMMC
   if cmd_opts.do_smmc && cpmmc_works
     for i = 1 : n_alpha
-      # printf("# Soft CPMMC %.3f #%d\n", cmd_opts.soft_alpha(i), run);
-      # printf(DUMP_FORMAT, ...
-      # 	     evaluation_curves(smmc_scores{i}, truth_expec, ...
-      # 			       truth_sizes));
-      # printf("\n\n");
+      %% printf("# Soft CPMMC %.3f #%d\n", cmd_opts.soft_alpha(i), run);
+      %% printf(DUMP_FORMAT, ...
+      %% 	     evaluation_curves(smmc_scores{i}, truth_expec, ...
+      %% 			       truth_sizes));
+      %% printf("\n\n");
     endfor
   endif
     

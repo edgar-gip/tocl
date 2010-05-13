@@ -79,7 +79,7 @@ function [ expec, model, info ] = dirichlet_clustering(data, k, blocks, opts)
 
   %% Loop
   i = 2;
-  while i <= opts.em_iterations && change >= opts.em_threshold
+  while i <= opts.em_iterations && log_like < 0 && change >= opts.em_threshold
     %% Maximization
     model = dirichlet_maximization(log_data, blocks, expec);
 

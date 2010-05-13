@@ -18,7 +18,7 @@ function model = dirichlet_maximization(log_data, blocks, expec)
   cl_obs ./= ones(n_dims, 1) * cl_sizes';
 
   %% Fit the thetas for each block and cluster
-  [ cl_theta, cl_z ] = dirichlet_estimation(blocks, cl_obs);
+  [ cl_theta, cl_log_z ] = dirichlet_estimation(blocks, cl_obs);
 
   %% Smoothen cl_sizes
   cl_sizes .+= 1;
@@ -28,8 +28,8 @@ function model = dirichlet_maximization(log_data, blocks, expec)
   model          = struct();
   model.k        = k;
   model.blocks   = blocks;
-  model.alpha    = log(cl_sizes);                   % k * 1
-  model.z        = cl_z;                            % k * n_blocks
-  model.alpha_z  = model.alpha - sum(log(cl_z), 2); % k * 1
-  model.theta_m1 = cl_theta - 1;                    % k * n_dims
+  model.alpha    = log(cl_sizes);                  % k * 1
+  model.log_z    = cl_log_z;                       % k * n_blocks
+  model.alpha_z  = model.alpha - sum(cl_log_z, 2); % k * 1
+  model.theta_m1 = cl_theta - 1;                   % k * n_dims
 endfunction
