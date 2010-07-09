@@ -272,3 +272,73 @@ Blockize a matrix\n\
   // Return the result
   return result;
 }
+
+
+/*************************/
+/* Eye blockize a matrix */
+/*************************/
+
+// PKG_ADD: autoload('matrix_eyeblockize', which('matrix_rankize'));
+
+DEFUN_DLD(matrix_eyeblockize, args, nargout,
+          "-*- texinfo -*-\n\
+@deftypefn {Loadable Function} {[ @var{matrix} ] =}\
+ matrix_eyeblockize(@var{matrix}, @var{eye_block))\n\
+\n\
+Eye-Blockize a matrix\n\
+@end deftypefn") {
+  // Result
+  octave_value_list result;
+
+  try {
+    // Check the number of parameters
+    if (args.length() != 2 or nargout > 1)
+      throw (const char*)0;
+
+    // Check first argument
+    if (not args(0).is_real_matrix())
+      throw "matrix should be a real matrix";
+    Matrix m = args(0).matrix_value();
+
+    // Check second argument
+    if (not args(1).is_real_scalar())
+      throw "row_block should be a real scalar";
+    int eye_block = args(1).int_value();
+
+    // Output
+    Matrix out(m.rows() * eye_block, m.columns() * eye_block, 0.0);
+
+    // Fill it
+    double* m_ptr   =   m.fortran_vec();
+    double* out_ptr = out.fortran_vec();
+
+    // For each one in the input
+    for (int c = 0; c < m.columns(); ++c, m_ptr += m.rows()) {
+      for (int crep = 0; crep < eye_block; ++crep) {
+	double* m_col_ptr = m_ptr;
+	for (int r = 0; r < m.rows(); ++r, ++m_col_ptr, out_ptr += eye_block)
+	  out_ptr[crep] = *m_col_ptr;
+      }
+    }
+    
+    // Set
+    result.resize(1);
+    result(0) = out;
+  }
+  // Was there an error?
+  catch (const char* _error) {
+    // Display the error or the usage
+    if (_error)
+      error(_error);
+    else
+      print_usage();
+  }
+  // Was there an exception
+  catch (std::exception& _excep) {
+    // Display the error
+    error(_excep.what());
+  }
+
+  // Return the result
+  return result;
+}

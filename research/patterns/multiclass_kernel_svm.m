@@ -14,7 +14,7 @@
 
 %% Author: Edgar Gonzalez
 
-function [ model, info ] = multiclass_kernel_svm(data, classes, opts)
+function [ model, info, problem ] = multiclass_kernel_svm(data, classes, opts)
 
   %% Data and classes should be given
   if nargin() < 2 || nargin() > 3
@@ -82,8 +82,11 @@ function [ model, info ] = multiclass_kernel_svm(data, classes, opts)
   %%   (\sum_{m=1}^{k} \tau_{im} \cdot \tau_{jm}) \cdot \K(x_i, x_j)
   %% + \beta \cdot \sum_{i=1}^{n_data} \tau_{iy_i}
   %% Or minimize the negated...
-  H = matrix_blockize(K, n_classes, n_classes);
+  H = matrix_eyeblockize(K, n_classes);
   f = -beta * full(flat_classes);
+
+  %% <- There used to be a bug here
+  %% H = matrix_blockize(K, n_classes, n_classes);
 
   %% Subject to
   %% \forall i, r \tau_{ir} \leq \delta(y_i, r)
@@ -134,4 +137,18 @@ function [ model, info ] = multiclass_kernel_svm(data, classes, opts)
   info.iterations = in_info.iterations;
   info.obj        = fval;
   info.status     = in_info.status();
+
+  %% Problem
+  problem      = struct();
+  problem.H    = H;
+  problem.f    = f;
+  problem.lb   = lb;
+  problem.ub   = ub;
+  problem.Aeq  = Aeq;
+  problem.beq  = beq;
+  problem.Ain  = Ain;
+  problem.bin  = 0;
+  problem.x    = raw_tau;
+  problem.fval = fval;
+  problem.info = in_info;
 endfunction
