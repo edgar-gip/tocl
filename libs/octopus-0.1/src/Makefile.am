@@ -6,8 +6,8 @@ AM_CXXFLAGS = -Wall -Wextra
 SUFFIXES = .oct
 
 # Modules
-noinst_DATA = array_zip.oct cell_cat.oct \
-	      isfunctionhandle.oct matrix_rankize.oct
+noinst_DATA = array_zip.oct cell_cat.oct isfunctionhandle.oct \
+	      matrix_rankize.oct parse_qps.oct quadprog_turlach.oct
 EXTRA_DATA  = istream_open.oct psi.oct quadprog_cgal.oct regex_match.oct
 
 
@@ -40,6 +40,11 @@ quadprog_cgal_CXXFLAGS = -g -frounding-math -Wall -Wextra -fPIC
 quadprog_cgal.oct: quadprog_cgal.cc $(quadprog_cgal_SOURCES)
 	CXXFLAGS="$(quadprog_cgal_CXXFLAGS)" $(MKOCTFILE) $(CPPFLAGS) $(quadprog_cgal_OCTFLAGS) $(DEFS) $^ $(LDFLAGS) $(quadprog_cgal_LDADD)
 endif
+
+
+# quadprog_turlach
+quadprog_turlach_SOURCES = extern/linpack_dpofa.f extern/qpgen2.f \
+	                   extern/qpgen2_util.f quadprog_common.cc
 
 
 # regex

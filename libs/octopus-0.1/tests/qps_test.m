@@ -16,23 +16,34 @@
 %% along with octopus; see the file COPYING.  If not, see
 %% <http://www.gnu.org/licenses/>.
 
-%% Test for get_options.m
+%% Test for parse_qps.m, quadprog.m
 
 %% Load the package
 pkg load octopus;
 
-%% Test and show the results
-[ args, opts ] = get_options("simple",     "simple", ...
-			     "negable!",   "negable", ...
-			     "pseudo~",    "simple", ...
-			     "negated-",   "simple", ...
-			     "integer=i",  "integer", ...
-			     "float=f",    "float", ...
-			     "string=s",   "string", ...
-			     "radio1=r1", "radio", ...
-			     "radio2=r2", "radio", ...
-			     "radio3=r3", "radio", ...
-			     "radio4=r4", "radio")
+%% Arguments
+file = argv(){1};
+fval = str2num(argv(){2});
+
+%% Display
+printf("%40s  Actual: %15g", file, fval);
+
+%% Parse the file
+[ H, f, g, Aineq, bineq, Aeq, beq, lb, ub ] = parse_qps(file);
+
+%% Solve by CGAL
+[ x1_cgal, obj_cgal ] = quadprog_cgal(H, f, Aineq, bineq, Aeq, beq, lb, ub);
+obj_cgal += g;
+
+%% Display
+printf("  CGAL: %15g", obj_cgal);
+
+%% Solve by Turlach
+[ x1_tur, obj_tur ] = quadprog_turlach(H, f, Aineq, bineq, Aeq, beq, lb, ub);
+obj_tur += g;
+
+%% Display
+printf("  Turlach: %15g", obj_tur);
 
 %% Local Variables:
 %% mode:octave

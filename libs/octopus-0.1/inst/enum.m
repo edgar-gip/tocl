@@ -16,7 +16,10 @@
 %% along with octopus; see the file COPYING.  If not, see
 %% <http://www.gnu.org/licenses/>.
 
+%% -*- texinfo -*-
+%% @deftypefn {Command} enum @var{value} @var{value} ...
 %% Define enumerations
+%% @end deftypefn
 
 function enum(varargin)
   

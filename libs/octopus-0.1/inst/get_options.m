@@ -16,7 +16,10 @@
 %% along with octopus; see the file COPYING.  If not, see
 %% <http://www.gnu.org/licenses/>.
 
+%% -*- texinfo -*-
+%% @deftypefn {Function File} {[ @var{args}, @var{opts} ] =} get_options(...)
 %% Get options in a Getopt::Long style
+%% @end deftypefn
 
 function [ args, opts ] = get_options(varargin)
 
