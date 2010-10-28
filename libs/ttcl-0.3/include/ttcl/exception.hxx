@@ -37,20 +37,20 @@ namespace ttcl {
   protected:
     /// Description message
     std::string message_;
-    
+
     /// Exception source file
     std::string file_;
-    
+
     /// Exception source line number
     uint line_no_;
 
-#ifdef _EXECINFO_H    
+#ifdef _EXECINFO_H
     /// Backtrace
     char** trace_;
-    
+
     /// Number of positions of trace filled
     int n_filled_;
-#endif    
+#endif
 
   public:
     /// Constructor
@@ -119,10 +119,10 @@ namespace ttcl {
       // Get the backtrace
       void* buffer[20];
       n_filled_ = backtrace(buffer, 20);
-      
+
       // Split the first 2
       n_filled_ -= 2;
-      
+
       // Convert to symbols
       trace_ = backtrace_symbols(buffer + 2, n_filled_);
 
@@ -180,7 +180,7 @@ namespace ttcl {
       return message_;
     }
 
-    /// Get the message 
+    /// Get the message
     /** As a char*
      */
     const char* c_message() const {
