@@ -61,7 +61,8 @@ function [ scores, model, info ] = score(this, data)
   endfor
 
   %% Create the model
-  model = EWOCSModel(ensemble_models, ensemble_cluster_scores);
+  model = EWOCSModel(ensemble_models, ensemble_cluster_scores, ...
+		     this.interpolator);
 
   %% Create the information
   info = struct();

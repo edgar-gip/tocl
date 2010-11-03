@@ -57,6 +57,26 @@ function [ this ] = EWOCS(clusterer, opts)
     this.score_function = opts.score_function;
   endif
 
+  %% Interpolator
+  %% Default -> Linear
+  if ~isfield(opts, "interpolator")
+    this.interpolator = LinearInterpolator();
+
+  elseif ~isobject(opts.interpolator)
+    opts.interpolator = tolower(opts.interpolator);
+    switch opts.interpolator
+      case "exp"
+	this.interpolator = ExpInterpolator();
+      case "linear"
+	this.interpolator = LinearInterpolator();
+      case "log"
+	this.interpolator = LogInterpolator();
+    endswitch
+
+  else
+    this.interpolator = opts.interpolator;
+  endif
+
   %% Bless
   %% And add inheritance
   this = class(this, "EWOCS", ...
