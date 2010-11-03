@@ -15,7 +15,7 @@ function [ model, info ] = twopoint_svm(data, opts)
 
   %% Size
   [ n_dims, n_data ] = size(data);
-  if n_data != 2
+  if n_data ~= 2
     usage("Two data points must be given");
   endif
 

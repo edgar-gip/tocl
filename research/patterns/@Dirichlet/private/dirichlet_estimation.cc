@@ -44,12 +44,12 @@ static double digamma_inv(double y) {
 
     // New function value
     f = digamma(x) - y;
-    
+
     // Exit if the function is close enough to zero
     if (std::abs(f) < THRESHOLD)
       break;
   }
-  
+
   // Return the result
   return x;
 }
@@ -76,11 +76,11 @@ dirichlet_estimate(Matrix& _alpha, Matrix& _log_z,
 
     // Total amount of change
     double change = 0.0;
-    
+
     // Each feature
     sum_alpha = 0.0;
     for (int j = _start; j < _end; ++j) {
-      // New alpha 
+      // New alpha
       /* Remember _suff is (n_dims * k)
        */
       double new_alpha = digamma_inv(dig_sum_alpha + _suff(j, _cl));
@@ -102,7 +102,7 @@ dirichlet_estimate(Matrix& _alpha, Matrix& _log_z,
   // for (int j = _start + 1; j < _end; ++j)
   //   std::cerr << ", " << _alpha(_cl, j);
   // std::cerr << " )" << std::endl;
-  
+
   // Find the log normalization factor
   double log_norm = 0.0;
   for (int j = _start; j < _end; ++j)
@@ -125,7 +125,7 @@ Estimate the alpha parameters in Dirichlet clusters\n\
     // Check the number of parameters
     if (args.length() != 2 or nargout < 1)
       throw (const char*)0;
-  
+
     // Get blocks
     Array<int> blocks = args(0).int_vector_value();
     octave_idx_type n_blocks = blocks.length();

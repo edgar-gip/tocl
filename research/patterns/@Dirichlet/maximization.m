@@ -5,10 +5,10 @@
 
 %% Author: Edgar Gonzalez
 
-function model = dirichlet_maximization(log_data, blocks, expec)
+function model = maximization(this, log_data, blocks, expec)
   %% Number of data and features
   [ n_dims, n_data ] = size(log_data);
-  [ k     , n_data ] = size(expec); 
+  [ k     , n_data ] = size(expec);
 
   %% Cluster sizes
   cl_sizes = sum(expec, 2); % k * 1
@@ -20,16 +20,16 @@ function model = dirichlet_maximization(log_data, blocks, expec)
   %% Fit the thetas for each block and cluster
   [ cl_theta, cl_log_z ] = dirichlet_estimation(blocks, cl_obs);
 
-  %% Smoothen cl_sizes
+  %% Smoothen (and log) cl_sizes
   cl_sizes .+= 1;
   cl_sizes ./= n_data + k;
+  cl_sizes   = log(cl_sizes);
 
   %% Create the model
-  model          = struct();
-  model.k        = k;
-  model.blocks   = blocks;
-  model.alpha    = log(cl_sizes);                  % k * 1
-  model.log_z    = cl_log_z;                       % k * n_blocks
-  model.alpha_z  = model.alpha - sum(cl_log_z, 2); % k * 1
-  model.theta_m1 = cl_theta - 1;                   % k * n_dims
+  model = DirichletModel(k,
+			 blocks,
+			 cl_sizes,                    % k * 1
+			 cl_log_z,                    % k * n_blocks
+			 cl_sizes - sum(cl_log_z, 2), % k * 1
+			 cl_theta - 1);               % k * n_dims
 endfunction

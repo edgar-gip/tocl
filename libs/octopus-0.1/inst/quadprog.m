@@ -1,4 +1,4 @@
-%% Copyright (C) 2010 Edgar Gonzàlez i Pellicer <ausias.et.al@gmail.com>
+%% Copyright (C) 2010 Edgar Gonzàlez i Pellicer <edgar.gip@gmail.com>
 %%
 %% This file is part of octopus-0.1.
 %%

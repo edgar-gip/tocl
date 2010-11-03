@@ -72,7 +72,7 @@ def_opts.stat_tests = false();
 		"rbf-gamma=f",       "rbf_gamma",     ...
 		"runs=i",            "runs",          ...
 		"repeats=i",         "repeats",       ...
-		"seed=f",            "seed",          ...	
+		"seed=f",            "seed",          ...
 		"max-tries=i",       "max_tries",     ...
 		"threshold=i",       "threshold",     ...
 		"train=s",           "train",         ...
@@ -82,7 +82,7 @@ def_opts.stat_tests = false();
 		"stat-tests!",       "stat_tests");
 
 %% Chek number of arguments
-if length(cmd_args) != 1 && length(cmd_args) != 3
+if length(cmd_args) ~= 1 && length(cmd_args) ~= 3
   error("Wrong number of arguments (should be 1 or 3)");
 endif
 
@@ -118,7 +118,7 @@ else % length(cmd_args) == 3
   data_dir = sprintf("%s/%s/%s", base_dir, pair, feat);
 endif
 
-%% Infix  
+%% Infix
 if cmd_opts.threshold == 1
   th_infix = "";
 else
@@ -196,7 +196,7 @@ for run = 1 : cmd_opts.runs
     rbf_end   = false();
     rbf_tries = 0;
     while ~rbf_end
-      try 
+      try
 	%% One more try
 	++rbf_tries;
 
@@ -281,12 +281,12 @@ for run = 1 : cmd_opts.runs
 	      cmd_opts.soft_alpha);
     else
       %% Inifinite -> Hard version
-      
+
       %% Apply to train
       train_srbf_expec = ...
 	  sparse(sign(train_rbf_dist) / 2 + 1.5, 1 : n_train, ...
 		 ones(1, n_train), 2, n_train);
-	  
+
       %% Apply to test
       test_srbf_expec  = ...
 	  sparse(sign(test_rbf_dist) / 2 + 1.5, 1 : n_test, ...

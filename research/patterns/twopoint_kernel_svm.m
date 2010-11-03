@@ -15,7 +15,7 @@ function [ model, info ] = twopoint_kernel_svm(data, opts)
 
   %% Size
   [ n_dims, n_data ] = size(data);
-  if n_data != 2
+  if n_data ~= 2
     usage("Two data points must be given");
   endif
 
@@ -41,7 +41,7 @@ function [ model, info ] = twopoint_kernel_svm(data, opts)
   endif
 
   %% Adapt the quadratic programming dual problem
-  
+
   %% http://en.wikipedia.org/wiki/Support_vector_machine
 
   %% Kernel matrix
@@ -77,7 +77,7 @@ function [ model, info ] = twopoint_kernel_svm(data, opts)
   %% A radial kernel?
   if model.radial
     %% Add self product and number of SVs
-    model.SV_self = self_data; 
+    model.SV_self = self_data;
     model.n_SV    = 2;
   endif
 

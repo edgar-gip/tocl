@@ -104,7 +104,7 @@ def_opts.do_rfnce   = false();
 		"do-none-soft~",     @set_all_soft);
 
 %% Chek number of arguments
-if length(cmd_args) != 1 && length(cmd_args) != 3
+if length(cmd_args) ~= 1 && length(cmd_args) ~= 3
   error("Wrong number of arguments (should be 1 or 3)");
 endif
 
@@ -144,7 +144,7 @@ else % length(cmd_args) == 3
   data_dir = sprintf("%s/%s/%s", base_dir, pair, feat);
 endif
 
-%% Infix  
+%% Infix
 if cmd_opts.threshold == 1
   th_infix = "";
 else
@@ -211,7 +211,7 @@ for run = 1 : cmd_opts.runs
   endif
 
   %% SVM
-  if cmd_opts.do_svm  
+  if cmd_opts.do_svm
     %% train_svm_scores = zeros(1, n_train);
     test_svm_scores  = zeros(1, n_test);
   endif
@@ -354,7 +354,7 @@ for run = 1 : cmd_opts.runs
       %% Update train scores
       kmean_scores        = sum(kmean_expec, 2)';
       %% train_kmean_scores += kmean_scores * kmean_expec;
-      
+
       %% Update test scores
       test_kmean_expec   = kmeans_expectation(test_data, kmean_model);
       test_kmean_scores += kmean_scores * test_kmean_expec;
@@ -368,7 +368,7 @@ for run = 1 : cmd_opts.runs
     %%%%%%%%%
     %% SVM %%
     %%%%%%%%%
-    
+
     if cmd_opts.do_svm || cmd_opts.do_ssvm || ...
 	  (cpmmc_works && (cmd_opts.do_cpmmc || cmd_opts.do_smmc))
 
@@ -438,7 +438,7 @@ for run = 1 : cmd_opts.runs
 	       (exp( cmd_opts.soft_alpha(i) * test_svm_dist) +  ...
 		exp(-cmd_opts.soft_alpha(i) * test_svm_dist)) ];
 	  test_ssvm_scores{i} += ssvm_scores * test_ssvm_expec;
-	  
+
 	  %% Log
 	  if i == 1
 	    fprintf(2, "        Softened SVM decision for alpha=%.3f", ...
@@ -464,7 +464,7 @@ for run = 1 : cmd_opts.runs
     %%%%%%%%%%%%%%%%%%%
     %% Quadratic SVM %%
     %%%%%%%%%%%%%%%%%%%
-    
+
     if cmd_opts.do_qsvm || cmd_opts.do_sqsvm
 
       %% Find quadratic SVM
@@ -525,7 +525,7 @@ for run = 1 : cmd_opts.runs
 	       (exp( cmd_opts.soft_alpha(i) * train_qsvm_dist) +  ...
 		exp(-cmd_opts.soft_alpha(i) * train_qsvm_dist)) ];
 	  sqsvm_scores = sum(train_sqsvm_expec, 2)';
-	  
+
 	  %% Apply to test
 	  test_sqsvm_expec = ...
 	      [ exp( cmd_opts.soft_alpha(i) * test_qsvm_dist) ./ ...
@@ -535,7 +535,7 @@ for run = 1 : cmd_opts.runs
 	       (exp( cmd_opts.soft_alpha(i) * test_qsvm_dist) +  ...
 		exp(-cmd_opts.soft_alpha(i) * test_qsvm_dist)) ];
 	  test_sqsvm_scores{i} += sqsvm_scores * test_sqsvm_expec;
-	  
+
 	  %% Log
 	  if i == 1
 	    fprintf(2, "        Softened Quadratic SVM decision for alpha=%.3f", ...
@@ -561,7 +561,7 @@ for run = 1 : cmd_opts.runs
     %%%%%%%%%%%%%
     %% RBF SVM %%
     %%%%%%%%%%%%%
-    
+
     if cmd_opts.do_rbf || cmd_opts.do_srbf
 
       for j = 1 : n_gamma
@@ -594,7 +594,7 @@ for run = 1 : cmd_opts.runs
 		     ones(1, n_train), 2, n_train);
 	  rbf_scores        = sum(train_rbf_expec, 2)';
 	  %% train_rbf_scores += rbf_scores * train_rbf_expec;
-	  
+
 	  %% Apply to test
 	  test_rbf_expec   = ...
 	      sparse(sign(test_rbf_dist) / 2 + 1.5, 1 : n_test, ...
@@ -605,7 +605,7 @@ for run = 1 : cmd_opts.runs
 	  clear train_rbf_expec rbf_scores test_rbf_expec
 	endif
 
-	
+
 	%%%%%%%%%%%%%%%%%%
 	%% Soft RBF SVM %%
 	%%%%%%%%%%%%%%%%%%
@@ -643,7 +643,7 @@ for run = 1 : cmd_opts.runs
 		      cmd_opts.soft_alpha(i));
 	    endif
 	  endfor
-	    
+
 	  %% Newline
 	  fprintf(2, "\n");
 
@@ -672,7 +672,7 @@ for run = 1 : cmd_opts.runs
       cpmmc_end   = false();
       cpmmc_tries = 0;
       while ~cpmmc_end
-	try 
+	try
 	  %% Try
 	  ++cpmmc_tries;
 	  [ cpmmc_expec, cpmmc_model, cpmmc_info ] = ...
@@ -694,7 +694,7 @@ for run = 1 : cmd_opts.runs
             %% Apply to train
 	    cpmmc_scores        = sum(cpmmc_expec, 2)';
 	    %% train_cpmmc_scores += cpmmc_scores * cpmmc_expec;
-	    
+
             %% Apply to test
 	    test_cpmmc_expec   = ...
 		sparse(sign(test_cpmmc_dist) / 2 + 1.5, 1 : n_test, ...
@@ -747,7 +747,7 @@ for run = 1 : cmd_opts.runs
 			cmd_opts.soft_alpha(i));
 	      endif
 	    endfor
-	    
+
 	    %% Newline
 	    fprintf(2, "\n");
 
@@ -778,7 +778,7 @@ for run = 1 : cmd_opts.runs
       clear svm_model cpmmc_end cpmmc_tries cpmmc_opts
     endif
   endfor
-  
+
 
   %%%%%%%%%%%%%%%%
   %% CUR & Dump %%
@@ -884,7 +884,7 @@ for run = 1 : cmd_opts.runs
 				    test_truth_sizes));
     printf("\n\n");
   endif
-  
+
   %% Soft CPMMC
   if cmd_opts.do_smmc && cpmmc_works
     for i = 1 : n_alpha
@@ -895,7 +895,7 @@ for run = 1 : cmd_opts.runs
       printf("\n\n");
     endfor
   endif
-    
+
 
   %%%%%%%%%%%%%%%
   %% Reference %%
@@ -918,7 +918,7 @@ for run = 1 : cmd_opts.runs
 	%% Not found!
 	fprintf(2, "        Reference information not available for %s\n", ...
 		cmd_opts.rfnce_head);
-	
+
       else
 	%% Curves
 	rfnce_length = size(rfnce_info, 1);

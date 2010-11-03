@@ -104,7 +104,7 @@ def_opts.do_rfnce     = false();
 		"do-none-soft~",     @set_all_soft);
 
 %% Chek number of arguments
-if length(cmd_args) != 1 && length(cmd_args) != 3
+if length(cmd_args) ~= 1 && length(cmd_args) ~= 3
   error("Wrong number of arguments (should be 1 or 3)");
 endif
 
@@ -144,7 +144,7 @@ else % length(cmd_args) == 3
   data_dir = sprintf("%s/%s/%s", base_dir, pair, feat);
 endif
 
-%% Infix  
+%% Infix
 if cmd_opts.threshold == 1
   th_infix = "";
 else
@@ -216,7 +216,7 @@ for run = 1 : cmd_opts.runs
   endif
 
   %% SVM
-  if cmd_opts.do_svm  
+  if cmd_opts.do_svm
     %% train_svm_scores = zeros(1, n_train);
     test_svm_scores  = zeros(1, n_test);
   endif
@@ -288,7 +288,7 @@ for run = 1 : cmd_opts.runs
     %% Seed parts
     seed_data    = train_data(:, seeds);
     seed_classes = 1 : k;
-    
+
     %% Seed expectation
     seed_expec   = sparse(seed_classes, seeds, ones(1, k), k, n_train);
 
@@ -346,7 +346,7 @@ for run = 1 : cmd_opts.runs
       %% Update train scores
       kmean_scores        = sum(kmean_expec, 2)';
       %% train_kmean_scores += kmean_scores * kmean_expec;
-      
+
       %% Update test scores
       test_kmean_expec   = kmeans_expectation(test_data, kmean_model);
       test_kmean_scores += kmean_scores * test_kmean_expec;
@@ -360,7 +360,7 @@ for run = 1 : cmd_opts.runs
     %%%%%%%%%
     %% SVM %%
     %%%%%%%%%
-    
+
     if cmd_opts.do_svm || cmd_opts.do_ssvm
 
       %% Find SVM
@@ -418,7 +418,7 @@ for run = 1 : cmd_opts.runs
 	  test_ssvm_expec = ...
 	      distance_probability(cmd_opts.soft_alpha(i), test_svm_dist);
 	  test_ssvm_scores{i} += ssvm_scores * test_ssvm_expec;
-	  
+
 	  %% Log
 	  if i == 1
 	    fprintf(2, "        Softened SVM decision for alpha=%.3f", ...
@@ -444,7 +444,7 @@ for run = 1 : cmd_opts.runs
     %%%%%%%%%%%%%%%%%%%
     %% Quadratic SVM %%
     %%%%%%%%%%%%%%%%%%%
-    
+
     if cmd_opts.do_qsvm || cmd_opts.do_sqsvm
 
       %% Find quadratic SVM
@@ -502,7 +502,7 @@ for run = 1 : cmd_opts.runs
 	  test_sqsvm_expec = ...
 	      distance_probability(cmd_opts.soft_alpha(i), test_qsvm_dist);
 	  test_sqsvm_scores{i} += sqsvm_scores * test_sqsvm_expec;
-	  
+
 	  %% Log
 	  if i == 1
 	    fprintf(2, "        Softened Quadratic SVM decision for alpha=%.3f", ...
@@ -528,7 +528,7 @@ for run = 1 : cmd_opts.runs
     %%%%%%%%%%%%%
     %% RBF SVM %%
     %%%%%%%%%%%%%
-    
+
     if cmd_opts.do_rbf || cmd_opts.do_srbf
 
       for j = 1 : n_gamma
@@ -560,7 +560,7 @@ for run = 1 : cmd_opts.runs
 	  train_rbf_expec   = distance_winner(train_rbf_dist);
 	  rbf_scores        = sum(train_rbf_expec, 2)';
 	  %% train_rbf_scores += rbf_scores * train_rbf_expec;
-	  
+
 	  %% Apply to test
 	  test_rbf_expec      = distance_winner(test_rbf_dist);
 	  test_rbf_scores{j} += rbf_scores * test_rbf_expec;
@@ -569,7 +569,7 @@ for run = 1 : cmd_opts.runs
 	  clear train_rbf_expec rbf_scores test_rbf_expec
 	endif
 
-	
+
 	%%%%%%%%%%%%%%%%%%
 	%% Soft RBF SVM %%
 	%%%%%%%%%%%%%%%%%%
@@ -597,7 +597,7 @@ for run = 1 : cmd_opts.runs
 		      cmd_opts.soft_alpha(i));
 	    endif
 	  endfor
-	    
+
 	  %% Newline
 	  fprintf(2, "\n");
 
@@ -730,7 +730,7 @@ for run = 1 : cmd_opts.runs
 	%% Not found!
 	fprintf(2, "        Reference information not available for %s\n", ...
 		cmd_opts.rfnce_head);
-	
+
       else
 	%% Curves
 	rfnce_length = size(rfnce_info, 1);
