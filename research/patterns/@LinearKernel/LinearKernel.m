@@ -1,11 +1,16 @@
 %% -*- mode: octave; -*-
 
-%% Ensemble Weak One-Class Scoring
-%% Linear Kernel Constructor
+%% Linear Kernel
+%% Constructor
 
 %% Author: Edgar Gonzalez
 
 function [ this ] = LinearKernel()
+
+  %% Check arguments
+  if nargin() ~= 0
+    usage("[ this ] = LinearKernel()");
+  endif
 
   %% Bless
   %% And add inheritance

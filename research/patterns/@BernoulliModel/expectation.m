@@ -6,6 +6,12 @@
 %% Author: Edgar Gonzalez
 
 function [ expec, log_like ] = expectation(this, data)
+
+  %% Check arguments
+  if nargin() ~= 2
+    usage("[ expec, log_like ] = @BernoulliModel/expectation(this, data)");
+  endif
+
   %% Number of data
   n_data = size(data, 2);
 

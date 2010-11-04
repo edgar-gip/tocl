@@ -7,8 +7,8 @@
 
 function [ expec, model, info ] = cluster(this, data, k, expec_0)
 
-  %% Data and k must be given
-  if nargin() < 3 || nargin() > 4
+  %% Check arguments
+  if ~any(nargin() == [ 3, 4 ])
     usage(cstrcat("[ expec, model, info ] = ", ...
 		  "@Bernoulli/cluster(this, data, k [, expec_0 ])"));
   endif

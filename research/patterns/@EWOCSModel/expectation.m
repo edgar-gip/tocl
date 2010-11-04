@@ -7,9 +7,17 @@
 
 function [ expec, log_like ] = expectation(this, data)
 
+  %% Check arguments
+  if nargin() ~= 2
+    usage("[ expec, log_like ] = @EWOCSModel/expectation(this, data)");
+  endif
+
   %% Find the scores
-  [ scores, log_like ] = score(this, data);
+  scores = score(this, data);
 
   %% Interpolate them
-  expec = apply(this.interpolator, scores);
+  expec = apply(this.inter_model, scores);
+
+  %% Log-like is not considered here
+  log_like = nan;
 endfunction

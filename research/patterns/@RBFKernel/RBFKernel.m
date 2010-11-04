@@ -1,13 +1,13 @@
 %% -*- mode: octave; -*-
 
-%% Ensemble Weak One-Class Scoring
-%% RBF Kernel Constructor
+%% RBF Kernel
+%% Constructor
 
 %% Author: Edgar Gonzalez
 
 function [ this ] = RBFKernel(rbf_gamma)
 
-  %% rbf_gamma must be given
+  %% Check arguments
   if nargin() ~= 1
     usage("[ this ] = RBFKernel(rbf_gamma)");
   endif

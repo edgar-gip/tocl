@@ -5,7 +5,13 @@
 
 %% Author: Edgar Gonzalez
 
-function model = maximization(this, log_data, blocks, expec)
+function [ model ] = maximization(this, log_data, blocks, expec)
+
+  %% Check arguments
+  if nargin() ~= 4
+    usage("[ model ] = @Dirichlet/maximization(this, log_data, blocks, expec)");
+  endif
+
   %% Number of data and features
   [ n_dims, n_data ] = size(log_data);
   [ k     , n_data ] = size(expec);

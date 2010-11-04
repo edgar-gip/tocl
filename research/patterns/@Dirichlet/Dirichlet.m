@@ -5,11 +5,11 @@
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = Dirichlet(opts)
+function [ this ] = Dirichlet(opts = struct())
 
-  %% Options given?
-  if nargin() < 1
-    opts = struct();
+  %% Check arguments
+  if ~any(nargin() == [ 0, 1 ])
+    usage("[ this ] = Dirichlet([opts])");
   endif
 
   %% This object

@@ -1,17 +1,21 @@
 %% -*- mode: octave; -*-
 
-%% Ensemble Weak One-Class Scoring
 %% Polynomial Kernel
+%% Kernel function
 
 %% Author: Edgar Gonzalez
 
 function [ result ] = apply(this, source, target)
 
+  %% Check arguments
+  if ~any(nargin() == [ 2, 3 ])
+    usage("[ result ] = @PolynomialKernel/apply(this, source [, target])");
+  endif
+
   %% Find dot product
-  %% One or two arguments?
-  if nargin() < 3
-    result = sum(source .* source);
-  else
+  if nargin() == 2
+    result = source' * source;
+  else %% nargin() == 3
     result = source' * target;
   endif
 

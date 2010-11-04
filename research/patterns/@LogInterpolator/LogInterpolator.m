@@ -5,10 +5,10 @@
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = LogInterpolator(low, high)
+function [ this ] = LogInterpolator(low = 0.0, high = 1.0)
 
-  %% Both values or none
-  if nargin() ~= 0 && nargin() ~= 2
+  %% Check arguments
+  if ~any(nargin() = [ 0, 2 ])
     usage("[ this ] = LogInterpolator([low, high])");
   endif
 
@@ -16,13 +16,8 @@ function [ this ] = LogInterpolator(low, high)
   this = struct();
 
   %% Set fields
-  if nargin() == 0
-    this.low       = 0.0;
-    this.high      = 1.0;
-  else
-    this.low  = low;
-    this.high = high;
-  endif
+  this.low  = low;
+  this.high = high;
 
   %% Bless
   %% And add inheritance

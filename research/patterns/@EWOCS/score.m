@@ -3,11 +3,13 @@
 %% Ensemble Weak One-Class Scoring
 %% Scoring function
 
-function [ scores, model, info ] = score(this, data)
+%% Author: Edgar Gonzalez
 
-  %% Data must be given
+function [ scores, model, info, expec ] = score(this, data)
+
+  %% Check arguments
   if nargin() ~= 2
-    usage("[ scores, model, info ] = @EWOCS/score(this, data)");
+    usage("[ scores, model, info, expec ] = @EWOCS/score(this, data)");
   endif
 
   %% Size
@@ -60,10 +62,18 @@ function [ scores, model, info ] = score(this, data)
     ensemble_cluster_scores{i} = ind_cluster_scores;
   endfor
 
+  %% Interpolate probabilities
+  [ expec, inter_model, inter_info ] = apply(this.interpolator, scores);
+
   %% Create the model
   model = EWOCSModel(ensemble_models, ensemble_cluster_scores, ...
-		     this.interpolator);
+		     inter_model);
 
   %% Create the information
   info = struct();
+
+  %% Extend info with inter_info
+  for [ value, field ] = inter_info
+    info = setfield(info, field, value);
+  endfor
 endfunction

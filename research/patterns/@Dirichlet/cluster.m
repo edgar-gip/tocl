@@ -7,8 +7,8 @@
 
 function [ expec, model, info ] = cluster(this, data, k, blocks, expec_0)
 
-  %% Data, blocks and k must be given
-  if nargin() < 3 || nargin() > 5
+  %% Check arguments
+  if ~any(nargin() == [ 3, 4, 5 ])
     usage(cstrcat("[ expec, model, info ] = ", ...
 		  "@Dirichlet/cluster(data, k [, blocks [, expec_0 ]])"));
   endif
@@ -28,6 +28,7 @@ function [ expec, model, info ] = cluster(this, data, k, blocks, expec_0)
     expec_0   = rand(k, n_data);
     expec_0 ./= ones(k, 1) * sum(expec_0);
     expec_0   = expec_0;
+
   else
     %% Check the size
     [ expec_0_r, expec_0_c ] = size(expec_0);

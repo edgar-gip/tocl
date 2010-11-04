@@ -5,11 +5,11 @@
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = Bernoulli(opts)
+function [ this ] = Bernoulli(opts = struct())
 
-  %% Options given?
-  if nargin() < 1
-    opts = struct();
+  %% Check arguments
+  if ~any(nargin() == [ 0, 1 ])
+    usage("[ this ] = Bernoulli(opts = struct())");
   endif
 
   %% This object

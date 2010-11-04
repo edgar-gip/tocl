@@ -1,35 +1,43 @@
 %% -*- mode: octave; -*-
 
 %% Logarithmic interpolator
-%% Map function
+%% Apply function
 
 %% Author: Edgar Gonzalez
 
-function [ output, info ] = map(this, input)
+function [ output, model, info ] = apply(this, input)
 
-  %% Input must be given
+  %% Check arguments
   if nargin() ~= 2
-    usage("[ output, info ] = @LogInterpolator/apply(this, input)");
+    usage("[ output, model, info ] = @LogInterpolator/apply(this, input)");
   endif
 
   %% Find bounds
-  min_in = min(min(input));
-  max_in = max(max(input));
+  low_in  = min(min(input));
+  high_in = max(max(input));
 
   %% Range is null?
-  if min_in == max_in
+  if low_in == high_in
     %% Output is the average of high and low
-    output = (this.low + this.high) / 2 * ones(size(input));
+    mean   = (this.low + this.high) / 2;
+    output = mean * ones(size(input));
+
+    %% Model
+    model = ConstInterModel(mean);
 
   else
     %% Map
-    output = ...
+    log_denom  = log(high_in / low_in);
+    output     = ...
 	this.low + (this.high - this.low) * ...
-	           log(input / min_in) / log(max_in / min_in);
+	           log(input / low_in) / log_denom;
+
+    %% Model
+    model = LogInterModel(this.low, this.high, low_in, log_denom);
   endif
 
   %% Information
   info = struct();
-  info.min = min_in;
-  info.max = max_in;
+  info.low  = low_in;
+  info.high = high_in;
 endfunction

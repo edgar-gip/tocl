@@ -5,16 +5,11 @@
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = Voronoi(distance, opts)
+function [ this ] = Voronoi(distance, opts = struct())
 
-  %% kernel must be given
-  if nargin() < 1 || nargin() > 2
+  %% Check arguments
+  if ~any(nargin() == [ 1, 2 ])
     usage("[ this ] = Voronoi(distance [, opts])");
-  endif
-
-  %% Options given?
-  if nargin() < 2
-    opts = struct();
   endif
 
   %% This object

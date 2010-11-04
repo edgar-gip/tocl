@@ -5,7 +5,13 @@
 
 %% Author: Edgar Gonzalez
 
-function [ expec, log_like ] = dirichlet_expectation(this, log_data)
+function [ expec, log_like ] = expectation(this, log_data)
+
+  %% Check arguments
+  if nargin() ~= 2
+    usage("[ expec, log_like ] = @DirichletModel/expectation(this, log_data)");
+  endif
+
   %% Number of data
   n_data = size(log_data, 2);
 

@@ -5,10 +5,10 @@
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = ExpInterpolator(low, high, convexity)
+function [ this ] = ExpInterpolator(low = 0.0, high = 1.0, convexity = 1.0)
 
-  %% Both values or none
-  if nargin() ~= 0 && nargin() ~= 2 && nargin() ~= 3
+  %% Check arguments
+  if ~any(nargin() = [ 0, 2, 3 ])
     usage("[ this ] = ExpInterpolator([low, high [, convexity]])");
   endif
 
@@ -16,19 +16,9 @@ function [ this ] = ExpInterpolator(low, high, convexity)
   this = struct();
 
   %% Set fields
-  if nargin() == 0
-    this.low       = 0.0;
-    this.high      = 1.0;
-    this.convexity = 1.0;
-  else
-    this.low  = low;
-    this.high = high;
-    if nargin () == 2
-      this.convexity = 1.0;
-    else
-      this.convexity = convexity;
-    endif
-  endif
+  this.low       = low;
+  this.high      = high;
+  this.convexity = convexity;
 
   %% Bless
   %% And add inheritance

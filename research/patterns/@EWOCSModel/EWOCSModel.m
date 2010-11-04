@@ -3,7 +3,14 @@
 %% Ensemble Weak One-Class Scoring
 %% Model Constructor
 
-function [ this ] = EWOCSModel(models, cluster_scores, interpolator)
+%% Author: Edgar Gonzalez
+
+function [ this ] = EWOCSModel(models, cluster_scores, inter_model)
+
+  %% Check arguments
+  if nargin() ~= 3
+    usage("[ this ] = EWOCSModel(models, cluster_scores, inter_model)");
+  endif
 
   %% This object
   this = struct();
@@ -11,7 +18,7 @@ function [ this ] = EWOCSModel(models, cluster_scores, interpolator)
   %% Set fields
   this.models         = models;         % r
   this.cluster_scores = cluster_scores; % r * (k_r * 1)
-  this.interpolator   = interpolator;
+  this.inter_model    = inter_model;
 
   %% Bless
   %% And add inheritance

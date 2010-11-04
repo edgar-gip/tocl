@@ -7,6 +7,11 @@
 
 function [ scores ] = cluster_scores(this, data, expec)
 
+  %% Check arguments
+  if nargin() ~= 3
+    usage("[ scores ] = @NSizeCSF/cluster_scores(this, data, expec)");
+  endif
+
   %% Number of clusters
   [ k, n_data ] = size(expec);
 

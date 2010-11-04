@@ -7,7 +7,7 @@
 
 function [ this ] = KernelDistance(kernel)
 
-  %% kernel must be given
+  %% Check arguments
   if nargin() ~= 1
     usage("[ this ] = KernelDistance(kernel)");
   endif

@@ -1,18 +1,21 @@
 %% -*- mode: octave; -*-
 
-%% Ensemble Weak One-Class Scoring
 %% Linear Kernel
+%% Kernel function
 
 %% Author: Edgar Gonzalez
 
 function [ result ] = apply(this, source, target)
 
-  %% The linear kernel is the dot product
+  %% Check arguments
+  if ~any(nargin() == [ 2, 3 ])
+    usage("[ result ] = @LinearKernel/apply(this, source [, target])");
+  endif
 
-  %% One or two arguments?
-  if nargin() < 3
-    result = sum(source .* source);
-  else
+  %% The linear kernel is the dot product
+  if nargin() == 2
+    result = source' * source;
+  else %% nargin() == 3
     result = source' * target;
   endif
 endfunction

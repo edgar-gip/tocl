@@ -1,13 +1,13 @@
 %% -*- mode: octave; -*-
 
-%% Ensemble Weak One-Class Scoring
-%% Polynomial Kernel Constructor
+%% Polynomial Kernel
+%% Constructor
 
 %% Author: Edgar Gonzalez
 
 function [ this ] = PolynomialKernel(degree, homogeneous)
 
-  %% degree and homogeneous must be given
+  %% Check arguments
   if nargin() ~= 2
     usage("[ this ] = PolynomialKernel(degree, homogeneous)");
   endif

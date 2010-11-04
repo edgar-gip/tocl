@@ -7,6 +7,11 @@
 
 function [ scores ] = cluster_scores(this, data, expec)
 
+  %% Check arguments
+  if nargin() ~= 3
+    usage("[ scores ] = @SizeCSF/cluster_scores(this, data, expec)");
+  endif
+
   %% Find the size of each cluster
   scores = sum(expec, 2)';
 endfunction

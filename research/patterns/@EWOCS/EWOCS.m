@@ -3,16 +3,13 @@
 %% Ensemble Weak One-Class Scoring
 %% Constructor
 
-function [ this ] = EWOCS(clusterer, opts)
+%% Author: Edgar Gonzalez
 
-  %% Clusterer must be given
-  if nargin() < 1 || nargin() > 2
+function [ this ] = EWOCS(clusterer, opts = struct())
+
+  %% Check arguments
+  if ~any(nargin() == [ 1, 2 ])
     usage("[ this ] = EWOCS(clusterer [, opts])");
-  endif
-
-  %% Options given?
-  if nargin() < 2
-    opts = struct();
   endif
 
   %% This object

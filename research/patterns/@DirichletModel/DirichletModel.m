@@ -7,6 +7,12 @@
 
 function [ this ] = DirichletModel(k, blocks, alpha, log_z, alpha_z, theta_m1)
 
+  %% Check arguments
+  if nargin() ~= 6
+    usage(cstrcat("[ this ] = DirichletModel(k, blocks, alpha, log_z,",
+		  " alpha_z, theta_m1)"));
+  endif
+
   %% This object
   this = struct();
 

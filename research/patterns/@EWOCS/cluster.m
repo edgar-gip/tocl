@@ -3,26 +3,26 @@
 %% Ensemble Weak One-Class Scoring
 %% Clustering function
 
-function [ expec, model, info ] = cluster(this, data, k)
+%% Author: Edgar Gonzalez
 
-  %% this and data must be given
-  if nargin() < 2 || nargin() > 3
-    usage("[ expec, model, info ] = @EWOCS/cluster(this, data, k)");
+function [ expec, model, info ] = cluster(this, data, k, expec_0)
+
+  %% Check arguments
+  if ~any(nargin() == [ 2, 3, 4 ])
+    usage(cstrcat("[ expec, model, info ] = ",
+		  "@EWOCS/cluster(this, data [, k [, expec_0]])"));
   endif
 
-  %% The number of clusters must be 2
-  if nargin() == 3 && k ~= 2
-    error("k must be 2 if given");
+  %% The number of clusters must be 1
+  if nargin() >= 3 && k ~= 1
+    usage("k must be 1 if given");
+  endif
+
+  %% Warn that expec_0 is ignored
+  if nargin() == 4 && ~isempty(expec_0)
+    warning("expec_0 is ignored");
   endif
 
   %% Score them data
-  [ scores, model, info ] = score(this, data);
-
-  %% Interpolate scores
-  [ expec, map_info ] = apply(this.interpolator, scores);
-
-  %% Extend info with map_info
-  for [ field, value ] = map_info
-    info = setfield(info, field, value);
-  endfor
+  [ scores, model, info, expec ] = score(this, data);
 endfunction

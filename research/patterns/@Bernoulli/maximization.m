@@ -5,7 +5,12 @@
 
 %% Author: Edgar Gonzalez
 
-function model = maximization(this, data, expec)
+function [ model ] = maximization(this, data, expec)
+
+  %% Check arguments
+  if nargin() ~= 3
+    usage("[ model ] = @Bernoulli/maximization(this, data, expec)");
+  endif
 
   %% Number of data and features
   [ n_dims, n_data ] = size(data);

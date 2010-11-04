@@ -7,6 +7,11 @@
 
 function [ this ] = NSizeCSF()
 
+  %% Check arguments
+  if nargin() ~= 0
+    usage("[ this ] = NSizeCSF()");
+  endif
+
   %% Bless
   %% And add inheritance
   this = class(struct(), "NSizeCSF", ...

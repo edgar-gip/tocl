@@ -7,6 +7,11 @@
 
 function [ this ] = BernoulliModel(k, alpha, alpha_ctheta, theta)
 
+  %% Check arguments
+  if nargin() ~= 4
+    usage("[ this ] = BernoulliModel(k, alpha, alpha_ctheta, theta)");
+  endif
+
   %% This object
   this = struct();
 

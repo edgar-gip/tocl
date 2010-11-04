@@ -3,9 +3,11 @@
 %% Ensemble Weak One-Class Scoring
 %% Scoring function
 
+%% Author: Edgar Gonzalez
+
 function [ scores ] = score(this, data)
 
-  %% Data must be given
+  %% Check arguments
   if nargin() ~= 2
     usage("[ scores ] = @EWOCSModel/score(this, data)");
   endif
