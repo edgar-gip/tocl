@@ -8,7 +8,7 @@
 function [ this ] = ExpInterpolator(low = 0.0, high = 1.0, convexity = 1.0)
 
   %% Check arguments
-  if ~any(nargin() = [ 0, 2, 3 ])
+  if ~any(nargin() == [ 0, 2, 3 ])
     usage("[ this ] = ExpInterpolator([low, high [, convexity]])");
   endif
 

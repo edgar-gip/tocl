@@ -14,7 +14,7 @@ function [ output, model, info ] = apply(this, input)
 
   %% Sort input
   n_elems = numel(input);
-  sorted  = sort(reshape(input, 1, n_elems), "descend")
+  sorted  = sort(reshape(input, 1, n_elems), "descend");
   high_in = sorted(1);
   low_in  = sorted(n_elems);
 
@@ -32,7 +32,7 @@ function [ output, model, info ] = apply(this, input)
 
   else
     %% Find the distance
-    sorted_n = (sorted - low_in) ./ (high_in - low_in)
+    sorted_n = (sorted - low_in) ./ (high_in - low_in);
     idx_n    = (0 : (n_elems - 1)) ./ (n_elems - 1);
     dist     = sorted_n .* sorted_n + idx_n .* idx_n;
 

@@ -16,22 +16,11 @@ function [ result ] = apply(this, source, target)
   [ n_feats, n_source ] = size(source);
 
   %% Squared euclidean distance
-  %% | x - y |^2 = x \cdot x + y \cdot y - 2 \cdot x \cdot y
-  %% @see @SqEuclideanDistance/apply
-  if nargin() < 3
-    dot         = source' * source;
-    self_source = diag(dot, 0)';
-    result      = self_source' * ones(1, n_source) + ...
-                  ones(n_source, 1) * self_source - 2 * dot;
-
-  else
-    [ n_feats, n_target ] = size(target);
-
-    self_source = sum(source .* source);
-    self_target = sum(target .* target);
-    dot         = source' * target;
-    result      = self_source' * ones(1, n_target) + ...
-                  ones(n_source, 1) * self_target - 2 * dot;
+  %% Call helper functions
+  if nargin() == 2
+    result = sq_euclidean_distance1(source);
+  else %% nargin() == 3
+    result = sq_euclidean_distance2(source, target);
   endif
 
   %% Now, apply RBF

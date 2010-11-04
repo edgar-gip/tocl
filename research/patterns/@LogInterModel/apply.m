@@ -18,5 +18,6 @@ function [ output ] = apply(this, input)
                  log(input / this.low_in) / this.log_denom;
 
   %% Saturate
-  output = max([this.low, min([this.high, output])]);
+  output(output < this.low ) = this.low;
+  output(output > this.high) = this.high;
 endfunction

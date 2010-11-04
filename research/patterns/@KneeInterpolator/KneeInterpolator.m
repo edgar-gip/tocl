@@ -9,7 +9,7 @@ function [ this ] = KneeInterpolator(inner = @LogInterpolator, ...
 				     low = 0.0, mid = 0.5, high = 1.0)
 
   %% Check arguments
-  if ~any(nargin() = [ 0, 1, 4 ])
+  if ~any(nargin() == [ 0, 1, 4 ])
     usage("[ this ] = KneeInterpolator([inner [, low, mid, high]])");
   endif
 

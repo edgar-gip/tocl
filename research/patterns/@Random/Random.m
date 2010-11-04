@@ -1,22 +1,19 @@
 %% -*- mode: octave; -*-
 
-%% Voronoi clustering
+%% Random clustering
 %% Constructor
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = Voronoi(distance, opts = struct())
+function [ this ] = Random(opts = struct())
 
   %% Check arguments
-  if ~any(nargin() == [ 1, 2 ])
-    usage("[ this ] = Voronoi(distance [, opts])");
+  if ~any(nargin() == [ 0, 1 ])
+    usage("[ this ] = Random([opts])");
   endif
 
   %% This object
   this = struct();
-
-  %% Distance
-  this.distance = distance;
 
   %% Softening alpha
   %% Default -> 0.1
@@ -28,6 +25,6 @@ function [ this ] = Voronoi(distance, opts = struct())
 
   %% Bless
   %% And add inheritance
-  this = class(this, "Voronoi", ...
+  this = class(this, "Random", ...
 	       Simple());
 endfunction

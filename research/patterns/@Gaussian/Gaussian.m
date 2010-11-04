@@ -1,15 +1,15 @@
 %% -*- mode: octave; -*-
 
-%% Bernoulli distribution clustering
+%% Gaussian distribution clustering
 %% Constructor
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = Bernoulli(opts = struct())
+function [ this ] = Gaussian(opts = struct())
 
   %% Check arguments
   if ~any(nargin() == [ 0, 1 ])
-    usage("[ this ] = Bernoulli(opts = struct())");
+    usage("[ this ] = Gaussian(opts = struct())");
   endif
 
   %% This object
@@ -19,12 +19,12 @@ function [ this ] = Bernoulli(opts = struct())
   %% Default -> 1
   this.alpha_prior = getfielddef(opts, "alpha_prior", 1);
 
-  %% Theta prior
-  %% Default -> 1
-  this.theta_prior = getfielddef(opts, "theta_prior", 1);
+  %% Verbose
+  %% Default -> false
+  this.verbose = getfielddef(opts, "verbose", false());
 
   %% Bless
   %% And add inheritance
-  this = class(this, "Bernoulli", ...
+  this = class(this, "Gaussian", ...
 	       EM(opts));
 endfunction

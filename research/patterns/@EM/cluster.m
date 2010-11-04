@@ -1,6 +1,6 @@
 %% -*- mode: octave; -*-
 
-%% Bernoulli distribution clustering
+%% Expectation-Maximization clustering
 %% Main procedure
 
 %% Author: Edgar Gonzalez
@@ -10,7 +10,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Check arguments
   if ~any(nargin() == [ 3, 4 ])
     usage(cstrcat("[ expec, model, info ] = ", ...
-		  "@Bernoulli/cluster(this, data, k [, expec_0 ])"));
+		  "@EM/cluster(this, data, k [, expec_0 ])"));
   endif
 
   %% Size

@@ -1,6 +1,6 @@
 %% -*- mode: octave; -*-
 
-%% Bernoulli distribution clustering
+%% Gaussian distribution clustering
 %% Expectation
 
 %% Author: Edgar Gonzalez
@@ -9,15 +9,14 @@ function [ expec, log_like ] = expectation(this, data)
 
   %% Check arguments
   if nargin() ~= 2
-    usage("[ expec, log_like ] = @BernoulliModel/expectation(this, data)");
+    usage("[ expec, log_like ] = @GaussianModel/expectation(this, data)");
   endif
 
   %% Number of data
   [ n_feats, n_data ] = size(data);
 
-  %% Find the expectation
-  expec = this.alpha_ctheta * ones(1, n_data) .+ ...
-          this.theta        * data;
+  %% Distance
+  expec = gaussian_log_expectation(this.alpha_pvar, this.mean, this.var, data);
 
   %% Normalize
   max_expec = max(expec);

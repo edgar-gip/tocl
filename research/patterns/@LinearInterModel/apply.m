@@ -16,5 +16,6 @@ function [ output ] = apply(this, input)
   output = this.low + this.step * (input - this.low_in);
 
   %% Saturate
-  output = max([this.low, min([this.high, output])]);
+  output(output < this.low ) = this.low;
+  output(output > this.high) = this.high;
 endfunction
