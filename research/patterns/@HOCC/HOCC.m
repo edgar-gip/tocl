@@ -25,7 +25,7 @@ function [ this ] = HOCC(divergence, opts = struct())
 
   %% Size ratio
   %% Default -> 0.1
-  this.size_ratio = getfielddef(opts, "size_ratio", 100);
+  this.size_ratio = getfielddef(opts, "size_ratio", 0.1);
 
   %% Verbose
   %% Default -> false

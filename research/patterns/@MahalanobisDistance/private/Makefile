@@ -5,14 +5,13 @@ MKOCTFILE = mkoctfile
 OCTFLAGS = -Wall -Wextra
 
 # Modules
-MODULES = dirichlet_estimation
+MODULES = mahalanobis_distance1
 
 # Module specific flags
 # <module>_OCTFLAGS = ...
 
 # Module specific libs
 # <module>_LIBS = ...
-dirichlet_estimation_LIBS = -lRmath
 
 # Objects and targets
 OBJECTS = $(addsuffix .o,   $(MODULES))

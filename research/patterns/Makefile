@@ -4,6 +4,9 @@ MKOCTFILE = mkoctfile
 # Flags
 OCTFLAGS = -Wall -Wextra
 
+# SUBDIRS
+SUBDIRS = @GaussianModel/private @MahalanobisDistance/private @Dirichlet/private
+
 # Modules
 MODULES = CPM3C read_redo read_seeds read_sparse
 
@@ -24,18 +27,36 @@ read_sparse_LIBS          = -lbz2 -lz
 OBJECTS = $(addsuffix .o,   $(MODULES))
 TARGETS = $(addsuffix .oct, $(MODULES))
 
-# Modules
+# Subdirs template
+define SUBDIR_TEMPLATE
+all: all_$(1)
+all_$(1):
+	$$(MAKE) -C $(1) all
+
+clean: clean_$(1)
+clean_$(1):
+	$$(MAKE) -C $(1) clean
+
+distclean: distclean_$(1)
+distclean_$(1):
+	$$(MAKE) -C $(1) distclean
+endef
 
 # All targets
+.PHONY: all
 all: $(TARGETS)
 
 # .oct file generation
 %.oct: %.cc
 	$(MKOCTFILE) $($*_OCTFLAGS) $^ $($*_LIBS)
 
+# Subdirs
+$(foreach s,$(SUBDIRS),$(eval $(call SUBDIR_TEMPLATE,$(s))))
+
 # Clean targets
-clean:
+clean: _clean
+_clean:
 	rm -f $(OBJECTS)
 
-distclean: clean
+distclean: _clean
 	rm -f $(TARGETS)

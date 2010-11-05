@@ -17,8 +17,6 @@ MODULES = gaussian_log_expectation
 OBJECTS = $(addsuffix .o,   $(MODULES))
 TARGETS = $(addsuffix .oct, $(MODULES))
 
-# Modules
-
 # All targets
 all: $(TARGETS)
 

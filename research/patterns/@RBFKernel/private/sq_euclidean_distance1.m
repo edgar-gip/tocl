@@ -1,1 +1,1 @@
-../../private/sq_euclidean_distance1.m
+../../@SqEuclideanDistance/private/sq_euclidean_distance1.m

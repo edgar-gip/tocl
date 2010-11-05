@@ -16,15 +16,28 @@ function [ expec, log_like ] = expectation(this, data)
   [ n_feats, n_samples ] = size(data);
 
   %% Find the divergence matrix
-  divs = apply(this.divergence, this.centroid, data);
+  divs = apply(this.divergence, this.centroids, data);
 
-  %% Keep those within
-  cluster   = find(divs <= this.radius);
-  n_cluster = length(cluster);
+  %% Only one cluster?
+  if this.k == 1
+    %% Keep those within
+    on   = find(divs <= this.radius);
+    n_on = length(on);
 
-  %% Expectation
-  expec = sparse(ones(1, n_cluster), cluster, ones(1, n_cluster), ...
-		 1, n_samples);
+    %% Expectation
+    expec = sparse(ones(1, n_on), on, ones(1, n_on), 1, n_samples);
+
+  else %% this.k > 1
+    %% Select the closest cluster
+    [ min_divs, min_indices ] = min(divs);
+
+    %% Keep those within
+    on   = find(min_divs <= this.radius);
+    n_on = length(on);
+
+    %% Expectation
+    expec = sparse(min_indices(on), on, ones(1, n_on), this.k, n_samples);
+  endif
 
   %% Log-likelihood is not considered here
   log_like = nan;

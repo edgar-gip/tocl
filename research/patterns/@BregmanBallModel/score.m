@@ -13,6 +13,18 @@ function [ scores ] = score(this, data)
   endif
 
   %% Find the divergence matrix
-  %% Use negated divergence matrix as score
-  scores = -apply(this.divergence, this.centroid, data);
+  divs = apply(this.divergence, this.centroids, data);
+
+  %% Only one cluster?
+  if this.k == 1
+    %% Use negated divergence matrix as score
+    scores = -divs;
+
+  else %% this.k > 1
+    %% Select the closest cluster
+    min_divs = min(divs);
+
+    %% Use negated minimal divergences as score
+    scores = -min_divs;
+  endif
 endfunction

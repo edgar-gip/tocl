@@ -5,11 +5,11 @@
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = BregmanBallModel(divergence, centroid, radius)
+function [ this ] = BregmanBallModel(divergence, centroids, radius)
 
   %% Check arguments
   if nargin() ~= 3
-    usage("[ this ] = BregmanBallModel(divergence, centroid, radius)");
+    usage("[ this ] = BregmanBallModel(divergence, centroids, radius)");
   endif
 
   %% This object
@@ -17,8 +17,12 @@ function [ this ] = BregmanBallModel(divergence, centroid, radius)
 
   %% Set fields
   this.divergence = divergence;
-  this.centroid   = centroid;
+  this.centroids  = centroids;
   this.radius     = radius;
+
+  %% Extra fields
+  [ n_feats, k ] = size(centroids);
+  this.k         = k;
 
   %% Bless
   %% And add inheritance

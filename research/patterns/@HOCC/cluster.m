@@ -34,16 +34,17 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   [ sort_divs, sort_indices ] = sort(divs);
 
   %% Find the minimum column
-  [ best_far, best_idx ] = min(sort_divs(target_size, :));
+  [ radius, best_idx ] = min(sort_divs(target_size, :));
 
   %% Cluster
-  cluster = sort_indices(1 : target_size, best_idx);
+  cluster = find(sort_divs(:, best_idx) <= radius);
+  size    = length(cluster);
 
   %% Model
-  model = BregmanBallModel(this.divergence, data(:, best_idx), best_far);
+  model = BregmanBallModel(this.divergence, data(:, best_idx), radius);
 
   %% Expectation
-  expec = sparse(ones(1, target_size), cluster, ones(1, target_size), ...
+  expec = sparse(ones(1, size), cluster, ones(1, size), ...
 		 1, n_samples);
 
   %% Info

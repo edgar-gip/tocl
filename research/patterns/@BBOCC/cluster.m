@@ -42,8 +42,8 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   while ~final
     %% Preserve previous cluster, centroid and radius
     p_cluster  = cluster;
-    p_centroid = centroid;
-    p_radius   = radius;
+    %% p_centroid = centroid;
+    %% p_radius   = radius;
 
     %% Find the divergences
     divs = apply(this.divergence, centroid, data);
@@ -52,19 +52,21 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
     [ sort_divs, sort_indices ] = sort(divs);
 
     %% New cluster and centroid
-    cluster  = sort_indices(1 : target_size);
-    centroid = mean(data(:, cluster), 2);
     radius   = sort_divs(target_size);
+    cluster  = find(divs <= radius);
+    centroid = mean(data(:, cluster), 2);
 
-    %% Any change?
-    final = all(centroid == p_centroid);
+    %% Changes
+    n_changes = length(setxor(cluster, p_cluster));
+    final     = n_changes < this.change_threshold;
   endwhile
 
   %% Model
   model = BregmanBallModel(this.divergence, centroid, radius);
 
   %% Expectation
-  expec = sparse(ones(1, target_size), cluster, ones(1, target_size), ...
+  size  = length(cluster);
+  expec = sparse(ones(1, size), cluster, ones(1, size), ...
 		 1, n_samples);
 
   %% Info
