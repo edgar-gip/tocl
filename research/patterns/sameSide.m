@@ -36,6 +36,11 @@ function [ opts ] = s_signal_size(opts, value)
   opts.signal_size = cellfun(@str2double, regex_split(value, '(,|\s+,)\s*'));
 endfunction
 
+%% Set clusters
+function [ opts ] = s_clusters(opts, value)
+  opts.min_clusters = opts.max_clusters = value;
+endfunction
+
 %% Set hard alpha
 function [ opts ] = s_hard_alpha(opts, value)
   opts.soft_alpha = inf;
@@ -58,6 +63,7 @@ def_opts.signal_size     = 100;
 def_opts.signal_dist     = P_GAUSSIAN;
 def_opts.signal_shift    = 2.5;
 def_opts.signal_var      = 1.0;
+def_opts.min_clusters    = 2;
 def_opts.max_clusters    = 20;
 def_opts.clusterer       = C_VORONOI;
 def_opts.em_iterations   = 100;       %% For C_BERNOULLI
@@ -91,7 +97,9 @@ def_opts.soft_alpha      = 0.1;       %% For C_VORONOI
 		"signal-uniform=r2",  "signal_dist",   ...
 		"signal-shift=f",     "signal_shift",  ...
 		"signal-var=f",       "signal_var",    ...
+		"min-clusters=i",     "min_clusters",  ...
 		"max-clusters=i",     "max_clusters",  ...
+		"clusters=i",         @s_clusters,     ...
 		"bernoulli=r0",       "clusterer",     ...
 		"voronoi=r1",         "clusterer",     ...
 		"em-iterations=i",    "em_iterations", ...
@@ -130,6 +138,9 @@ if length(cmd_opts.signal_size) == 1
 else
   cmd_opts.signal_groups = length(cmd_opts.signal_size);
 endif
+
+% Number of clusters range
+cmd_opts.range_clusters = cmd_opts.max_clusters - cmd_opts.min_clusters;
 
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -347,7 +358,7 @@ for or = 1 : cmd_opts.outer_runs
   %% For each inner run
   for ir = 1 : cmd_opts.inner_runs
     %% Number of clusters
-    k = floor(2 + (cmd_opts.max_clusters - 1) * rand());
+    k = floor(cmd_opts.min_clusters + (cmd_opts.range_clusters + 1) * rand());
 
     %% Cluster it
     expec = cluster(clusterer, data, k);
