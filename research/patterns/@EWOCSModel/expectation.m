@@ -5,11 +5,11 @@
 
 %% Author: Edgar Gonzalez
 
-function [ expec, log_like ] = expectation(this, data)
+function [ expec, log_like, scores ] = expectation(this, data)
 
   %% Check arguments
   if nargin() ~= 2
-    usage("[ expec, log_like ] = @EWOCSModel/expectation(this, data)");
+    usage("[ expec, log_like, scores ] = @EWOCSModel/expectation(this, data)");
   endif
 
   %% Find the scores

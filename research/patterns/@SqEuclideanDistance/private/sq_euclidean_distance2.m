@@ -7,8 +7,8 @@
 function [ dists ] = sq_euclidean_distance2(source, target)
 
   %% Sizes
-  [ n_feats, n_source ] = size(source);
-  [ n_feats, n_target ] = size(target);
+  [ n_dims, n_source ] = size(source);
+  [ n_dims, n_target ] = size(target);
 
   %% | x - y |^2 = x \cdot x + y \cdot y - 2 \cdot x \cdot y
   self_source = sum(source .* source);

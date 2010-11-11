@@ -13,7 +13,7 @@ function [ result ] = apply(this, source, target)
   endif
 
   %% Sizes
-  [ n_feats, n_source ] = size(source);
+  [ n_dims, n_source ] = size(source);
 
   %% Squared euclidean distance
   %% Call helper functions

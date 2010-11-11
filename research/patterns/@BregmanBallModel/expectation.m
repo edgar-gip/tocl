@@ -13,7 +13,7 @@ function [ expec, log_like ] = expectation(this, data)
   endif
 
   %% Number of samples
-  [ n_feats, n_samples ] = size(data);
+  [ n_dims, n_samples ] = size(data);
 
   %% Find the divergence matrix
   divs = apply(this.divergence, this.centroids, data);

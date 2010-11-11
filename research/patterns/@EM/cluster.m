@@ -19,8 +19,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Is the starting expectation given?
   if nargin() < 4
     %% Take it at random
-    expec_0   = rand(k, n_data);
-    expec_0 ./= ones(k, 1) * sum(expec_0);
+    expec_0 = random_expec(this, data, k);
   else
     %% Check the size
     [ expec_0_r, expec_0_c ] = size(expec_0);

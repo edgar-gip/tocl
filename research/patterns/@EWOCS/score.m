@@ -13,7 +13,7 @@ function [ scores, model, info, expec ] = score(this, data)
   endif
 
   %% Size
-  [ n_feats, n_samples ] = size(data);
+  [ n_dims, n_samples ] = size(data);
 
   %% Effective max_clusters
   if this.max_clusters > n_samples
@@ -21,6 +21,16 @@ function [ scores, model, info, expec ] = score(this, data)
   else
     eff_max_clusters = this.max_clusters;
   endif
+
+  %% Effective min_clusters
+  if this.min_clusters > eff_max_clusters
+    eff_min_clusters = eff_max_clusters;
+  else
+    eff_min_clusters = this.min_clusters;
+  endif
+
+  %% Effective range
+  eff_range = eff_max_clusters - eff_min_clusters + 1;
 
   %% Scores
   scores = zeros(1, n_samples);
@@ -33,7 +43,7 @@ function [ scores, model, info, expec ] = score(this, data)
   for i = 1 : this.ensemble_size
 
     %% Select the number of classes and seeds
-    k     = floor(2 + (eff_max_clusters - 1) * rand());
+    k     = floor(eff_min_clusters + eff_range * rand());
     seeds = sort(randperm(n_samples)(1 : k));
 
     %% Seed expectation

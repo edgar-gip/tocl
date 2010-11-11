@@ -13,7 +13,7 @@ function [ dists ] = apply(this, source, target)
   endif
 
   %% Sizes
-  [ n_feats, n_source ] = size(source);
+  [ n_dims, n_source ] = size(source);
 
   %% | x - y |^2 = x \cdot x + y \cdot y - 2 \cdot x \cdot y
   if nargin() == 2
@@ -23,7 +23,7 @@ function [ dists ] = apply(this, source, target)
                   ones(n_source, 1) * self_source - 2 * dot;
 
   else %% nargin() == 3
-    [ n_feats, n_target ] = size(target);
+    [ n_dims, n_target ] = size(target);
 
     self_source = self_apply(this.kernel, source);
     self_target = self_apply(this.kernel, target);

@@ -24,7 +24,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   endif
 
   %% Size
-  [ n_feats, n_samples ] = size(data);
+  [ n_dims, n_samples ] = size(data);
 
   %% First, apply HOCC
   [ mid_expec, mid_model, mid_info ] = cluster(this.hocc, data);

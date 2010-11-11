@@ -13,7 +13,7 @@ function [ expec, log_like ] = expectation(this, data)
   endif
 
   %% Number of data
-  [ n_feats, n_data ] = size(data);
+  [ n_dims, n_data ] = size(data);
 
   %% Find the distance
   distances = apply(this.distance, this.centroids, data);

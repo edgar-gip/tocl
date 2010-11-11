@@ -13,7 +13,7 @@ function [ result ] = self_apply(this, source)
   endif
 
   %% Sizes
-  [ n_feats, n_source ] = size(source);
+  [ n_dims, n_source ] = size(source);
 
   %% The kernel is always 1
   result = ones(1, n_source);

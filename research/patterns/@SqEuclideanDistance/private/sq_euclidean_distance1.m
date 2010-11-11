@@ -7,7 +7,7 @@
 function [ dists ] = sq_euclidean_distance1(source)
 
   %% Sizes
-  [ n_feats, n_source ] = size(source);
+  [ n_dims, n_source ] = size(source);
 
   %% | x - y |^2 = x \cdot x + y \cdot y - 2 \cdot x \cdot y
   dot         = source' * source;

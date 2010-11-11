@@ -5,7 +5,7 @@
 
 %% Author: Edgar Gonzalez
 
-function [ expec, model, info ] = cluster(this, data, k, expec_0)
+function [ expec, model, info, scores ] = cluster(this, data, k, expec_0)
 
   %% Check arguments
   if ~any(nargin() == [ 2, 3, 4 ])

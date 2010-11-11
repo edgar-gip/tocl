@@ -19,7 +19,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   endif
 
   %% Size
-  [ n_feats, n_samples ] = size(data);
+  [ n_dims, n_samples ] = size(data);
   target_size = max([2, round(n_samples * this.size_ratio)]);
 
   %% expec_0 given?

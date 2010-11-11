@@ -21,8 +21,8 @@ function [ this ] = BregmanBallModel(divergence, centroids, radius)
   this.radius     = radius;
 
   %% Extra fields
-  [ n_feats, k ] = size(centroids);
-  this.k         = k;
+  [ n_dims, k ] = size(centroids);
+  this.k        = k;
 
   %% Bless
   %% And add inheritance

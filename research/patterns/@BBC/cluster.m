@@ -14,7 +14,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   endif
 
   %% Size
-  [ n_feats, n_samples ] = size(data);
+  [ n_dims, n_samples ] = size(data);
   target_size = max([2, k, round(n_samples * this.size_ratio)]);
 
   %% expec_0 given?
@@ -41,7 +41,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   sizes = full(sum(expec, 2))'; % 1 * k
 
   %% Cluster centroids
-  centroids = (data * expec') ./ (ones(n_feats, 1) * sizes); % n_feats * k
+  centroids = (data * expec') ./ (ones(n_dims, 1) * sizes); % n_dims * k
 
   %% Starting radius -> Infinity
   radius = inf;
@@ -75,7 +75,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
     sizes = full(sum(expec, 2))'; % 1 * k
 
     %% Cluster centroids
-    centroids = (data * expec') ./ (ones(n_feats, 1) * sizes); % n_feats * k
+    centroids = (data * expec') ./ (ones(n_dims, 1) * sizes); % n_dims * k
 
     %% Changes
     n_changes = full(sum(sum(xor(expec, p_expec))));

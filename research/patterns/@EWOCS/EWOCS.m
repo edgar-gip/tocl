@@ -22,6 +22,10 @@ function [ this ] = EWOCS(clusterer, opts = struct())
   %% Default -> 100
   this.ensemble_size = getfielddef(opts, "ensemble_size", 100);
 
+  %% Minimum number of clusters
+  %% Default -> 2
+  this.min_clusters = getfielddef(opts, "min_clusters", 2);
+
   %% Maximum number of clusters
   %% Default -> 100
   this.max_clusters = getfielddef(opts, "max_clusters", 100);
@@ -31,9 +35,9 @@ function [ this ] = EWOCS(clusterer, opts = struct())
   this.verbose = getfielddef(opts, "verbose", false());
 
   %% Scoring function name
-  %% Default -> NSize
+  %% Default -> Size
   if ~isfield(opts, "score_function")
-    this.score_function = NSizeCSF();
+    this.score_function = SizeCSF();
 
   elseif ~isobject(opts.score_function)
     opts.score_function = tolower(opts.score_function);

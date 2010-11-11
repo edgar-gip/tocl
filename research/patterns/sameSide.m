@@ -13,6 +13,9 @@ pkg load octopus
 %% Enums %%
 %%%%%%%%%%%
 
+%% Task
+enum T_SAME_SIDE T_SCORE_HISTO
+
 %% Distributions
 enum P_BERNOULLI P_GAUSSIAN P_UNIFORM
 
@@ -48,6 +51,7 @@ endfunction
 
 %% Default options
 def_opts                 = struct();
+def_opts.task            = T_SAME_SIDE;
 def_opts.seed            = [];
 def_opts.outer_runs      = 5;
 def_opts.inner_runs      = 100;
@@ -65,6 +69,7 @@ def_opts.signal_shift    = 2.5;
 def_opts.signal_var      = 1.0;
 def_opts.min_clusters    = 2;
 def_opts.max_clusters    = 20;
+def_opts.ensemble_size   = 100;
 def_opts.clusterer       = C_VORONOI;
 def_opts.em_iterations   = 100;       %% For C_BERNOULLI
 def_opts.em_threshold    = 1e-6;      %% For C_BERNOULLI
@@ -74,10 +79,13 @@ def_opts.poly_degree     = 2;         %% For K_POLYNOMIAL
 def_opts.poly_constant   = true();    %% For K_POLYNOMIAL
 def_opts.rbf_gamma       = 0.1;       %% For K_RBF
 def_opts.soft_alpha      = 0.1;       %% For C_VORONOI
+def_opts.histo_bins      = 100;
 
 %% Parse options
 [ cmd_args, cmd_opts ] = ...
     get_options(def_opts, ...
+		"same-side=r0",       "task",          ...
+		"score-histo=r1",     "task",          ...
 		"seed=f",             "seed",          ...
 		"outer-runs=i",       "outer_runs",    ...
 		"inner-runs=i",       "inner_runs",    ...
@@ -99,6 +107,7 @@ def_opts.soft_alpha      = 0.1;       %% For C_VORONOI
 		"signal-var=f",       "signal_var",    ...
 		"min-clusters=i",     "min_clusters",  ...
 		"max-clusters=i",     "max_clusters",  ...
+		"ensemble-size=i",    "ensemble_size", ...
 		"clusters=i",         @s_clusters,     ...
 		"bernoulli=r0",       "clusterer",     ...
 		"voronoi=r1",         "clusterer",     ...
@@ -113,7 +122,8 @@ def_opts.soft_alpha      = 0.1;       %% For C_VORONOI
 		"poly-constant!",     "poly_constant", ...
 	 	"rbf-gamma=f",        "rbf_gamma",     ...
 		"hard-alpha",         @s_hard_alpha,   ...
-		"soft-alpha=f",       "soft_alpha");
+		"soft-alpha=f",       "soft_alpha",    ...
+		"histo-bins=i",       "histo_bins");
 
 %% Chek number of arguments
 if length(cmd_args) ~= 0
@@ -162,9 +172,10 @@ endfunction
 %% Generate gaussian
 function [ data ] = gen_gaussian(dims, size, mean, var)
   %% Variance projection
-  project   = rand(dims, dims) - 0.5;
-  project ./= ones(dims, 1) * sqrt(sum(project .* project));
-  variance  = project * diag(var * rand(dims, 1), 0);
+  %% project   = rand(dims, dims) - 0.5;
+  %% project ./= ones(dims, 1) * sqrt(sum(project .* project));
+  %% variance  = project * diag(var * rand(dims, 1), 0);
+  variance = var * eye(dims);
 
   %% Data
   data = mean * ones(1, size) + variance * randn(dims, size);
@@ -238,8 +249,8 @@ endfunction
 %% Plotting %%
 %%%%%%%%%%%%%%
 
-%% Do the plot
-function do_plot(window, data, expec, pause_time)
+%% Do the expectation plot
+function do_plot_expec(window, data, expec, pause_time)
   %% Sizes
   [ dims, elems ] = size(data);
   [ k,    elems ] = size(expec);
@@ -255,11 +266,11 @@ function do_plot(window, data, expec, pause_time)
     %% Add their data
     if dims == 2
       plots = cell_push(plots, ...
-			data(1, cluster), data(2, cluster), 'x');
+			data(1, cluster), data(2, cluster), "x");
     else %% dims == 3
       plots = cell_push(plots, ...
 			data(1, cluster), data(2, cluster), ...
-			data(3, cluster), 'x');
+			data(3, cluster), "x");
     endif
   endfor
 
@@ -274,6 +285,78 @@ function do_plot(window, data, expec, pause_time)
   %% Stop?
   if pause_time > 0
     pause(pause_time);
+  endif
+endfunction
+
+%% Do the sorted score plot
+function do_plot_sorted_score(window, scores, pause_time)
+  %% Plot
+  figure(window);
+  plot(sort(scores, "descend"), "-");
+
+  %% Stop?
+  if pause_time > 0
+    pause(pause_time);
+  endif
+endfunction
+
+%% Do the score plot
+function do_plot_score(window, scores, expec, histo_bins, pause_time)
+  %% Sizes
+  [ k, elems ] = size(expec);
+
+  %% Min/max
+  min_score = min(scores);
+  max_score = max(scores);
+
+  %% Empty range?
+  if min_score ~= max_score
+    %% Bin size
+    bin_size = (max_score - min_score) / histo_bins;
+
+    %% Bin limits
+    bin_limits = min_score + bin_size * (0 : (histo_bins - 1));
+
+    %% Plots
+    plots = {};
+
+    %% For each cl
+    for cl = 1 : k
+      %% Elements
+      cluster = find(expec(cl, :));
+      cl_size = length(cluster);
+
+      %% Bins
+      bins = 1 + floor((scores(cluster) - min_score) / bin_size);
+      bins(bins == (histo_bins + 1)) = histo_bins;
+
+      %% Histogram
+      histo = full(sum(sparse(bins, 1 : cl_size, ones(1, cl_size), ...
+			      histo_bins, cl_size), 2));
+
+      %% Add their data
+      plots = cell_push(plots, bin_limits, histo, "-");
+    endfor
+
+    %% Full bins
+    bins = 1 + floor((scores - min_score) / bin_size);
+    bins(bins == (histo_bins + 1)) = histo_bins;
+
+    %% Histogram
+    histo = full(sum(sparse(bins, 1 : elems, ones(1, elems), ...
+			    histo_bins, elems), 2));
+
+    %% Add it
+    plots = cell_push(plots, bin_limits, histo, "-", "linewidth", 2);
+
+    %% Plot
+    figure(window);
+    plot(plots{:});
+
+    %% Stop?
+    if pause_time > 0
+      pause(pause_time);
+    endif
   endif
 endfunction
 
@@ -313,93 +396,181 @@ switch cmd_opts.clusterer
 	Voronoi(distance, struct("soft_alpha", cmd_opts.soft_alpha));
 endswitch
 
+%% Ewocs
+ewocs = ...
+    EWOCS(clusterer, struct("ensemble_size", cmd_opts.ensemble_size, ...
+			    "min_clusters",  cmd_opts.min_clusters,  ...
+			    "max_clusters",  cmd_opts.max_clusters));
+                            %% "interpolator",  ClusterInterpolator()));
+
+%%%%%%%%%%%%%%%
+%% Same side %%
+%%%%%%%%%%%%%%%
+
+%% Do the same side task
+function do_same_side(clusterer, cmd_opts)
+
+  %% Create figures
+  if cmd_opts.do_plot
+    truth_fig = figure();
+    expec_fig = figure();
+  endif
+
+  %% Total size, and number of pairs
+  all_sizes  = [ cmd_opts.noise_size, cmd_opts.signal_size ];
+  total_size = sum(all_sizes);
+  pair_sizes = all_sizes' * all_sizes;
+
+  %% Simplified size, and number of pairs
+  simp_all_sizes  = [ cmd_opts.noise_size, sum(cmd_opts.signal_size) ];
+  simp_pair_sizes = simp_all_sizes' * simp_all_sizes;
+
+  %% Accumulated probs
+  acc_prob      = zeros(1 + cmd_opts.signal_groups, 1 + cmd_opts.signal_groups);
+  simp_acc_prob = zeros(2, 2);
+
+  %% For each outer run
+  for or = 1 : cmd_opts.outer_runs
+    %% Generate the data
+    [ data, truth ] = gen_data(cmd_opts);
+
+    %% Truth expectation
+    t_expec = sparse(truth, 1 : total_size, ones(1, total_size),
+		     1 + cmd_opts.signal_groups, total_size);
+
+    %% Simplified expectation
+    s_expec = sparse(1 + (truth > 1), 1 : total_size, ones(1, total_size),
+		     2, total_size);
+
+    %% Plot?
+    if cmd_opts.do_plot
+      do_plot_expec(truth_fig, data, t_expec, 0.0);
+    endif
+
+    %% For each inner run
+    for ir = 1 : cmd_opts.inner_runs
+      %% Number of clusters
+      k = floor(cmd_opts.min_clusters + (cmd_opts.range_clusters + 1) * rand());
+
+      %% Cluster it
+      expec = cluster(clusterer, data, k);
+
+      %% Harden it
+      [ max_expec, max_cl ] = max(expec);
+      h_expec = sparse(max_cl, 1 : total_size, ones(1, total_size),
+		       k, total_size);
+
+      %% Plot?
+      if cmd_opts.do_plot
+	do_plot_expec(expec_fig, data, h_expec, cmd_opts.pause_time);
+      endif
+
+      %% Map
+      mapped_expec = t_expec * h_expec';
+
+      %%%% Count co-clustererd pairs
+      pairs   = full(mapped_expec * mapped_expec');
+      pairs ./= pair_sizes;
+
+      %%%% Add to accumulated probabilities
+      acc_prob += pairs;
+
+      %% Simplified map
+      simp_mapped_expec = s_expec * h_expec';
+
+      %%%% Count co-clustererd pairs
+      simp_pairs   = full(simp_mapped_expec * simp_mapped_expec');
+      simp_pairs ./= simp_pair_sizes;
+
+      %%%% Add to accumulated probabilities
+      simp_acc_prob += simp_pairs;
+    endfor
+  endfor
+
+  %% Average results
+  acc_prob      ./= cmd_opts.inner_runs * cmd_opts.outer_runs;
+  simp_acc_prob ./= cmd_opts.inner_runs * cmd_opts.outer_runs;
+
+  %% Display results
+  acc_prob
+  simp_acc_prob
+endfunction
+
+
+%%%%%%%%%%%%%%%%%%%%%
+%% Score histogram %%
+%%%%%%%%%%%%%%%%%%%%%
+
+%% Do the score histogram task
+function do_score_histo(ewocs, cmd_opts)
+
+  %% Create figures
+  if cmd_opts.do_plot
+    truth_fig = figure();
+    expec_fig = figure();
+  endif
+  sorted_fig  = figure();
+  t_score_fig = figure();
+  s_score_fig = figure();
+  roc_fig     = figure();
+
+  %% Total size, and number of pairs
+  all_sizes  = [ cmd_opts.noise_size, cmd_opts.signal_size ];
+  total_size = sum(all_sizes);
+  pair_sizes = all_sizes' * all_sizes;
+
+  %% For each outer run
+  for or = 1 : cmd_opts.outer_runs
+    %% Generate the data
+    [ data, truth ] = gen_data(cmd_opts);
+
+    %% Truth expectation
+    t_expec = sparse(truth, 1 : total_size, ones(1, total_size),
+		     1 + cmd_opts.signal_groups, total_size);
+
+    %% Simplified expectation
+    s_expec = sparse(1 + (truth > 1), 1 : total_size, ones(1, total_size),
+		     2, total_size);
+
+    %% Plot?
+    if cmd_opts.do_plot
+      do_plot_expec(truth_fig, data, t_expec, 0.0);
+    endif
+
+    %% For each inner run
+    for ir = 1 : cmd_opts.inner_runs
+      %% Run ewocs
+      [ expec, model, info, scores ] = cluster(ewocs, data);
+
+      %% Harden it
+      h_expec = sparse(1 + (expec > 0.5), 1 : total_size, ones(1, total_size),
+		       2, total_size);
+
+      %% Plot?
+      if cmd_opts.do_plot
+	do_plot_expec(expec_fig, data, h_expec, 0.0);
+      endif
+
+      %% Plot score
+      do_plot_sorted_score(sorted_fig, scores, 0.0);
+      do_plot_score(t_score_fig, scores, t_expec, ...
+		    cmd_opts.histo_bins, 0.0);
+      do_plot_score(s_score_fig, scores, s_expec, ...
+		    cmd_opts.histo_bins, cmd_opts.pause_time);
+    endfor
+  endfor
+endfunction
+
 
 %%%%%%%%%%%%
 %% Do it! %%
 %%%%%%%%%%%%
 
-%% Create figures
-if cmd_opts.do_plot
-  truth_fig = figure();
-  expec_fig = figure();
-endif
+%% According to the task
+switch cmd_opts.task
+  case T_SAME_SIDE
+    do_same_side(clusterer, cmd_opts)
 
-%% Total size, and number of pairs
-all_sizes  = [ cmd_opts.noise_size, cmd_opts.signal_size ];
-total_size = sum(all_sizes);
-pair_sizes = all_sizes' * all_sizes;
-
-%% Simplified size, and number of pairs
-simp_all_sizes  = [ cmd_opts.noise_size, sum(cmd_opts.signal_size) ];
-simp_pair_sizes = simp_all_sizes' * simp_all_sizes;
-
-%% Accumulated probs
-acc_prob      = zeros(1 + cmd_opts.signal_groups, 1 + cmd_opts.signal_groups);
-simp_acc_prob = zeros(2, 2);
-
-%% For each outer run
-for or = 1 : cmd_opts.outer_runs
-  %% Generate the data
-  [ data, truth ] = gen_data(cmd_opts);
-
-  %% Truth expectation
-  t_expec = sparse(truth, 1 : total_size, ones(1, total_size),
-		   1 + cmd_opts.signal_groups, total_size);
-
-  %% Simplified expectation
-  s_expec = sparse(1 + (truth > 1), 1 : total_size, ones(1, total_size),
-		   2, total_size);
-
-  %% Plot?
-  if cmd_opts.do_plot
-    do_plot(truth_fig, data, t_expec, 0.0);
-  endif
-
-  %% For each inner run
-  for ir = 1 : cmd_opts.inner_runs
-    %% Number of clusters
-    k = floor(cmd_opts.min_clusters + (cmd_opts.range_clusters + 1) * rand());
-
-    %% Cluster it
-    expec = cluster(clusterer, data, k);
-
-    %% Harden it
-    [ max_expec, max_cl ] = max(expec);
-    h_expec = sparse(max_cl, 1 : total_size, ones(1, total_size),
-		     k, total_size);
-
-    %% Plot?
-    if cmd_opts.do_plot
-      do_plot(expec_fig, data, h_expec, cmd_opts.pause_time);
-    endif
-
-    %% Map
-    mapped_expec = t_expec * h_expec';
-
-    %%%% Count co-clustererd pairs
-    pairs   = full(mapped_expec * mapped_expec');
-    pairs ./= pair_sizes;
-
-    %%%% Add to accumulated probabilities
-    acc_prob += pairs;
-
-    %% Simplified map
-    simp_mapped_expec = s_expec * h_expec';
-
-    %%%% Count co-clustererd pairs
-    simp_pairs   = full(simp_mapped_expec * simp_mapped_expec');
-    simp_pairs ./= simp_pair_sizes;
-
-    %%%% Add to accumulated probabilities
-    simp_acc_prob += simp_pairs;
-  endfor
-endfor
-
-%% Average results
-acc_prob      ./= cmd_opts.inner_runs * cmd_opts.outer_runs;
-simp_acc_prob ./= cmd_opts.inner_runs * cmd_opts.outer_runs;
-
-%% Display results
-acc_prob
-simp_acc_prob
-
+  case T_SCORE_HISTO
+    do_score_histo(ewocs, cmd_opts)
+endswitch

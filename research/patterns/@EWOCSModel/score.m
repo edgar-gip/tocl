@@ -16,7 +16,7 @@ function [ scores ] = score(this, data)
   ensemble_size = length(this.models);
 
   %% Size
-  [ n_feats, n_samples ] = size(data);
+  [ n_dims, n_samples ] = size(data);
 
   %% Scores
   scores = zeros(1, n_samples);
