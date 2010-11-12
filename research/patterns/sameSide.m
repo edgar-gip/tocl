@@ -61,7 +61,7 @@ def_opts.dimensions      = 2;
 def_opts.noise_size      = 1000;
 def_opts.noise_dist      = P_UNIFORM;
 def_opts.noise_mean      = 0.0;
-def_opts.noise_var       = 5.0;
+def_opts.noise_var       = 10.0;
 def_opts.signal_groups   = 1;
 def_opts.signal_size     = 100;
 def_opts.signal_dist     = P_GAUSSIAN;
@@ -242,6 +242,11 @@ function [ data, truth ] = gen_data(cmd_opts)
     base += cur_size;
     cl   += 1;
   endfor
+
+  %% Shuffle
+  shuffler = randperm(total_size);
+  data  = data (:, shuffler);
+  truth = truth(shuffler);
 endfunction
 
 
@@ -357,6 +362,27 @@ function do_plot_score(window, scores, expec, histo_bins, pause_time)
     if pause_time > 0
       pause(pause_time);
     endif
+  endif
+endfunction
+
+%% Do the ROC plot
+function do_roc_plot(window, scores, s_truth, pause_time)
+  %% ROC
+  [ sort_scores, sort_idx ] = sort(scores, "descend");
+  size = length(sort_idx);
+
+  %% Find accumulated positive and negative
+  roc_pos = cumsum( s_truth(sort_idx)); roc_pos ./= roc_pos(size);
+  roc_neg = cumsum(~s_truth(sort_idx)); roc_neg ./= roc_neg(size);
+
+  %% Plot
+  figure(window);
+  plot(roc_neg, roc_pos, "-", ...
+       [ 0, 1 ], [ 0, 1 ], "-");
+
+  %% Stop?
+  if pause_time > 0
+    pause(pause_time);
   endif
 endfunction
 
@@ -510,7 +536,9 @@ function do_score_histo(ewocs, cmd_opts)
     expec_fig = figure();
   endif
   sorted_fig  = figure();
-  t_score_fig = figure();
+  if cmd_opts.signal_groups > 1
+    t_score_fig = figure();
+  endif
   s_score_fig = figure();
   roc_fig     = figure();
 
@@ -553,10 +581,13 @@ function do_score_histo(ewocs, cmd_opts)
 
       %% Plot score
       do_plot_sorted_score(sorted_fig, scores, 0.0);
-      do_plot_score(t_score_fig, scores, t_expec, ...
-		    cmd_opts.histo_bins, 0.0);
+      if cmd_opts.signal_groups > 1
+	do_plot_score(t_score_fig, scores, t_expec, ...
+		      cmd_opts.histo_bins, 0.0);
+      endif
       do_plot_score(s_score_fig, scores, s_expec, ...
-		    cmd_opts.histo_bins, cmd_opts.pause_time);
+		    cmd_opts.histo_bins, 0.0);
+      do_roc_plot(roc_fig, scores, truth > 1, cmd_opts.pause_time);
     endfor
   endfor
 endfunction
