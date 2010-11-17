@@ -23,7 +23,7 @@ function [ output, model, info ] = apply(this, input)
     output = mean * ones(size(input));
 
     %% Model
-    model = ConstInterModel(mean);
+    model = ConstInterModel(low_in, mean);
 
   else
     %% Map
@@ -34,8 +34,8 @@ function [ output, model, info ] = apply(this, input)
 	            exp_denom;
 
     %% Model
-    model = ExpInterModel(this.high, this.low, this.convexity, ...
-			  low_in, exp_denom);
+    model = ExpInterModel(this.low, this.high, this.convexity, ...
+			  low_in, high_in, exp_denom);
   endif
 
   %% Information

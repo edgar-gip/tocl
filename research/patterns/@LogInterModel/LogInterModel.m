@@ -5,11 +5,11 @@
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = LogInterModel(low, high, low_in, log_denom)
+function [ this ] = LogInterModel(low, high, low_in, high_in, log_denom)
 
   %% Check arguments
-  if nargin() ~= 4
-    usage("[ this ] = LogInterModel(low, high, low_in, log_denom)");
+  if nargin() ~= 5
+    usage("[ this ] = LogInterModel(low, high, low_in, high_in, log_denom)");
   endif
 
   %% This object
@@ -19,6 +19,7 @@ function [ this ] = LogInterModel(low, high, low_in, log_denom)
   this.low       = low;
   this.high      = high;
   this.low_in    = low_in;
+  this.high_in   = high_in;
   this.log_denom = log_denom;
 
   %% Bless

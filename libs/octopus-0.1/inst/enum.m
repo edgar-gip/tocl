@@ -11,7 +11,7 @@
 %% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 %% FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 %% for more details.
-%% 
+%%
 %% You should have received a copy of the GNU General Public License
 %% along with octopus; see the file COPYING.  If not, see
 %% <http://www.gnu.org/licenses/>.
@@ -22,7 +22,7 @@
 %% @end deftypefn
 
 function enum(varargin)
-  
+
   %% Last enum value
   last = -1;
 
@@ -38,13 +38,13 @@ function enum(varargin)
       %% Define the function to be equal to the next value
       ++last;
       eval(sprintf("function v = %s(); v = %d; end;", varargin{i}, last));
-      
+
     elseif (([ match, name, value ] = ...
 	     regex_match(varargin{i}, '([a-zA-Z]\w*)=([\+\-]?\d+)')))
       %% Define the function to be equal to the specified value
       last = fix(str2double(value));
       eval(sprintf("function v = %s(); v = %d; end;", name, last));
-      
+
     else
       %% Error!
       usage("Wrong enumeration value specification %s", varargin{i});
@@ -53,7 +53,7 @@ function enum(varargin)
 endfunction
 
 %% Mark as command
-mark_as_command("enum");
+%% mark_as_command("enum");
 
 %% Local Variables:
 %% mode:octave

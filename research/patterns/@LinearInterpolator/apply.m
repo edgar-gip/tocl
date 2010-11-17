@@ -23,7 +23,7 @@ function [ output, model, info ] = apply(this, input)
     output = mean * ones(size(input));
 
     %% Model
-    model = ConstInterModel(mean);
+    model = ConstInterModel(low_in, mean);
 
   else
     %% Step
@@ -33,7 +33,7 @@ function [ output, model, info ] = apply(this, input)
     output = this.low + step * (input - low_in);
 
     %% Model
-    model = LinearInterModel(this.low, this.high, low_in, step);
+    model = LinearInterModel(this.low, this.high, low_in, high_in, step);
   endif
 
   %% Information

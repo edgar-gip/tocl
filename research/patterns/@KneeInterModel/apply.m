@@ -13,8 +13,8 @@ function [ output ] = apply(this, input)
   endif
 
   %% Low and high parts
-  low_part  = input <= this.cut;
-  high_part = input >= this.cut;
+  low_part  = input <= this.mid_in;
+  high_part = input >= this.mid_in;
 
   %% Interpolate both parts
   low_output  = apply(this.low_model,  input(low_part));

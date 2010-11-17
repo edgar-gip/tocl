@@ -28,7 +28,7 @@ function [ output, model, info ] = apply(this, input)
     output = mean * ones(size(input));
 
     %% Model
-    model = ConstInterModel(mean);
+    model = ConstInterModel(low_in, mean);
 
   else
     %% Find the distance
@@ -40,11 +40,11 @@ function [ output, model, info ] = apply(this, input)
     [ min_dist, min_idx ] = min(dist);
 
     %% Cut point
-    cut = sorted(min_idx);
+    mid_in = sorted(min_idx);
 
     %% Low and high parts
-    low_part  = input <= cut;
-    high_part = input >= cut;
+    low_part  = input <= mid_in;
+    high_part = input >= mid_in;
 
     %% Interpolate both parts
     [ low_output,  low_model  ] = apply(this.low_inter,  input(low_part));
@@ -55,12 +55,12 @@ function [ output, model, info ] = apply(this, input)
     output(high_part) = high_output;
 
     %% Model
-    model = KneeInterModel(cut, low_model, high_model);
+    model = KneeInterModel(this.mid, mid_in, low_model, high_model);
   endif
 
   %% Information
   info = struct();
   info.low  = low_in;
-  info.cut  = cut;
+  info.mid  = mid_in;
   info.high = high_in;
 endfunction

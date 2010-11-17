@@ -20,6 +20,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   if nargin() < 4
     %% Take it at random
     expec_0 = random_expec(this, data, k);
+
   else
     %% Check the size
     [ expec_0_r, expec_0_c ] = size(expec_0);

@@ -17,6 +17,9 @@ function [ this ] = KneeInterpolator(inner = @LogInterpolator, ...
   this = struct();
 
   %% Set fields
+  this.low        = low;
+  this.mid        = mid;
+  this.high       = high;
   this.low_inter  = feval(inner, low, mid);
   this.high_inter = feval(inner, mid, high);
 

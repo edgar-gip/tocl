@@ -5,11 +5,13 @@
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = ExpInterModel(low, high, convexity, low_in, exp_denom)
+function [ this ] = ExpInterModel(low, high, convexity, ...
+				  low_in, high_in, exp_denom)
 
   %% Check arguments
-  if nargin() ~= 5
-    usage("[ this ] = ExpInterModel(low, high, convexity, low_in, exp_denom)");
+  if nargin() ~= 6
+    usage(cstrcat("[ this ] = ExpInterModel(low, high, convexity,", ...
+		  " low_in, high_in, exp_denom)"));
   endif
 
   %% This object
@@ -20,6 +22,7 @@ function [ this ] = ExpInterModel(low, high, convexity, low_in, exp_denom)
   this.high      = high;
   this.convexity = convexity;
   this.low_in    = low_in;
+  this.high_in   = high_in;
   this.exp_denom = exp_denom;
 
   %% Bless

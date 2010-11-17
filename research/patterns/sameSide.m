@@ -8,6 +8,9 @@
 %% Octopus
 pkg load octopus
 
+%% Warnings
+warning off Octave:divide-by-zero;
+
 
 %%%%%%%%%%%
 %% Enums %%
@@ -17,7 +20,7 @@ pkg load octopus
 enum T_SAME_SIDE T_SCORE_HISTO
 
 %% Distributions
-enum P_BERNOULLI P_GAUSSIAN P_UNIFORM
+enum P_BERNOULLI P_GAUSSIAN P_SPHERICAL P_UNIFORM
 
 %% Inside weak clustering methods
 %% enum C_BERNOULLI C_KMEANS C_SVM C_VORONOI
@@ -95,14 +98,16 @@ def_opts.histo_bins      = 100;
 		"noise-size=i",       "noise_size",    ...
 		"noise-bernoulli=r0", "noise_dist",    ...
 		"noise-gaussian=r1",  "noise_dist",    ...
-		"noise-uniform=r2",   "noise_dist",    ...
+		"noise-spherical=r2", "noise_dist",    ...
+		"noise-uniform=r3",   "noise_dist",    ...
 		"noise-mean=f",       "noise_mean",    ...
 		"noise-var=f",        "noise_var",     ...
 		"signal-groups=i",    "signal_groups", ...
 		"signal-size=s",      @s_signal_size,  ...
 		"signal-bernoulli=r0","signal_dist",   ...
 		"signal-gaussian=r1", "signal_dist",   ...
-		"signal-uniform=r2",  "signal_dist",   ...
+		"signal-spherical=r2","signal_dist",   ...
+		"signal-uniform=r3",  "signal_dist",   ...
 		"signal-shift=f",     "signal_shift",  ...
 		"signal-var=f",       "signal_var",    ...
 		"min-clusters=i",     "min_clusters",  ...
@@ -153,103 +158,6 @@ endif
 cmd_opts.range_clusters = cmd_opts.max_clusters - cmd_opts.min_clusters;
 
 
-%%%%%%%%%%%%%%%%%%%%%
-%% Data generation %%
-%%%%%%%%%%%%%%%%%%%%%
-
-%% Generate uniform
-function [ data ] = gen_uniform(dims, size, mean, var)
-  %% Data
-  data = mean * ones(1, size) + 2 * var * (rand(dims, size) - 0.5);
-endfunction
-
-%% Generate bernoulli
-function [ data ] = gen_bernoulli(dims, size, mean)
-  %% Data
-  data = rand(dims, size) < mean;
-endfunction
-
-%% Generate gaussian
-function [ data ] = gen_gaussian(dims, size, mean, var)
-  %% Variance projection
-  %% project   = rand(dims, dims) - 0.5;
-  %% project ./= ones(dims, 1) * sqrt(sum(project .* project));
-  %% variance  = project * diag(var * rand(dims, 1), 0);
-  variance = var * eye(dims);
-
-  %% Data
-  data = mean * ones(1, size) + variance * randn(dims, size);
-endfunction
-
-%% Generate the data
-function [ data, truth ] = gen_data(cmd_opts)
-  %% Total size
-  total_size = cmd_opts.noise_size + sum(cmd_opts.signal_size);
-
-  %% Now, generate
-  data  = zeros(cmd_opts.dimensions, total_size);
-  truth = ones (1,                   total_size);
-
-  %% Effective noise mean
-  eff_noise_mean = gen_gaussian(cmd_opts.dimensions, 1, ...
-				0, cmd_opts.noise_mean);
-
-  %% Noise
-  switch cmd_opts.noise_dist
-    case P_BERNOULLI
-      data(:, 1 : cmd_opts.noise_size) = ...
-	  gen_bernoulli(cmd_opts.dimensions, cmd_opts.noise_size, ...
-			cmd_opts.noise_mean);
-    case P_GAUSSIAN
-      data(:, 1 : cmd_opts.noise_size) = ...
-	  gen_gaussian(cmd_opts.dimensions, cmd_opts.noise_size, ...
-		       eff_noise_mean, cmd_opts.noise_var);
-    case P_UNIFORM
-      data(:, 1 : cmd_opts.noise_size) = ...
-	  gen_uniform(cmd_opts.dimensions, cmd_opts.noise_size, ...
-		      eff_noise_mean, cmd_opts.noise_var);
-  endswitch
-
-  %% Signal
-  cl   = 2;
-  base = cmd_opts.noise_size;
-  for cur_size = cmd_opts.signal_size
-    %% Effective signal mean
-    eff_signal_mean = ...
-	eff_noise_mean + gen_gaussian(cmd_opts.dimensions, 1, ...
-				      0, cmd_opts.signal_shift);
-
-    %% Generate each one
-    switch cmd_opts.signal_dist
-      case P_BERNOULLI
-	data(:, base : base + cur_size - 1) = ...
-	    gen_bernoulli(cmd_opts.dimensions, cur_size, ...
-			  cmd_opts.noise_mean + rand() * cmd_opts.signal_shift);
-      case P_GAUSSIAN
-	data(:, base : base + cur_size - 1) = ...
-	    gen_gaussian(cmd_opts.dimensions, cur_size, ...
-			 eff_signal_mean, cmd_opts.signal_var);
-      case P_UNIFORM
-	data(:, base : base + cur_size - 1) = ...
-	    gen_uniform(cmd_opts.dimensions, cur_size, ...
-			eff_signal_mean, cmd_opts.signal_var);
-    endswitch
-
-    %% Truth
-    truth(base : base + cur_size - 1) = cl;
-
-    %% Next
-    base += cur_size;
-    cl   += 1;
-  endfor
-
-  %% Shuffle
-  shuffler = randperm(total_size);
-  data  = data (:, shuffler);
-  truth = truth(shuffler);
-endfunction
-
-
 %%%%%%%%%%%%%%
 %% Plotting %%
 %%%%%%%%%%%%%%
@@ -293,11 +201,122 @@ function do_plot_expec(window, data, expec, pause_time)
   endif
 endfunction
 
-%% Do the sorted score plot
-function do_plot_sorted_score(window, scores, pause_time)
+%% Plot
+function do_plot_score_data(window, data, s_truth, scores, pause_time)
+  %% Indices
+  neg = find(~s_truth);
+  pos = find( s_truth);
+
   %% Plot
   figure(window);
-  plot(sort(scores, "descend"), "-");
+  plot3(data(1, neg), data(2, neg), scores(neg), "x", ...
+	data(1, pos), data(2, pos), scores(pos), "x");
+
+  %% Stop?
+  if pause_time > 0
+    pause(pause_time);
+  endif
+endfunction
+
+%% Do the sorted score plot
+function do_plot_sorted_score(window, scores, s_truth, pause_time)
+
+  %% Mapper
+  mapper_01 = @LinearInterpolator();
+
+  %% Size
+  n_data = length(scores);
+
+  %% Map scores
+  map_scores = apply(mapper_01, scores);
+
+  %% Sort
+  [ sort_scores, sort_idx ] = sort(map_scores, "descend");
+
+
+  %% Prc/Rec/F1
+
+  %% Find the curves
+  acc_pos = cumsum( s_truth(sort_idx));
+  acc_neg = cumsum(~s_truth(sort_idx));
+
+  %% Prc/Rec/F1
+  prc = acc_pos ./ (acc_pos .+ acc_neg);
+  rec = acc_pos ./  acc_pos(n_data);
+  f1  = (2 .* prc .* rec) ./ (prc .+ rec);
+
+
+  %% Knee Threshold
+
+  %% Find the distance
+  knee_idx_n = (0 : (n_data - 1)) ./ (n_data - 1);
+  knee_dist  = sort_scores .* sort_scores + knee_idx_n .* knee_idx_n;
+
+  %% Minimum point
+  [ min_knee_dist, min_knee_idx ] = min(knee_dist);
+
+
+  %% 1D Gaussian Threshold
+
+  %% Model
+  gauss = Gaussian1D();
+  gauss_expec     = cluster(gauss, sort_scores, 2);
+  gauss_expec_tru = gauss_expec(1, :);
+
+  %% Cut point
+  gauss_cut_idx = min(find(gauss_expec_tru >= 0.5));
+
+
+  %% Two-class Hard Gaussian log-likelihood
+
+  %% Cummulated sums
+  left_sum     = cumsum(sort_scores);
+  left_sum_sq  = cumsum(sort_scores .* sort_scores);
+  right_sum    = left_sum   (n_data) - [ 0,    left_sum(1 : n_data - 1) ];
+  right_sum_sq = left_sum_sq(n_data) - [ 0, left_sum_sq(1 : n_data - 1) ];
+
+  %% Means and variances
+  left_mean  = left_sum     ./ (1 : n_data);
+  left_var   = left_sum_sq  ./ (1 : n_data) - left_mean  .* left_mean;
+  right_mean = right_sum    ./ (n_data : -1 : 1);
+  right_var  = right_sum_sq ./ (n_data : -1 : 1) - right_mean .* right_mean;
+
+  %% Cut points
+  log_like = zeros(1, n_data - 1);
+  for k = 1 : n_data - 1
+    log_like(k) = + k * ...
+	            log(1 / sqrt(2 * pi * left_var(k)) * k / n_data) ...
+	          - sum(((sort_scores(1 : k) - left_mean(k)) .^ 2) ./ ...
+			left_var(k)) ...
+	          + (n_data - k) * ...
+	            log(1 / sqrt(2 * pi * right_var(k + 1)) * ...
+			(n_data - k) / n_data)...
+	          - sum(((sort_scores(k + 1 : n_data) -
+			  right_mean(k + 1)) .^ 2) ./ ...
+			right_var(k + 1));
+  endfor
+
+  %% Cut
+  [ max_log_like, max_log_like_idx ] = max(log_like);
+
+  %% Map
+  map_log_like = apply(mapper_01, log_like);
+
+
+  %% Plot
+  figure(window);
+  plot(sort_scores, "-k;Score;", "linewidth", 2, ...
+       prc, "-c;Precision;", rec, "-y;Recall;", ...
+       f1, "-m;F1;", "linewidth", 2, ...
+       knee_dist, "-b;Distance;", ...
+       [ min_knee_idx,  min_knee_idx ], ...
+       [ min_knee_dist, f1(min_knee_idx) ], "x-b", ...
+       gauss_expec_tru, "-r;Gaussian;", ...
+       [ gauss_cut_idx, gauss_cut_idx ], ...
+       [ gauss_expec_tru(gauss_cut_idx), f1(gauss_cut_idx) ], "x-r", ...
+       map_log_like, "-g;Log-Like;",
+       [ max_log_like_idx, max_log_like_idx ], ...
+       [ map_log_like(max_log_like_idx), f1(max_log_like_idx) ], "x-g");
 
   %% Stop?
   if pause_time > 0
@@ -465,7 +484,8 @@ function do_same_side(clusterer, cmd_opts)
 		     1 + cmd_opts.signal_groups, total_size);
 
     %% Simplified expectation
-    s_expec = sparse(1 + (truth > 1), 1 : total_size, ones(1, total_size),
+    s_truth = truth > 1;
+    s_expec = sparse(1 + s_truth, 1 : total_size, ones(1, total_size),
 		     2, total_size);
 
     %% Plot?
@@ -534,6 +554,9 @@ function do_score_histo(ewocs, cmd_opts)
   if cmd_opts.do_plot
     truth_fig = figure();
     expec_fig = figure();
+    if cmd_opts.dimensions == 2
+      score_fig = figure();
+    endif
   endif
   sorted_fig  = figure();
   if cmd_opts.signal_groups > 1
@@ -557,7 +580,8 @@ function do_score_histo(ewocs, cmd_opts)
 		     1 + cmd_opts.signal_groups, total_size);
 
     %% Simplified expectation
-    s_expec = sparse(1 + (truth > 1), 1 : total_size, ones(1, total_size),
+    s_truth = truth > 1;
+    s_expec = sparse(1 + s_truth, 1 : total_size, ones(1, total_size),
 		     2, total_size);
 
     %% Plot?
@@ -577,17 +601,21 @@ function do_score_histo(ewocs, cmd_opts)
       %% Plot?
       if cmd_opts.do_plot
 	do_plot_expec(expec_fig, data, h_expec, 0.0);
+
+	if cmd_opts.dimensions == 2
+	  do_plot_score_data(score_fig, data, s_truth, scores, 0.0);
+	endif
       endif
 
       %% Plot score
-      do_plot_sorted_score(sorted_fig, scores, 0.0);
+      do_plot_sorted_score(sorted_fig, scores, s_truth, 0.0);
       if cmd_opts.signal_groups > 1
 	do_plot_score(t_score_fig, scores, t_expec, ...
 		      cmd_opts.histo_bins, 0.0);
       endif
       do_plot_score(s_score_fig, scores, s_expec, ...
 		    cmd_opts.histo_bins, 0.0);
-      do_roc_plot(roc_fig, scores, truth > 1, cmd_opts.pause_time);
+      do_roc_plot(roc_fig, scores, s_truth, cmd_opts.pause_time);
     endfor
   endfor
 endfunction

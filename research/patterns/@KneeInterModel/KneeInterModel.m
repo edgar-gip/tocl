@@ -5,18 +5,20 @@
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = KneeInterModel(cut, low_model, high_model)
+function [ this ] = KneeInterModel(mid, mid_in, low_model, high_model)
 
   %% Check arguments
-  if nargin() ~= 3
-    usage("[ this ] = KneeInterModel(cut, low_model, high_model)");
+  if nargin() ~= 4
+    usage(cstrcat("[ this ] = KneeInterModel(mid, mid_in,",
+		  " high_in, low_model, high_model)"));
   endif
 
   %% This object
   this = struct();
 
   %% Set fields
-  this.cut        = cut;
+  this.mid        = mid;
+  this.mid_in     = mid_in;
   this.low_model  = low_model;
   this.high_model = high_model;
 

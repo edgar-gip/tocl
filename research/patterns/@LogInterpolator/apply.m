@@ -23,7 +23,7 @@ function [ output, model, info ] = apply(this, input)
     output = mean * ones(size(input));
 
     %% Model
-    model = ConstInterModel(mean);
+    model = ConstInterModel(low_in, mean);
 
   else
     %% Map
@@ -33,7 +33,7 @@ function [ output, model, info ] = apply(this, input)
 	           log(input / low_in) / log_denom;
 
     %% Model
-    model = LogInterModel(this.low, this.high, low_in, log_denom);
+    model = LogInterModel(this.low, this.high, low_in, high_in, log_denom);
   endif
 
   %% Information

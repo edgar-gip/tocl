@@ -66,8 +66,15 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
       %% Find the divergences
       divs = apply(this.divergence, centroids, data);
 
-      %% Select the closest cluster
-      [ min_divs, min_indices ] = min(divs);
+      %% Only one cluster?
+      if k == 1
+	%% It's it
+	min_divs    = divs;
+	min_indices = ones(1, n_samples);
+      else
+	%% Select the closest cluster
+	[ min_divs, min_indices ] = min(divs);
+      endif
 
       %% Sort the clusters
       [ sort_divs, sort_indices ] = sort(min_divs);

@@ -8,15 +8,16 @@
 function [ this ] = ConstInterModel(value)
 
   %% Check arguments
-  if nargin() ~= 1
-    usage("[ this ] = ConstInterModel(value)");
+  if nargin() ~= 2
+    usage("[ this ] = ConstInterModel(value_in, value)");
   endif
 
   %% This object
   this = struct();
 
   %% Set fields
-  this.value = value;
+  this.value_in = value_in;
+  this.value    = value;
 
   %% Bless
   %% And add inheritance
