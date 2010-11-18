@@ -5,7 +5,7 @@ MKOCTFILE = mkoctfile
 OCTFLAGS = -Wall -Wextra
 
 # Modules
-MODULES = gaussian_log_expectation
+MODULES = gaussian_expectation
 
 # Module specific flags
 # <module>_OCTFLAGS = ...

@@ -9,7 +9,7 @@ function [ this ] = Gaussian(opts = struct())
 
   %% Check arguments
   if ~any(nargin() == [ 0, 1 ])
-    usage("[ this ] = Gaussian(opts = struct())");
+    usage("[ this ] = Gaussian([opts])");
   endif
 
   %% This object
@@ -18,6 +18,10 @@ function [ this ] = Gaussian(opts = struct())
   %% Alpha prior
   %% Default -> 1
   this.alpha_prior = getfielddef(opts, "alpha_prior", 1);
+
+  %% Stdev prior
+  %% Default -> 0.1
+  this.stdev_prior = getfielddef(opts, "stdev_prior", 0.1);
 
   %% Verbose
   %% Default -> false

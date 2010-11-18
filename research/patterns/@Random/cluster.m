@@ -18,11 +18,11 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
 
   %% Warn that expec_0 is ignored
   if nargin() == 4 && ~isempty(expec_0)
-    warning("expec_0 is ignored");
+    %% warning("expec_0 is ignored");
   endif
 
   %% Random projection matrix
-  projection = rand(k, n_dims);
+  projection = rand(k, n_dims) - 0.5;
 
   %% Create the model
   model = RandomModel(this.soft_alpha, projection);

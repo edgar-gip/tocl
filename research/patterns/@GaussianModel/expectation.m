@@ -15,8 +15,18 @@ function [ expec, log_like ] = expectation(this, data)
   %% Number of data
   [ n_dims, n_data ] = size(data);
 
-  %% Distance
-  expec = gaussian_log_expectation(this.alpha_pvar, this.mean, this.var, data);
+  %% Raw probability
+  %% Start with the a priori probabilities
+  expec = this.alpha_pvar' * ones(1, n_data);
+
+  %% For each cluster
+  for c = 1 : this.k
+    %% Scale data
+    s_data = data ./ (this.stdev(:, c) * ones(1, n_data));
+
+    %% Distances
+    expec(c, :) -= sq_euclidean_distance2(this.mean_stdev(:, c), s_data);
+  endfor
 
   %% Normalize
   max_expec = max(expec);

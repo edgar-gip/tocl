@@ -22,11 +22,11 @@ function [ model ] = maximization(this, data, expec)
   endif
 
   %% Cluster sizes
-  cl_sizes = sum(expec, 2); % k * 1
+  cl_sizes = sum(expec, 2)'; % 1 * k
 
   %% Sum and sum_sq
-  cl_sum   = full(expec *  data');
-  cl_sumsq = full(expec * (data .* data)');
+  cl_sum   = full( data          * expec'); % 1 * k
+  cl_sumsq = full((data .* data) * expec'); % 1 * k
 
   %% Mean and variance
   cl_mean = cl_sum   ./ cl_sizes;
@@ -39,7 +39,7 @@ function [ model ] = maximization(this, data, expec)
 
   %% Create the model
   model = Gaussian1DModel(k, ...
-			  cl_sizes - 0.5 * log(cl_var), ... % k * 1
-			  cl_mean, ...                      % k * 1
-			  cl_var);                          % k * 1
+			  cl_sizes - 0.5 * log(cl_var), ... % 1 * k
+			  cl_mean, ...                      % 1 * k
+			  cl_var);                          % 1 * k
 endfunction
