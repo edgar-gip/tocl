@@ -18,7 +18,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
 
   %% Warn that expec_0 is ignored
   if nargin() == 4 && ~isempty(expec_0)
-    %% warning("expec_0 is ignored");
+    warning("expec_0 is ignored");
   endif
 
   %% Random projection matrix

@@ -55,7 +55,7 @@ function [ best_expec, best_model, best_info ] = cluster(this, data, k, expec_0)
 	crit = apply(this.criterion, data, expec, model, info);
 
 	%% Log
-	fprintf(2, "%d %d -> %g\n", k, r, crit);
+	%% fprintf(2, "%d %d -> %g\n", k, r, crit);
 
 	%% Better?
 	if crit > best_crit

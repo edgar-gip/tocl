@@ -132,11 +132,6 @@ def_opts.histo_bins      = 100;
 		"soft-alpha=f",       "soft_alpha",    ...
 		"histo-bins=i",       "histo_bins");
 
-%% Chek number of arguments
-if length(cmd_args) ~= 0
-  error("Wrong number of arguments (should be 0)");
-endif
-
 %% Set a seed
 if isempty(cmd_opts.seed)
   cmd_opts.seed = floor(1000.0 * rand());
@@ -160,12 +155,126 @@ endif
 cmd_opts.range_clusters = cmd_opts.max_clusters - cmd_opts.min_clusters;
 
 
+%%%%%%%%%%%%%
+%% Calculi %%
+%%%%%%%%%%%%%
+
+%% Prc/Rec curves
+function [ prc, rec, f1 ] = prc_rec(sort_scores, sort_idx, s_truth)
+
+  %% Size
+  n_data = length(sort_idx);
+
+  %% Find the curves
+  acc_pos = cumsum( s_truth(sort_idx));
+  acc_neg = cumsum(~s_truth(sort_idx));
+
+  %% Prc/Rec/F1
+  prc = acc_pos ./ (acc_pos .+ acc_neg);
+  rec = acc_pos ./  acc_pos(n_data);
+  f1  = (2 .* prc .* rec) ./ (prc .+ rec);
+endfunction
+
+%% Score plots
+function [ plots, max_histo ] = score_histo_plots(scores, expec, histo_bins)
+
+  %% Sizes
+  [ k, elems ] = size(expec);
+
+  %% Min/max
+  min_score = min(scores);
+  max_score = max(scores);
+
+  %% Histogram
+  h = Histogram();
+
+  %% Plots
+  plots   = {};
+  max_bin = 0;
+
+  %% For each cl
+  for cl = 1 : k
+
+    %% Cluster
+    cluster = find(expec(cl, :));
+
+    %% Histogram
+    [ histo, bin_limits ] = ...
+	make(h, scores(cluster), histo_bins, min_score, max_score);
+
+    %% Is it the noise cluster?
+    if cl == 1
+      plots = cell_push(plots, bin_limits, histo, "-r", "linewidth", 2);
+    else
+      plots = cell_push(plots, bin_limits, histo, "-g");
+    endif
+  endfor
+
+  %% Truth cluster
+  truth_cluster = find(sum(expec(2 : k, :)));
+
+  %% Histogram
+  [ histo, bin_limits ] = ...
+      make(h, scores(truth_cluster), histo_bins, min_score, max_score);
+  plots = cell_push(plots, bin_limits, histo, "-g", "linewidth", 2);
+
+  %% All histogram
+  [ histo, bin_limits ] = ...
+      make(h, scores, histo_bins, min_score, max_score);
+  plots = cell_push(plots, bin_limits, histo, "-k", "linewidth", 2);
+
+  %% Max
+  max_histo = max(histo);
+endfunction
+
+%% Gaussian model plots
+function [ model_plots, sorted_cl ] = ...
+      gaussian_model_plots(model, max_histo, color)
+
+  %% Model info
+  als = alphas(model);
+  mns = means(model);
+  std = sqrt(variances(model));
+
+  %% Number of clusters
+  k = length(als);
+
+  %% Sort the clusters
+  [ sorted_mns, sorted_cl ] = sort(mns, "descend");
+
+  %% Xs and Ps
+  xs = zeros(k, 21);
+  ps = zeros(k, 21);
+
+  %% For each cluster
+  for c = 1 : k
+    %% Get 21 points Within 2 stdevs
+    xs(c, :) = mns(c) + (-10 : 10) * std(c) / 10;
+
+    %% Find a scaled density
+    ps(c, :) = als(c) * normpdf(xs(c, :), mns(c), std(c));
+  endfor
+
+  %% Scale
+  max_p = max(max(ps));
+  ps   *= max_histo / max_p;
+
+  %% For each cluster
+  model_plots = {};
+  for c = 1 : k
+    %% Add it
+    model_plots = cell_push(model_plots, xs(c, :), ps(c, :), color);
+  endfor
+endfunction
+
+
 %%%%%%%%%%%%%%
 %% Plotting %%
 %%%%%%%%%%%%%%
 
 %% Do the expectation plot
 function do_plot_expec(window, data, expec, pause_time)
+
   %% Sizes
   [ dims, elems ] = size(data);
   [ k,    elems ] = size(expec);
@@ -205,6 +314,7 @@ endfunction
 
 %% Plot
 function do_plot_score_data(window, data, s_truth, scores, pause_time)
+
   %% Indices
   neg = find(~s_truth);
   pos = find( s_truth);
@@ -220,65 +330,149 @@ function do_plot_score_data(window, data, s_truth, scores, pause_time)
   endif
 endfunction
 
-%% Do the sorted score plot
-function do_plot_sorted_score(window, scores, s_truth, pause_time)
-
-  %% Mapper
-  mapper_01 = @LinearInterpolator();
+%% Do the distance plot
+function [ min_knee_idx ] = ...
+      do_plot_dist(dist_fig, map_sort_scores, f1, pause_time)
 
   %% Size
-  n_data = length(scores);
-
-  %% Map scores
-  map_scores = apply(mapper_01, scores);
-
-  %% Sort
-  [ sort_scores, sort_idx ] = sort(map_scores, "descend");
-
-
-  %% Prc/Rec/F1
-
-  %% Find the curves
-  acc_pos = cumsum( s_truth(sort_idx));
-  acc_neg = cumsum(~s_truth(sort_idx));
-
-  %% Prc/Rec/F1
-  prc = acc_pos ./ (acc_pos .+ acc_neg);
-  rec = acc_pos ./  acc_pos(n_data);
-  f1  = (2 .* prc .* rec) ./ (prc .+ rec);
-
-
-  %% Knee Threshold
+  n_data = length(map_sort_scores);
 
   %% Find the distance
   knee_idx_n = (0 : (n_data - 1)) ./ (n_data - 1);
-  knee_dist  = sort_scores .* sort_scores + knee_idx_n .* knee_idx_n;
+  knee_dist  = map_sort_scores .* map_sort_scores + knee_idx_n .* knee_idx_n;
 
   %% Minimum point
   [ min_knee_dist, min_knee_idx ] = min(knee_dist);
 
+  %% Plot
+  figure(dist_fig);
+  plot(map_sort_scores, "-k;Score;", "linewidth", 2, ...
+       f1, "-m;F1;", "linewidth", 2, ...
+       knee_dist, "-b;Distance;", ...
+       [ min_knee_idx,  min_knee_idx ], ...
+       [ min_knee_dist, f1(min_knee_idx) ], "x-b");
 
-  %% 1D Gaussian Threshold
+  %% Stop?
+  if pause_time > 0
+    pause(pause_time);
+  endif
+endfunction
+
+%% Do the gaussian plot
+function [ gauss_cut_idx ] = ...
+      do_plot_gauss(gauss_fig, sort_scores, map_sort_scores, f1, ...
+		    histo_plots, max_histo, pause_time)
 
   %% Model
-  gauss = Gaussian1D();
-  gauss_expec     = cluster(gauss, sort_scores, 2);
-  gauss_expec_tru = gauss_expec(1, :);
+  [ expec, model ] = cluster(Gaussian1D(), sort_scores, 2);
+
+  %% Gaussian model plots
+  [ model_plots, sorted_cl ] = gaussian_model_plots(model, max_histo, "-b");
 
   %% Cut point
-  gauss_cut_idx = min(find(gauss_expec_tru >= 0.5));
+  gauss_expec_tru = expec(sorted_cl(1), :);
+  gauss_cut_idx   = max(find(gauss_expec_tru >= 0.5));
 
+  %% Plot
+  figure(gauss_fig);
+  subplot(1, 2, 1);
+  plot(map_sort_scores, "-k;Score;", "linewidth", 2, ...
+       f1, "-m;F1;", "linewidth", 2, ...
+       gauss_expec_tru, "-r;Gaussian;", ...
+       [ gauss_cut_idx, gauss_cut_idx ], ...
+       [ gauss_expec_tru(gauss_cut_idx), f1(gauss_cut_idx) ], "x-r");
+  subplot(1, 2, 2);
+  plot(histo_plots{:}, model_plots{:});
 
-  %% Many Gaussian Threshold
+  %% Stop?
+  if pause_time > 0
+    pause(pause_time);
+  endif
+endfunction
+
+%% Do the multi gaussian plot
+function [ mgauss_cut_idx ] = ...
+      do_plot_mgauss(mgauss_fig, mgauss_expec_fig, data, ...
+		     sort_scores, sort_idx, map_sort_scores, ...
+		     f1, histo_plots, max_histo, pause_time)
 
   %% Model
-  mgauss = CriterionClusterer(gauss, BIC(), struct("max_k", 20));
-  [ mgauss_expec, mgauss_model, mgauss_info ] = cluster(mgauss, sort_scores);
-  mgauss_expec_tru = 1 - mgauss_expec(mgauss_info.k, :);
+  [ expec, model ] = cluster(CriterionClusterer(Gaussian1D(), BIC(),
+						struct("max_k", 10)),
+			     sort_scores);
 
-  %% Cut point
-  mgauss_cut_idx = min(find(mgauss_expec_tru >= 0.5));
+  %% Gaussian model plots
+  [ model_plots, sorted_cl ] = gaussian_model_plots(model, max_histo, "-b");
 
+  %% Plots, and best cut point
+  plots    = {};
+  best_f1  = 0.0;
+  best_c   = -1;
+  best_idx = -1;
+
+  %% Find it
+  for c = 1 : length(sorted_cl) - 1
+
+    %% Expec
+    expec_tru = sum(expec(sorted_cl(1 : c), :), 1);
+    cut_idx   = max(find(expec_tru >= 0.5));
+
+    %% Add plots
+    plots = cell_push(plots, ...
+		      expec_tru, sprintf("-r;M-Gaussian-%d;", c), ...
+		      [ cut_idx, cut_idx ], ...
+		      [ expec_tru(cut_idx), f1(cut_idx) ], "x-r");
+
+    %% Better?
+    if f1(cut_idx) > best_f1
+      best_f1  = f1(cut_idx);
+      best_c   = c;
+      best_idx = cut_idx;
+    endif
+  endfor
+
+  %% Keep the best
+  mgauss_cut_idx = best_idx;
+
+  %% Change the plot color
+  plots{5 * (best_c - 1) + 2} = sprintf("-b;M-Gaussian-%d;", best_c);
+
+  %% Plot
+  figure(mgauss_fig);
+  subplot(1, 2, 1);
+  plot(map_sort_scores, "-k;Score;", "linewidth", 2, ...
+       f1, "-m;F1;", "linewidth", 2, ...
+       plots{:});
+  subplot(1, 2, 2);
+  plot(histo_plots{:}, model_plots{:});
+
+  %% Extra plot?
+  if mgauss_expec_fig
+    %% Size
+    n_data = length(sort_scores);
+
+    %% Harden it
+    [ max_expec, max_cl ] = max(expec);
+    h_expec = sparse(max_cl, sort_idx, ones(1, n_data), ...
+		     length(sorted_cl), n_data);
+
+    %% Plot it
+    do_plot_expec(mgauss_expec_fig, data, h_expec, 0.0);
+  endif
+
+  %% Stop?
+  if pause_time > 0
+    pause(pause_time);
+  endif
+endfunction
+
+%% Do the hard gaussian plot
+function [ max_log_like_idx ] = ...
+      do_plot_hgauss(hgauss_fig, sort_scores, map_sort_scores, f1, ...
+		     histo_plots, max_histo, pause_time)
+
+  %% Size
+  n_data = length(map_sort_scores);
 
   %% Two-class Hard Gaussian log-likelihood
 
@@ -308,31 +502,33 @@ function do_plot_sorted_score(window, scores, s_truth, pause_time)
 			  right_mean(k + 1)) .^ 2) ./ ...
 			(2 * right_var(k + 1)));
   endfor
+  log_like = real(log_like);
 
   %% Cut
   [ max_log_like, max_log_like_idx ] = max(log_like);
 
   %% Map
-  map_log_like = apply(mapper_01, log_like);
+  map_log_like = apply(LinearInterpolator(), log_like);
 
+  %% Create a fake model
+  alphas = [ max_log_like_idx / n_data, (n_data - max_log_like_idx) / n_data ];
+  means  = [ left_mean(max_log_like_idx), right_mean(max_log_like_idx + 1) ];
+  vars   = [ left_var(max_log_like_idx), right_var(max_log_like_idx + 1) ];
+  model  = Gaussian1DModel(2, alphas, means, vars);
+
+  %% Plot it
+  [ model_plots ] = gaussian_model_plots(model, max_histo, "-b");
 
   %% Plot
-  figure(window);
-  plot(sort_scores, "-k;Score;", "linewidth", 2, ...
-       prc, "-c;Precision;", rec, "-y;Recall;", ...
+  figure(hgauss_fig);
+  subplot(1, 2, 1);
+  plot(map_sort_scores, "-k;Score;", "linewidth", 2, ...
        f1, "-m;F1;", "linewidth", 2, ...
-       knee_dist, "-b;Distance;", ...
-       [ min_knee_idx,  min_knee_idx ], ...
-       [ min_knee_dist, f1(min_knee_idx) ], "x-b", ...
-       gauss_expec_tru, "-r;Gaussian;", ...
-       [ gauss_cut_idx, gauss_cut_idx ], ...
-       [ gauss_expec_tru(gauss_cut_idx), f1(gauss_cut_idx) ], "x-r", ...
-       mgauss_expec_tru, "-r;M-Gaussian;", "linewidth", 2, ...
-       [ mgauss_cut_idx, mgauss_cut_idx ], ...
-       [ mgauss_expec_tru(mgauss_cut_idx), f1(mgauss_cut_idx) ], "x-r", ...
-       map_log_like, "-g;Log-Like;",
+       map_log_like, "-r;Log-Like;", ...
        [ max_log_like_idx, max_log_like_idx ], ...
-       [ map_log_like(max_log_like_idx), f1(max_log_like_idx) ], "x-g");
+       [ map_log_like(max_log_like_idx), f1(max_log_like_idx) ], "x-r");
+  subplot(1, 2, 2);
+  plot(histo_plots{:}, model_plots{:});
 
   %% Stop?
   if pause_time > 0
@@ -340,63 +536,24 @@ function do_plot_sorted_score(window, scores, s_truth, pause_time)
   endif
 endfunction
 
-%% Do the score plot
-function do_plot_score(window, scores, expec, histo_bins, pause_time)
-  %% Sizes
-  [ k, elems ] = size(expec);
+%% Do the Prc/Rec plot
+function do_plot_prc_rec(prc_rec_fig, map_sort_scores, prc, rec, f1, ...
+			 min_knee_idx, gauss_idx, mgauss_idx, hgauss_idx, ...
+			 pause_time)
 
-  %% Min/max
-  min_score = min(scores);
-  max_score = max(scores);
+  %% Plot
+  figure(prc_rec_fig);
+  plot(map_sort_scores, "-k;Score;", "linewidth", 2, ...
+       prc, "-r;Precision;", rec, "-b;Recall;", ...
+       f1, "-m;F1;", "linewidth", 2, ...
+       min_knee_idx, f1(min_knee_idx), "*b;Distance;", ...
+       gauss_idx,    f1(gauss_idx),    "*r;2-Gaussian;", ...
+       mgauss_idx,   f1(mgauss_idx),   "*c;M-Gaussian;", ...
+       hgauss_idx,   f1(hgauss_idx),   "*g;H-Gaussian;");
 
-  %% Empty range?
-  if min_score ~= max_score
-    %% Bin size
-    bin_size = (max_score - min_score) / histo_bins;
-
-    %% Bin limits
-    bin_limits = min_score + bin_size * (0 : (histo_bins - 1));
-
-    %% Plots
-    plots = {};
-
-    %% For each cl
-    for cl = 1 : k
-      %% Elements
-      cluster = find(expec(cl, :));
-      cl_size = length(cluster);
-
-      %% Bins
-      bins = 1 + floor((scores(cluster) - min_score) / bin_size);
-      bins(bins == (histo_bins + 1)) = histo_bins;
-
-      %% Histogram
-      histo = full(sum(sparse(bins, 1 : cl_size, ones(1, cl_size), ...
-			      histo_bins, cl_size), 2));
-
-      %% Add their data
-      plots = cell_push(plots, bin_limits, histo, "-");
-    endfor
-
-    %% Full bins
-    bins = 1 + floor((scores - min_score) / bin_size);
-    bins(bins == (histo_bins + 1)) = histo_bins;
-
-    %% Histogram
-    histo = full(sum(sparse(bins, 1 : elems, ones(1, elems), ...
-			    histo_bins, elems), 2));
-
-    %% Add it
-    plots = cell_push(plots, bin_limits, histo, "-", "linewidth", 2);
-
-    %% Plot
-    figure(window);
-    plot(plots{:});
-
-    %% Stop?
-    if pause_time > 0
-      pause(pause_time);
-    endif
+  %% Stop?
+  if pause_time > 0
+    pause(pause_time);
   endif
 endfunction
 
@@ -476,89 +633,140 @@ ewocs = ...
 %%%%%%%%%%%%%%%
 
 %% Do the same side task
-function do_same_side(clusterer, cmd_opts)
+function [ acc_prob, simp_acc_prob ] = ...
+      do_same_side_one(clusterer, data, truth, cmd_opts, ...
+		       truth_fig, expec_fig)
+
+  %% Sizes
+  n_data   = length(truth);
+  n_groups = max(truth);
+
+  %% Truth expectation
+  t_expec = sparse(truth, 1 : n_data, ones(1, n_data), n_groups, n_data);
+
+  %% Simplified expectation
+  s_truth = truth > 1;
+  s_expec = sparse(1 + s_truth, 1 : n_data, ones(1, n_data), 2, n_data);
+
+  %% Sizes
+  all_sizes  = full(sum(t_expec, 2))';
+  pair_sizes = all_sizes' * all_sizes;
+
+  %% Simplified sizes
+  simp_all_sizes  = full(sum(s_expec, 2))';
+  simp_pair_sizes = simp_all_sizes' * simp_all_sizes;
+
+  %% Plot?
+  if cmd_opts.do_plot
+    do_plot_expec(truth_fig, data, t_expec, 0.0);
+  endif
+
+  %% Accumulated probs
+  acc_prob      = zeros(n_groups, n_groups);
+  simp_acc_prob = zeros(2, 2);
+
+  %% For each inner run
+  for ir = 1 : cmd_opts.inner_runs
+    %% Number of clusters
+    k = floor(cmd_opts.min_clusters + (cmd_opts.range_clusters + 1) * rand());
+
+    %% Cluster it
+    expec = cluster(clusterer, data, k);
+
+    %% Harden it
+    [ max_expec, max_cl ] = max(expec);
+    h_expec = sparse(max_cl, 1 : n_data, ones(1, n_data), k, n_data);
+
+    %% Plot?
+    if cmd_opts.do_plot
+      do_plot_expec(expec_fig, data, h_expec, cmd_opts.pause_time);
+    endif
+
+    %% Map
+    mapped_expec = t_expec * h_expec';
+
+    %%%% Count co-clustererd pairs
+    pairs   = full(mapped_expec * mapped_expec');
+    pairs ./= pair_sizes;
+
+    %%%% Add to accumulated probabilities
+    acc_prob += pairs;
+
+    %% Simplified map
+    simp_mapped_expec = s_expec * h_expec';
+
+    %%%% Count co-clustererd pairs
+    simp_pairs   = full(simp_mapped_expec * simp_mapped_expec');
+    simp_pairs ./= simp_pair_sizes;
+
+    %%%% Add to accumulated probabilities
+    simp_acc_prob += simp_pairs;
+  endfor
+
+  %% Average results
+  acc_prob      ./= cmd_opts.inner_runs;
+  simp_acc_prob ./= cmd_opts.inner_runs;
+endfunction
+
+%% Do the same side task
+function do_same_side(clusterer, cmd_args, cmd_opts)
 
   %% Create figures
   if cmd_opts.do_plot
     truth_fig = figure();
     expec_fig = figure();
+  else
+    truth_fig = 0;
+    expec_fig = 0;
   endif
 
-  %% Total size, and number of pairs
-  all_sizes  = [ cmd_opts.noise_size, cmd_opts.signal_size ];
-  total_size = sum(all_sizes);
-  pair_sizes = all_sizes' * all_sizes;
-
-  %% Simplified size, and number of pairs
-  simp_all_sizes  = [ cmd_opts.noise_size, sum(cmd_opts.signal_size) ];
-  simp_pair_sizes = simp_all_sizes' * simp_all_sizes;
-
   %% Accumulated probs
-  acc_prob      = zeros(1 + cmd_opts.signal_groups, 1 + cmd_opts.signal_groups);
+  acc_prob      = zeros(1 + cmd_opts.signal_groups, ...
+			1 + cmd_opts.signal_groups);
   simp_acc_prob = zeros(2, 2);
 
-  %% For each outer run
-  for or = 1 : cmd_opts.outer_runs
-    %% Generate the data
-    [ data, truth ] = gen_data(cmd_opts);
+  %% Arguments given?
+  if length(cmd_args) == 0
 
-    %% Truth expectation
-    t_expec = sparse(truth, 1 : total_size, ones(1, total_size),
-		     1 + cmd_opts.signal_groups, total_size);
+    %% For each outer run
+    for or = 1 : cmd_opts.outer_runs
 
-    %% Simplified expectation
-    s_truth = truth > 1;
-    s_expec = sparse(1 + s_truth, 1 : total_size, ones(1, total_size),
-		     2, total_size);
+      %% Generate the data
+      [ data, truth ] = gen_data(cmd_opts);
 
-    %% Plot?
-    if cmd_opts.do_plot
-      do_plot_expec(truth_fig, data, t_expec, 0.0);
-    endif
+      %% Do it
+      [ prob, simp_prob ] = do_same_side_one(clusterer, data, truth, ...
+					     cmd_opts, truth_fig, expec_fig);
 
-    %% For each inner run
-    for ir = 1 : cmd_opts.inner_runs
-      %% Number of clusters
-      k = floor(cmd_opts.min_clusters + (cmd_opts.range_clusters + 1) * rand());
-
-      %% Cluster it
-      expec = cluster(clusterer, data, k);
-
-      %% Harden it
-      [ max_expec, max_cl ] = max(expec);
-      h_expec = sparse(max_cl, 1 : total_size, ones(1, total_size),
-		       k, total_size);
-
-      %% Plot?
-      if cmd_opts.do_plot
-	do_plot_expec(expec_fig, data, h_expec, cmd_opts.pause_time);
-      endif
-
-      %% Map
-      mapped_expec = t_expec * h_expec';
-
-      %%%% Count co-clustererd pairs
-      pairs   = full(mapped_expec * mapped_expec');
-      pairs ./= pair_sizes;
-
-      %%%% Add to accumulated probabilities
-      acc_prob += pairs;
-
-      %% Simplified map
-      simp_mapped_expec = s_expec * h_expec';
-
-      %%%% Count co-clustererd pairs
-      simp_pairs   = full(simp_mapped_expec * simp_mapped_expec');
-      simp_pairs ./= simp_pair_sizes;
-
-      %%%% Add to accumulated probabilities
-      simp_acc_prob += simp_pairs;
+      %% Accumulate
+      acc_prob      += prob;
+      simp_acc_prob += simp_prob;
     endfor
-  endfor
 
-  %% Average results
-  acc_prob      ./= cmd_opts.inner_runs * cmd_opts.outer_runs;
-  simp_acc_prob ./= cmd_opts.inner_runs * cmd_opts.outer_runs;
+    %% Average results
+    acc_prob      ./= cmd_opts.outer_runs;
+    simp_acc_prob ./= cmd_opts.outer_runs;
+
+  else
+    %% For each file
+    for f = cmd_args
+
+      %% Load
+      load(f{1}, "data", "truth");
+
+      %% Do it
+      [ prob, simp_prob ] = do_same_side_one(clusterer, data, truth, ...
+					     cmd_opts, truth_fig, expec_fig);
+
+      %% Accumulate
+      acc_prob      += prob;
+      simp_acc_prob += simp_prob;
+    endfor
+
+    %% Average results
+    acc_prob      ./= length(cmd_args);
+    simp_acc_prob ./= length(cmd_args);
+  endif
 
   %% Display results
   acc_prob
@@ -571,76 +779,136 @@ endfunction
 %%%%%%%%%%%%%%%%%%%%%
 
 %% Do the score histogram task
-function do_score_histo(ewocs, cmd_opts)
+function do_score_histo_one(ewocs, data, truth, cmd_opts, ...
+			    truth_fig, expec_fig, mgauss_expec_fig, ...
+			    score_fig, prc_rec_fig, dist_fig, gauss_fig, ...
+			    mgauss_fig);
 
-  %% Create figures
+  %% Sizes
+  n_data   = length(truth);
+  n_groups = max(truth);
+
+  %% Truth expectation
+  t_expec = sparse(truth, 1 : n_data, ones(1, n_data), n_groups, n_data);
+
+  %% Simplified expectation
+  s_truth = truth > 1;
+  s_expec = sparse(1 + s_truth, 1 : n_data, ones(1, n_data),
+		   2, n_data);
+
+  %% Plot?
   if cmd_opts.do_plot
-    truth_fig = figure();
-    expec_fig = figure();
-    if cmd_opts.dimensions == 2
-      score_fig = figure();
-    endif
+    do_plot_expec(truth_fig, data, t_expec, 0.0);
   endif
-  sorted_fig  = figure();
-  if cmd_opts.signal_groups > 1
-    t_score_fig = figure();
-  endif
-  s_score_fig = figure();
-  roc_fig     = figure();
 
-  %% Total size, and number of pairs
-  all_sizes  = [ cmd_opts.noise_size, cmd_opts.signal_size ];
-  total_size = sum(all_sizes);
-  pair_sizes = all_sizes' * all_sizes;
+  %% For each inner run
+  for ir = 1 : cmd_opts.inner_runs
+    %% Run ewocs
+    [ expec, model, info, scores ] = cluster(ewocs, data);
 
-  %% For each outer run
-  for or = 1 : cmd_opts.outer_runs
-    %% Generate the data
-    [ data, truth ] = gen_data(cmd_opts);
-
-    %% Truth expectation
-    t_expec = sparse(truth, 1 : total_size, ones(1, total_size),
-		     1 + cmd_opts.signal_groups, total_size);
-
-    %% Simplified expectation
-    s_truth = truth > 1;
-    s_expec = sparse(1 + s_truth, 1 : total_size, ones(1, total_size),
-		     2, total_size);
+    %% Harden it
+    h_expec = sparse(1 + (expec > 0.5), 1 : n_data, ones(1, n_data),
+		     2, n_data);
 
     %% Plot?
     if cmd_opts.do_plot
-      do_plot_expec(truth_fig, data, t_expec, 0.0);
+      do_plot_expec(expec_fig, data, h_expec, 0.0);
+
+      if cmd_opts.dimensions == 2
+	do_plot_score_data(score_fig, data, s_truth, scores, 0.0);
+      endif
     endif
 
-    %% For each inner run
-    for ir = 1 : cmd_opts.inner_runs
-      %% Run ewocs
-      [ expec, model, info, scores ] = cluster(ewocs, data);
+    %% Score plots
+    [ histo_plots, max_histo ] = ...
+	score_histo_plots(scores, t_expec, cmd_opts.histo_bins);
 
-      %% Harden it
-      h_expec = sparse(1 + (expec > 0.5), 1 : total_size, ones(1, total_size),
-		       2, total_size);
+    %% Map scores
+    map_scores = apply(LinearInterpolator(), scores);
 
-      %% Plot?
-      if cmd_opts.do_plot
-	do_plot_expec(expec_fig, data, h_expec, 0.0);
+    %% Sort
+    [ sort_scores,     sort_idx     ] = sort(scores,     "descend");
+    [ map_sort_scores, map_sort_idx ] = sort(map_scores, "descend");
 
-	if cmd_opts.dimensions == 2
-	  do_plot_score_data(score_fig, data, s_truth, scores, 0.0);
-	endif
-      endif
+    %% Prc/Rec curves
+    [ prc, rec, f1 ] = prc_rec(map_sort_scores, map_sort_idx, s_truth);
 
-      %% Plot score
-      do_plot_sorted_score(sorted_fig, scores, s_truth, 0.0);
-      if cmd_opts.signal_groups > 1
-	do_plot_score(t_score_fig, scores, t_expec, ...
-		      cmd_opts.histo_bins, 0.0);
-      endif
-      do_plot_score(s_score_fig, scores, s_expec, ...
-		    cmd_opts.histo_bins, 0.0);
-      do_roc_plot(roc_fig, scores, s_truth, cmd_opts.pause_time);
-    endfor
+    %% Plot each criterion
+    [ min_knee_idx ] = do_plot_dist (dist_fig,  map_sort_scores, f1, 0.0);
+    [ gauss_idx ]    = do_plot_gauss(gauss_fig, sort_scores, ...
+				     map_sort_scores, f1, ...
+				     histo_plots, max_histo, 0.0);
+    [ mgauss_idx ]   = do_plot_mgauss(mgauss_fig, mgauss_expec_fig, ...
+				      data, sort_scores, sort_idx, ...
+				      map_sort_scores, f1, ...
+				      histo_plots, max_histo, 0.0);
+    %% [ hgauss_idx ]   = do_plot_hgauss(hgauss_fig, sort_scores, ...
+    %% 					map_sort_scores, f1, ...
+    %% 					histo_plots, max_histo, 0.0);
+    hgauss_idx = 1;
+
+    %% Plot the Prc/Rec and ROC
+    do_plot_prc_rec(prc_rec_fig, map_sort_scores, prc, rec, f1, ...
+		    min_knee_idx, gauss_idx, mgauss_idx, hgauss_idx, 0.0);
+    %% do_roc_plot(roc_fig, scores, s_truth, cmd_opts.pause_time);
   endfor
+endfunction
+
+%% Do the score histo task
+function do_score_histo(ewocs, cmd_args, cmd_opts)
+
+  %% Extra plot figures
+  if cmd_opts.do_plot
+    truth_fig        = figure("name", "Truth");
+    expec_fig        = figure("name", "Output");
+    if cmd_opts.dimensions == 2
+      score_fig = figure("name", "Score");
+    else
+      score_fig = 0;
+    endif
+    mgauss_expec_fig = figure("name", "M-Gaussian Output");
+  else
+    truth_fig        = 0;
+    expec_fig        = 0;
+    score_fig        = 0;
+    mgauss_expec_fig = 0;
+  endif
+
+  %% Figures
+  prc_rec_fig = figure("name", "Precision/Recall");
+  dist_fig    = figure("name", "Distance");
+  gauss_fig   = figure("name", "2-Gaussian");
+  mgauss_fig  = figure("name", "M-Gaussian");
+  %% hgauss_fig  = figure("name", "H-Gaussian");
+  %% roc_fig     = figure("name", "ROC");
+
+  %% Arguments given?
+  if length(cmd_args) == 0
+
+    %% For each outer run
+    for or = 1 : cmd_opts.outer_runs
+
+      %% Generate the data
+      [ data, truth ] = gen_data(cmd_opts);
+
+      %% Do it
+      do_score_histo_one(ewocs, data, truth, cmd_opts, truth_fig, expec_fig, ...
+			 mgauss_expec_fig, score_fig, prc_rec_fig, ...
+			 dist_fig, gauss_fig, mgauss_fig);
+    endfor
+
+  else
+    %% For each file
+    for f = cmd_args
+      %% Load
+      load(f{1}, "data", "truth");
+
+      %% Do it
+      do_score_histo_one(ewocs, data, truth, cmd_opts, truth_fig, expec_fig, ...
+			 mgauss_expec_fig, score_fig, prc_rec_fig, ...
+			 dist_fig, gauss_fig, mgauss_fig);
+    endfor
+  endif
 endfunction
 
 
@@ -651,8 +919,8 @@ endfunction
 %% According to the task
 switch cmd_opts.task
   case T_SAME_SIDE
-    do_same_side(clusterer, cmd_opts)
+    do_same_side(clusterer, cmd_args, cmd_opts)
 
   case T_SCORE_HISTO
-    do_score_histo(ewocs, cmd_opts)
+    do_score_histo(ewocs, cmd_args, cmd_opts)
 endswitch

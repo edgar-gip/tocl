@@ -35,11 +35,10 @@ function [ model ] = maximization(this, data, expec)
   %% Smoothen (and log) cl_sizes
   cl_sizes .+= this.alpha_prior;
   cl_sizes ./= n_data + k * this.alpha_prior;
-  cl_sizes   = log(cl_sizes);
 
   %% Create the model
   model = Gaussian1DModel(k, ...
-			  cl_sizes - 0.5 * log(cl_var), ... % 1 * k
-			  cl_mean, ...                      % 1 * k
-			  cl_var);                          % 1 * k
+			  cl_sizes, ... % 1 * k
+			  cl_mean, ...  % 1 * k
+			  cl_var);      % 1 * k
 endfunction

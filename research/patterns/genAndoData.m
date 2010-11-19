@@ -54,9 +54,55 @@ function [ data, truth ] = data_gaussbg(dims)
 				    "signal_shift", 0.5));
 endfunction
 
+%% Special 1
+%% From http://www.cs.umbc.edu/~squire/reference/polyhedra.shtml
+function [ data, truth ] = data_special1(dims)
+  %% Number of dimensions?
+  if dims == 2
+    %% Triangle
+    means = [ 0.000,  1.000 ; ...
+	      0.866, -0.500 ; ...
+	     -0.866, -0.500 ]';
+    sizes = [ 100, 150, 200 ];
+
+  elseif dims == 3
+    %% Tetrahedron
+    %% From http://www.cs.umbc.edu/~squire/reference/polyhedra.shtml
+    means = [ 0.000,  0.000,  1.000 ; ...
+	      0.943,  0.000, -0.333 ; ...
+	     -0.471,  0.816, -0.333 ; ...
+	     -0.471, -0.816, -0.333 ]';
+    sizes = [ 100, 150, 150, 200 ];
+
+  else
+    error("special1 generator suitable only for 2,3-dimensional data");
+  endif
+
+  %% Params
+  bg_size = 1000;
+  sx_var  = 0.0125;
+
+  %% Background
+  data  = 4.0 * (rand(dims, bg_size) - 0.5);
+  truth = ones(1, bg_size);
+
+  %% Signals
+  for c = 1 : length(sizes)
+    data  = [ data, means(:, c) * ones(1, sizes(c)) + ...
+	            sx_var * eye(dims) * randn(dims, sizes(c)) ];
+    truth = [ truth, (c + 1) * ones(1, sizes(c)) ];
+  endfor
+
+  %% Shuffle
+  shuffler = randperm(length(truth));
+  data  = data (:, shuffler);
+  truth = truth(shuffler);
+endfunction
+
 %% Map
-data_gen = struct("unibg",   @data_unibg,
-		  "gaussbg", @data_gaussbg);
+data_gen = struct("unibg",    @data_unibg,
+		  "gaussbg",  @data_gaussbg,
+		  "special1", @data_special1);
 
 
 %%%%%%%%%%
