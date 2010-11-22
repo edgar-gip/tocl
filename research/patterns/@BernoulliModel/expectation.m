@@ -17,7 +17,7 @@ function [ expec, log_like ] = expectation(this, data)
 
   %% Find the expectation
   expec = this.alpha_ctheta * ones(1, n_data) .+ ...
-          this.theta        * data;
+          this.theta        * (data > 0);
 
   %% Normalize
   max_expec = max(expec);

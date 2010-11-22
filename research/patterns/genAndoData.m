@@ -83,12 +83,12 @@ function [ data, truth ] = data_special1(dims)
   sx_var  = 0.0125;
 
   %% Background
-  data  = 4.0 * (rand(dims, bg_size) - 0.5);
+  data  = 8.0 * (rand(dims, bg_size) - 0.5);
   truth = ones(1, bg_size);
 
   %% Signals
   for c = 1 : length(sizes)
-    data  = [ data, means(:, c) * ones(1, sizes(c)) + ...
+    data  = [ data, 2.0 * means(:, c) * ones(1, sizes(c)) + ...
 	            sx_var * eye(dims) * randn(dims, sizes(c)) ];
     truth = [ truth, (c + 1) * ones(1, sizes(c)) ];
   endfor

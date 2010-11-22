@@ -5,7 +5,7 @@
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = ConstInterModel(value)
+function [ this ] = ConstInterModel(value_in, value)
 
   %% Check arguments
   if nargin() ~= 2

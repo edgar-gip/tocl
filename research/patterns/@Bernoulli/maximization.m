@@ -18,7 +18,7 @@ function [ model ] = maximization(this, data, expec)
 
   %% Cluster sizes and active features
   cl_sizes  = sum(expec, 2);       % k * 1
-  cl_active = full(data * expec'); % n_dims * k
+  cl_active = full((data > 0) * expec'); % n_dims * k
 
   %% Smoothen cl_active
   cl_active .+= this.theta_prior;

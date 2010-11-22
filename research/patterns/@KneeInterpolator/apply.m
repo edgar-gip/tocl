@@ -21,7 +21,7 @@ function [ output, model, info ] = apply(this, input)
   %% Range is null?
   if low_in == high_in
     %% Cut point
-    cut = low_in;
+    mid_in = low_in;
 
     %% Output is the average of high and low
     mean   = (this.low + this.high) / 2;

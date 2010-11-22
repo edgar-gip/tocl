@@ -56,6 +56,7 @@ endfunction
 def_opts                 = struct();
 def_opts.task            = T_SAME_SIDE;
 def_opts.seed            = [];
+def_opts.sparse          = false();
 def_opts.outer_runs      = 5;
 def_opts.inner_runs      = 100;
 def_opts.do_plot         = false();
@@ -90,6 +91,7 @@ def_opts.histo_bins      = 100;
 		"same-side=r0",       "task",          ...
 		"score-histo=r1",     "task",          ...
 		"seed=f",             "seed",          ...
+		"sparse!",            "sparse",        ...
 		"outer-runs=i",       "outer_runs",    ...
 		"inner-runs=i",       "inner_runs",    ...
 		"do-plot!",           "do_plot",       ...
@@ -319,10 +321,66 @@ function do_plot_score_data(window, data, s_truth, scores, pause_time)
   neg = find(~s_truth);
   pos = find( s_truth);
 
-  %% Plot
-  figure(window);
-  plot3(data(1, neg), data(2, neg), scores(neg), "x", ...
-	data(1, pos), data(2, pos), scores(pos), "x");
+  %% Size
+  [ n_dims, n_data ] = size(data);
+
+  %% What?
+  if n_dims == 2
+    %% Plot
+    figure(window);
+    plot3(data(1, neg), data(2, neg), scores(neg), "+", ...
+	  data(1, pos), data(2, pos), scores(pos), "*");
+
+  else %% n_dims == 3
+    %% Contours
+    min_score = min(scores);
+    max_score = max(scores);
+
+    %% Range
+    if min_score == max_score
+      %% Just plot positives and negatives
+      figure(window);
+      plot3(data(1, neg), data(2, neg), data(3, neg), "+r",
+	    data(1, pos), data(2, pos), data(3, pos), "*r");
+
+    else
+      %% Range
+      range = max_score - min_score;
+
+      %% Bins
+      bins = 1 + floor((scores - min_score) / (range / 4));
+      bins(bins == 5) = 4;
+
+      %% Colours
+      colours = { "r", "y", "g", "b" };
+
+      %% Plots
+      plots = {};
+      for g = 1 : 4
+	%% Neg
+	neg_x = intersect(neg, find(bins == g));
+	if ~isempty(neg_x)
+	  plots = ...
+	      cell_push(plots, ...
+			data(1, neg_x), data(2, neg_x), data(3, neg_x), ...
+			sprintf("+%s", colours{g}));
+	endif
+
+	%% Pos
+	pos_x = intersect(pos, find(bins == g));
+	if ~isempty(pos_x)
+	  plots = ...
+	      cell_push(plots, ...
+			data(1, pos_x), data(2, pos_x), data(3, pos_x), ...
+			sprintf("*%s", colours{g}));
+	endif
+      endfor
+
+      %% Plot
+      figure(window);
+      plot3(plots{:});
+    endif
+  endif
 
   %% Stop?
   if pause_time > 0
@@ -752,7 +810,11 @@ function do_same_side(clusterer, cmd_args, cmd_opts)
     for f = cmd_args
 
       %% Load
-      load(f{1}, "data", "truth");
+      if cmd_opts.sparse
+	[ data, truth ] = read_sparse(f{1}, true());
+      else
+	load(f{1}, "data", "truth");
+      endif
 
       %% Do it
       [ prob, simp_prob ] = do_same_side_one(clusterer, data, truth, ...
@@ -813,10 +875,7 @@ function do_score_histo_one(ewocs, data, truth, cmd_opts, ...
     %% Plot?
     if cmd_opts.do_plot
       do_plot_expec(expec_fig, data, h_expec, 0.0);
-
-      if cmd_opts.dimensions == 2
-	do_plot_score_data(score_fig, data, s_truth, scores, 0.0);
-      endif
+      do_plot_score_data(score_fig, data, s_truth, scores, 0.0);
     endif
 
     %% Score plots
@@ -861,11 +920,7 @@ function do_score_histo(ewocs, cmd_args, cmd_opts)
   if cmd_opts.do_plot
     truth_fig        = figure("name", "Truth");
     expec_fig        = figure("name", "Output");
-    if cmd_opts.dimensions == 2
-      score_fig = figure("name", "Score");
-    else
-      score_fig = 0;
-    endif
+    score_fig        = figure("name", "Score");
     mgauss_expec_fig = figure("name", "M-Gaussian Output");
   else
     truth_fig        = 0;
@@ -901,7 +956,11 @@ function do_score_histo(ewocs, cmd_args, cmd_opts)
     %% For each file
     for f = cmd_args
       %% Load
-      load(f{1}, "data", "truth");
+      if cmd_opts.sparse
+	[ data, truth ] = read_sparse(f{1}, true());
+      else
+	load(f{1}, "data", "truth");
+      endif
 
       %% Do it
       do_score_histo_one(ewocs, data, truth, cmd_opts, truth_fig, expec_fig, ...

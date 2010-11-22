@@ -85,42 +85,64 @@ d_sqe    = SqEuclideanDistance();
 d_rbf_05 = KernelDistance(RBFKernel(0.5));
 d_rbf_10 = KernelDistance(RBFKernel(1.0));
 d_rbf_20 = KernelDistance(RBFKernel(2.0));
+d_rbf_40 = KernelDistance(RBFKernel(4.0));
+d_rbf_80 = KernelDistance(RBFKernel(8.0));
 %% d_mah = @(data) MahalanobisDistance(data);
 
 %% Clusterers
-cl_voro_2  = @(dist) Voronoi(dist, struct("max_clusters",  2,
-					  "soft_alpha",  0.1));
-cl_voro_10 = @(dist) Voronoi(d_rbf_05, struct("max_clusters", 10,
-					      "soft_alpha",  0.1));
-cl_voro_50 = @(dist) Voronoi(d_rbf_05, struct("max_clusters", 50,
-					      "soft_alpha",  0.1));
+cl_voro = @(dist) Voronoi(dist, struct("soft_alpha", 0.1));
+cl_bern = Bernoulli();
 
 %% Clusterer Constructors
 c_oc = @(dist, data, truth) BBOCC(dist, ...
 				   struct("size_ratio", size_ratio(truth)));
 c_bp = @(dist, data, truth) BBCPress(dist, ...
 				     struct("size_ratio", size_ratio(truth)));
-c_ew_voro_2  = @(dist, data, truth) EWOCS(cl_voro_2(dist), ...
-					  struct("ensemble_size",  50));
-c_ew_voro_10 = @(dist, data, truth) EWOCS(cl_voro_10(dist), ...
-					  struct("ensemble_size",  50));
-c_ew_voro_50 = @(dist, data, truth) EWOCS(cl_voro_50(dist), ...
-					  struct("ensemble_size",  50));
+c_ew_voro_2  = @(dist, data, truth) EWOCS(cl_voro(dist), ...
+					  struct("max_clusters",   2,
+						 "ensemble_size", 50));
+c_ew_voro_10 = @(dist, data, truth) EWOCS(cl_voro(dist), ...
+					  struct("max_clusters",  10,
+						 "ensemble_size", 50));
+c_ew_voro_50 = @(dist, data, truth) EWOCS(cl_voro(dist), ...
+					  struct("max_clusters",  50,
+						 "ensemble_size", 50));
+c_ew_bern_2  = @(data, truth) EWOCS(cl_bern, ...
+				    struct("max_clusters",   2,
+					   "ensemble_size", 50));
+c_ew_bern_10 = @(data, truth) EWOCS(cl_bern, ...
+				    struct("max_clusters",  10,
+					   "ensemble_size", 50));
+c_ew_bern_50 = @(data, truth) EWOCS(cl_bern, ...
+				    struct("max_clusters",  50,
+					   "ensemble_size", 50));
 
 %% Clusterers set
+    %% struct("name", { "BBOCC",      "BBCPress/1", ...
+    %% 		     "BBCPress/2", "BBCPress/3", ...
+    %% 		     "BBCPress/4", "BBCPress/5", ...
+    %% 		     "EWOCS-Vo/2", "EWOCS-Vo/10", "EWOCS-Vo/50" }, ...
+    %% 	   "new",  { c_oc, c_bp, c_bp, c_bp, c_bp, c_bp, ...
+    %% 		     c_ew_voro_2, c_ew_voro_10, c_ew_voro_50 }, ...
+    %% 	   "k",    { 1, 1, 2, 3, 4, 5, 1, 1, 1 });
 clusterers = ...
-    struct("name", { "BBOCC",      "BBCPress/1", ...
-		     "BBCPress/2", "BBCPress/3", ...
-		     "BBCPress/4", "BBCPress/5", ...
-		     "EWOCS/2", "EWOCS/10", "EWOCS/50" }, ...
-	   "new",  { c_oc, c_bp, c_bp, c_bp, c_bp, c_bp, ...
+    struct("name", { "BBOCC",      "BBCPress/5", ...
+		     "EWOCS-Vo/2", "EWOCS-Vo/10", "EWOCS-Vo/50" }, ...
+	   "new",  { c_oc, c_bp, ...
 		     c_ew_voro_2, c_ew_voro_10, c_ew_voro_50 }, ...
-	   "k",    { 1, 1, 2, 3, 4, 5, 1, 1, 1 });
+	   "k",    { 1, 5, 1, 1, 1 });
+
+%% Prob clusterers
+prob_clusterers = ...
+    struct("name", { "EWOCS-Be/2", "EWOCS-Be/10", "EWOCS-Be/50" }, ...
+	   "new",  { c_ew_bern_2, c_ew_bern_10, c_ew_bern_50 }, ...
+	   "k",    { 1, 1, 1 });
 
 %% Distances
 distances = ...
-    struct("name", { "SqE", "RBF/0.5", "RBF/1.0", "RBF/2.0" },
-	   "dist", { d_sqe, d_rbf_05, d_rbf_10, d_rbf_20 });
+    struct("name", { "SqE", "RBF/0.5", "RBF/1.0", "RBF/2.0", ...
+		     "RBF/4.0", "RBF/8.0" },
+	   "dist", { d_sqe, d_rbf_05, d_rbf_10, d_rbf_20, d_rbf_40, d_rbf_80 });
 
 
 %%%%%%%%%%%%%
@@ -131,6 +153,7 @@ distances = ...
 def_opts            = struct();
 def_opts.ok         = true();
 def_opts.seed       = [];
+def_opts.sparse     = false();
 def_opts.outer_runs = 5;
 def_opts.inner_runs = 5;
 
@@ -139,13 +162,9 @@ def_opts.inner_runs = 5;
     get_options(def_opts, ...
 		"ok",           "ok",         ...
 		"seed=f",       "seed",       ...
+		"sparse!",      "sparse",     ...
 		"outer-runs=i", "outer_runs", ...
 		"inner-runs=i", "inner_runs");
-
-%% Chek number of arguments
-if length(cmd_args) ~= 0
-  error("Wrong number of arguments (should be 0)");
-endif
 
 %% Set a seed
 if isempty(cmd_opts.seed)
@@ -157,102 +176,177 @@ endif
 %% Run %%
 %%%%%%%%%
 
-%% Print the header
-printf(cstrcat("# %-5s %2s %2s %-10s %-7s %2s ", ...
-	       " %8s  %5s %5s %5s %5s  %5s\n"), ...
-       "Data", "Ds", "OR", "Method", "Dist", "IR", ...
-       "Time", "Prc", "Rec", "NRec", "F1", "AUC");
+%% Evaluate one
+function [ cl_prc, cl_rec, cl_nrec, cl_f1, cl_auc ] = ...
+      evaluate(s_truth, pos_tr, neg_tr, expec, scores)
 
-%% For each data generator
-for gen = generators
+  %% Info
+  n_data = length(s_truth);
 
-  %% For each number of dimensions
-  for dims = dimensions
+  %% Find Prec/Rec
 
-    %% Outer run
-    for or = 1 : cmd_opts.outer_runs
+  %% Negative/positive cluster
+  sexpec = sum(expec, 1);
+  pos_cl = find(sexpec >= 0.5);
+  neg_cl = find(sexpec < 0.5);
 
-      %% Generate data
-      [ data, truth ] = gen.fun(dims);
-      n_data  = length(truth);
-      s_truth = truth > 1;
+  %% Intersections
+  pos_pos = intersect(pos_tr, pos_cl);
+  pos_neg = intersect(pos_tr, neg_cl);
+  neg_pos = intersect(neg_tr, pos_cl);
+  neg_neg = intersect(neg_tr, neg_cl);
 
-      %% printf("Generated %d samples with %d dimensions\n", length(data), dims)
+  %% Sizes
+  n_pos_pos = length(pos_pos);
+  n_pos_neg = length(pos_neg);
+  n_neg_pos = length(neg_pos);
+  n_neg_neg = length(neg_neg);
 
-      %% Negative and positive indices
-      pos_tr = find( s_truth); n_pos_tr = length(pos_tr);
-      neg_tr = find(~s_truth); n_neg_tr = length(neg_tr);
+  %% Precision/Recall
+  cl_prc  = n_pos_pos / (n_pos_pos + n_neg_pos);
+  cl_rec  = n_pos_pos / (n_pos_pos + n_pos_neg);
+  cl_nrec = n_neg_pos / (n_neg_pos + n_neg_neg);
+  cl_f1   = 2 * cl_prc * cl_rec / (cl_prc + cl_rec);
 
-      %% Clusterer
-      for clu = clusterers
+  %% Find ROC curve
 
-	%% Distance
-	for dst = distances
+  %% Sort'em
+  [ sort_scores, sort_idx ] = sort(scores, "descend");
 
-	  %% Construct it
-	  cl_object = clu.new(dst.dist, data, truth);
+  %% Find accumulated positive and negative
+  roc_pos = cumsum( s_truth(sort_idx)); roc_pos ./= length(pos_tr);
+  roc_neg = cumsum(~s_truth(sort_idx)); roc_neg ./= length(neg_tr);
 
-	  %% Inner run
-	  for ir = 1 : cmd_opts.inner_runs
+  %% AUC
+  cl_auc = sum(diff(roc_neg) .* ...
+	       (roc_pos(1 : n_data - 1) + roc_pos(2 : n_data))) / 2;
+endfunction
 
-	    %% Cluster (timed)
-	    [ total0, user0, system0 ] = cputime();
-	    [ expec, cl_model ] = cluster(cl_object, data, clu.k);
-	    [ total1, user1, system1 ] = cputime();
+%% Run one
+function run_one(data, truth, gen_name, dims, o_r, ...
+		 clusterers, prob_clusterers, distances, cmd_opts)
 
-	    %% Time difference
-	    cl_time = total1 - total0;
+  %% Info
+  n_data  = length(truth);
+  s_truth = truth > 1;
 
+  %% Negative and positive indices
+  pos_tr = find( s_truth);
+  neg_tr = find(~s_truth);
 
-	    %% Find Prec/Rec
+  %% Clusterer
+  for clu = clusterers
 
-	    %% Negative/positive cluster
-	    sexpec = sum(expec, 1);
-	    pos_cl = find(sexpec >= 0.5);
-	    neg_cl = find(sexpec < 0.5);
+    %% Distance
+    for dst = distances
 
-	    %% Intersections
-	    pos_pos = intersect(pos_tr, pos_cl);
-	    pos_neg = intersect(pos_tr, neg_cl);
-	    neg_pos = intersect(neg_tr, pos_cl);
-	    neg_neg = intersect(neg_tr, neg_cl);
+      %% Construct it
+      cl_object = clu.new(dst.dist, data, truth);
 
-	    %% Sizes
-	    n_pos_pos = length(pos_pos);
-	    n_pos_neg = length(pos_neg);
-	    n_neg_pos = length(neg_pos);
-	    n_neg_neg = length(neg_neg);
+      %% Inner run
+      for ir = 1 : cmd_opts.inner_runs
 
-	    %% Precision/Recall
-	    cl_prc  = n_pos_pos / (n_pos_pos + n_neg_pos);
-	    cl_rec  = n_pos_pos / (n_pos_pos + n_pos_neg);
-	    cl_nrec = n_neg_pos / (n_neg_pos + n_neg_neg);
-	    cl_f1   = 2 * cl_prc * cl_rec / (cl_prc + cl_rec);
+	%% Cluster (timed)
+	[ total0, user0, system0 ] = cputime();
+	[ expec, cl_model ] = cluster(cl_object, data, clu.k);
+	[ total1, user1, system1 ] = cputime();
 
-	    %% Find ROC curve
+	%% Time difference
+	cl_time = total1 - total0;
 
-	    %% Scores
-	    scores = score(cl_model, data);
+	%% Scores
+	scores = score(cl_model, data);
 
-	    %% Sort'em
-	    [ sort_scores, sort_idx ] = sort(scores, "descend");
+	%% Evaluate
+	[ cl_prc, cl_rec, cl_nrec, cl_f1, cl_auc ] = ...
+	    evaluate(s_truth, pos_tr, neg_tr, expec, scores);
 
-	    %% Find accumulated positive and negative
-	    roc_pos = cumsum( s_truth(sort_idx)); roc_pos ./= n_pos_tr;
-	    roc_neg = cumsum(~s_truth(sort_idx)); roc_neg ./= n_neg_tr;
-
-	    %% AUC
-	    cl_auc = sum(diff(roc_neg) .* ...
-			 (roc_pos(1 : n_data - 1) + roc_pos(2 : n_data))) / 2;
-
-	    %% Display
-	    printf(cstrcat("%-7s %2d %2d %-10s %-7s %2d ",
-			   " %8g  %5.3f %5.3f %5.3f %5.3f  %5.3f\n"),
-		   gen.name, dims, or, clu.name, dst.name, ir, ...
-		   cl_time, cl_prc, cl_rec, cl_nrec, cl_f1, cl_auc);
-	  endfor
-	endfor
+	%% Display
+	printf(cstrcat("%-25s %5d %2d %-15s %-7s %2d ",
+		       " %8g  %5.3f %5.3f %5.3f %5.3f  %5.3f\n"),
+	       gen_name, dims, o_r, clu.name, dst.name, ir, ...
+	       cl_time, cl_prc, cl_rec, cl_nrec, cl_f1, cl_auc);
       endfor
     endfor
   endfor
-endfor
+
+  %% Clusterer
+  for clu = prob_clusterers
+
+    %% Construct it
+    cl_object = clu.new(dst.dist, data, truth);
+
+    %% Inner run
+    for ir = 1 : cmd_opts.inner_runs
+
+      %% Cluster (timed)
+      [ total0, user0, system0 ] = cputime();
+      [ expec, cl_model ] = cluster(cl_object, data, clu.k);
+      [ total1, user1, system1 ] = cputime();
+
+      %% Time difference
+      cl_time = total1 - total0;
+
+      %% Scores
+      scores = score(cl_model, data);
+
+      %% Evaluate
+      [ cl_prc, cl_rec, cl_nrec, cl_f1, cl_auc ] = ...
+	  evaluate(s_truth, pos_tr, neg_tr, expec, scores);
+
+      %% Display
+      printf(cstrcat("%-25s %5d %2d %-15s %-7s %2d ",
+		     " %8g  %5.3f %5.3f %5.3f %5.3f  %5.3f\n"),
+	     gen_name, dims, o_r, clu.name, "-", ir, ...
+	     cl_time, cl_prc, cl_rec, cl_nrec, cl_f1, cl_auc);
+    endfor
+  endfor
+endfunction
+
+%% Print the header
+printf(cstrcat("# %-23s %5s %2s %-15s %-7s %2s ", ...
+	       " %8s  %5s %5s %5s %5s  %5s\n"), ...
+       "Data", "Dims", "OR", "Method", "Dist", "IR", ...
+       "Time", "Prc", "Rec", "NRec", "F1", "AUC");
+
+%% What
+if length(cmd_args) == 0
+
+  %% For each data generator
+  for gen = generators
+
+    %% For each number of dimensions
+    for dims = dimensions
+
+      %% Outer run
+      for o_r = 1 : cmd_opts.outer_runs
+
+	%% Generate data
+	[ data, truth ] = gen.fun(dims);
+
+	%% Call
+	run_one(data, truth, gen.name, dims, o_r, ...
+		clusterers, prob_clusterers, distances, cmd_opts);
+      endfor
+    endfor
+  endfor
+
+else
+  %% For each file
+  for f = cmd_args
+
+    %% Load
+    if cmd_opts.sparse
+      [ data, truth ] = read_sparse(f{1}, true());
+    else
+      load(f{1}, "data", "truth");
+    endif
+
+    %% Size
+    [ dims, n_data ] = size(data);
+
+    %% Call
+    run_one(data, truth, f{1}, dims, 1, ...
+	    clusterers, prob_clusterers, distances, cmd_opts);
+  endfor
+endif
