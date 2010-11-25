@@ -31,16 +31,8 @@ function [ output, model, info ] = apply(this, input)
     model = ConstInterModel(low_in, mean);
 
   else
-    %% Find the distance
-    sorted_n = (sorted - low_in) ./ (high_in - low_in);
-    idx_n    = (0 : (n_elems - 1)) ./ (n_elems - 1);
-    dist     = sorted_n .* sorted_n + idx_n .* idx_n;
-
-    %% Minimum point
-    [ min_dist, min_idx ] = min(dist);
-
-    %% Cut point
-    mid_in = sorted(min_idx);
+    %% Find the knee
+    [ mid_in ] = apply(this.finder, sorted);
 
     %% Low and high parts
     low_part  = input <= mid_in;

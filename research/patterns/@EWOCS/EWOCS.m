@@ -61,15 +61,20 @@ function [ this ] = EWOCS(clusterer, opts = struct())
   %% Interpolator
   %% Default -> Linear
   if ~isfield(opts, "interpolator")
-    this.interpolator = KneeInterpolator();
+    this.interpolator = KneeInterpolator(DistanceKnee(), @LogInterpolator);
 
   elseif ~isobject(opts.interpolator)
     opts.interpolator = tolower(opts.interpolator);
     switch opts.interpolator
       case "exp"
 	this.interpolator = ExpInterpolator();
-      case "knee"
-	this.interpolator = KneeInterpolator();
+      case "knee-dist"
+	this.interpolator = KneeInterpolator(DistanceKnee(), @LogInterpolator);
+      case "knee-gauss"
+	this.interpolator = KneeInterpolator(GaussianKnee(), @LogInterpolator);
+      case "knee-gauss-noise"
+	this.interpolator = KneeInterpolator(GaussianNoiseKnee(), ...
+					     @LogInterpolator);
       case "linear"
 	this.interpolator = LinearInterpolator();
       case "log"

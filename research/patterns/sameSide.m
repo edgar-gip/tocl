@@ -70,6 +70,7 @@ def_opts.signal_groups   = 1;
 def_opts.signal_size     = 100;
 def_opts.signal_dist     = P_GAUSSIAN;
 def_opts.signal_shift    = 2.5;
+def_opts.signal_space    = 2.5;
 def_opts.signal_var      = 1.0;
 def_opts.min_clusters    = 2;
 def_opts.max_clusters    = 20;
@@ -111,6 +112,7 @@ def_opts.histo_bins      = 100;
 		"signal-spherical=r2","signal_dist",   ...
 		"signal-uniform=r3",  "signal_dist",   ...
 		"signal-shift=f",     "signal_shift",  ...
+		"signal-space=f",     "signal_space",  ...
 		"signal-var=f",       "signal_var",    ...
 		"min-clusters=i",     "min_clusters",  ...
 		"max-clusters=i",     "max_clusters",  ...
@@ -429,7 +431,39 @@ function [ gauss_cut_idx ] = ...
 
   %% Cut point
   gauss_expec_tru = expec(sorted_cl(1), :);
-  gauss_cut_idx   = max(find(gauss_expec_tru >= 0.5));
+  gauss_cut_idx   = min(find(gauss_expec_tru < 0.5));
+
+  %% Plot
+  figure(gauss_fig);
+  subplot(1, 2, 1);
+  plot(map_sort_scores, "-k;Score;", "linewidth", 2, ...
+       f1, "-m;F1;", "linewidth", 2, ...
+       gauss_expec_tru, "-r;Gaussian;", ...
+       [ gauss_cut_idx, gauss_cut_idx ], ...
+       [ gauss_expec_tru(gauss_cut_idx), f1(gauss_cut_idx) ], "x-r");
+  subplot(1, 2, 2);
+  plot(histo_plots{:}, model_plots{:});
+
+  %% Stop?
+  if pause_time > 0
+    pause(pause_time);
+  endif
+endfunction
+
+%% Do the gaussian noise plot
+function [ gauss_cut_idx ] = ...
+      do_plot_gaussn(gauss_fig, sort_scores, map_sort_scores, f1, ...
+		     histo_plots, max_histo, pause_time)
+
+  %% Model
+  [ expec, model ] = cluster(Gaussian1DNoise(), sort_scores, 3);
+
+  %% Gaussian model plots
+  [ model_plots, sorted_cl ] = gaussian_model_plots(model, max_histo, "-b");
+
+  %% Cut point
+  gauss_expec_tru = expec(sorted_cl(1), :);
+  gauss_cut_idx   = min(find(gauss_expec_tru < 0.5));
 
   %% Plot
   figure(gauss_fig);
@@ -455,7 +489,7 @@ function [ mgauss_cut_idx ] = ...
 		     f1, histo_plots, max_histo, pause_time)
 
   %% Model
-  [ expec, model ] = cluster(CriterionClusterer(Gaussian1D(), BIC(),
+  [ expec, model ] = cluster(CriterionClusterer(Gaussian1DNoise(), BIC(),
 						struct("max_k", 10)),
 			     sort_scores);
 
@@ -596,8 +630,8 @@ endfunction
 
 %% Do the Prc/Rec plot
 function do_plot_prc_rec(prc_rec_fig, map_sort_scores, prc, rec, f1, ...
-			 min_knee_idx, gauss_idx, mgauss_idx, hgauss_idx, ...
-			 pause_time)
+			 min_knee_idx, gauss_idx, gaussn_idx, mgauss_idx, ...
+			 hgauss_idx, pause_time)
 
   %% Plot
   figure(prc_rec_fig);
@@ -606,6 +640,7 @@ function do_plot_prc_rec(prc_rec_fig, map_sort_scores, prc, rec, f1, ...
        f1, "-m;F1;", "linewidth", 2, ...
        min_knee_idx, f1(min_knee_idx), "*b;Distance;", ...
        gauss_idx,    f1(gauss_idx),    "*r;2-Gaussian;", ...
+       gaussn_idx,   f1(gaussn_idx),   "*y;2-Gaussian/N;", ...
        mgauss_idx,   f1(mgauss_idx),   "*c;M-Gaussian;", ...
        hgauss_idx,   f1(hgauss_idx),   "*g;H-Gaussian;");
 
@@ -615,8 +650,41 @@ function do_plot_prc_rec(prc_rec_fig, map_sort_scores, prc, rec, f1, ...
   endif
 endfunction
 
+%% Do the recalls plot
+function do_plot_recs(recs_fig, map_sort_idx, n_groups, truth, ...
+		      pause_time)
+
+  %% For each one
+  plots = {};
+  for c = 1 : n_groups
+    %% Our truth
+    o_truth = truth == c;
+
+    %% Accumulated
+    acc   = cumsum(o_truth(map_sort_idx));
+    acc ./= acc(length(acc));
+
+    %% Plot
+    if c == 1
+      plots = cell_push(plots, acc, "-r");
+    else
+      plots = cell_push(plots, acc, "-g");
+    endif
+  endfor
+
+  %% Plot
+  figure(recs_fig);
+  plot(plots{:});
+
+  %% Stop?
+  if pause_time > 0
+    pause(pause_time);
+  endif
+endfunction
+
 %% Do the ROC plot
 function do_roc_plot(window, scores, s_truth, pause_time)
+
   %% ROC
   [ sort_scores, sort_idx ] = sort(scores, "descend");
   size = length(sort_idx);
@@ -843,8 +911,8 @@ endfunction
 %% Do the score histogram task
 function do_score_histo_one(ewocs, data, truth, cmd_opts, ...
 			    truth_fig, expec_fig, mgauss_expec_fig, ...
-			    score_fig, prc_rec_fig, dist_fig, gauss_fig, ...
-			    mgauss_fig);
+			    score_fig, prc_rec_fig, recs_fig, dist_fig, ...
+			    gauss_fig, gaussn_fig, mgauss_fig, hgauss_fig);
 
   %% Sizes
   n_data   = length(truth);
@@ -897,18 +965,23 @@ function do_score_histo_one(ewocs, data, truth, cmd_opts, ...
     [ gauss_idx ]    = do_plot_gauss(gauss_fig, sort_scores, ...
 				     map_sort_scores, f1, ...
 				     histo_plots, max_histo, 0.0);
+    [ gaussn_idx ]   = do_plot_gaussn(gaussn_fig, sort_scores, ...
+				      map_sort_scores, f1, ...
+				      histo_plots, max_histo, 0.0);
     [ mgauss_idx ]   = do_plot_mgauss(mgauss_fig, mgauss_expec_fig, ...
 				      data, sort_scores, sort_idx, ...
 				      map_sort_scores, f1, ...
 				      histo_plots, max_histo, 0.0);
-    %% [ hgauss_idx ]   = do_plot_hgauss(hgauss_fig, sort_scores, ...
-    %% 					map_sort_scores, f1, ...
-    %% 					histo_plots, max_histo, 0.0);
-    hgauss_idx = 1;
+    [ hgauss_idx ]   = do_plot_hgauss(hgauss_fig, sort_scores, ...
+     				      map_sort_scores, f1, ...
+     				      histo_plots, max_histo, 0.0);
 
     %% Plot the Prc/Rec and ROC
     do_plot_prc_rec(prc_rec_fig, map_sort_scores, prc, rec, f1, ...
-		    min_knee_idx, gauss_idx, mgauss_idx, hgauss_idx, 0.0);
+		    min_knee_idx, gauss_idx, gaussn_idx, mgauss_idx, ...
+		    hgauss_idx, 0.0);
+    do_plot_recs(recs_fig, map_sort_idx, n_groups, truth, ...
+		 cmd_opts.pause_time);
     %% do_roc_plot(roc_fig, scores, s_truth, cmd_opts.pause_time);
   endfor
 endfunction
@@ -931,10 +1004,12 @@ function do_score_histo(ewocs, cmd_args, cmd_opts)
 
   %% Figures
   prc_rec_fig = figure("name", "Precision/Recall");
+  recs_fig    = figure("name", "Recall");
   dist_fig    = figure("name", "Distance");
   gauss_fig   = figure("name", "2-Gaussian");
+  gaussn_fig  = figure("name", "2-Gaussian/N");
   mgauss_fig  = figure("name", "M-Gaussian");
-  %% hgauss_fig  = figure("name", "H-Gaussian");
+  hgauss_fig  = figure("name", "H-Gaussian");
   %% roc_fig     = figure("name", "ROC");
 
   %% Arguments given?
@@ -948,8 +1023,9 @@ function do_score_histo(ewocs, cmd_args, cmd_opts)
 
       %% Do it
       do_score_histo_one(ewocs, data, truth, cmd_opts, truth_fig, expec_fig, ...
-			 mgauss_expec_fig, score_fig, prc_rec_fig, ...
-			 dist_fig, gauss_fig, mgauss_fig);
+			 mgauss_expec_fig, score_fig, prc_rec_fig, recs_fig, ...
+			 dist_fig, gauss_fig, gaussn_fig, mgauss_fig, ...
+			 hgauss_fig);
     endfor
 
   else
@@ -964,8 +1040,9 @@ function do_score_histo(ewocs, cmd_args, cmd_opts)
 
       %% Do it
       do_score_histo_one(ewocs, data, truth, cmd_opts, truth_fig, expec_fig, ...
-			 mgauss_expec_fig, score_fig, prc_rec_fig, ...
-			 dist_fig, gauss_fig, mgauss_fig);
+			 mgauss_expec_fig, score_fig, prc_rec_fig, recs_fig, ...
+			 dist_fig, gauss_fig, gaussn_fig, mgauss_fig, ...
+			 hgauss_fig);
     endfor
   endif
 endfunction

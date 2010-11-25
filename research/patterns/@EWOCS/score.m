@@ -79,6 +79,9 @@ function [ scores, model, info, expec ] = score(this, data)
     ensemble_cluster_scores{i} = ind_cluster_scores;
   endfor
 
+  %% Divide scores
+  scores ./= this.ensemble_size;
+
   %% Interpolate probabilities
   [ expec, inter_model, inter_info ] = apply(this.interpolator, scores);
 

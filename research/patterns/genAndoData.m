@@ -28,13 +28,14 @@ function [ data, truth ] = data_unibg(dims)
 				    "noise_dist", P_UNIFORM,
 				    "noise_size", 1000 * 2 ^ dims,
 				    "noise_mean", 0.0,
-				    "noise_var",  1.0,
+				    "noise_var",  2.0,
 
 				    "signal_dist",  P_GAUSSIAN,
 				    "signal_size",  [ 100, 150, 150, 200 ],
 				    "signal_var",   0.125,
 				    "signal_mean",  0.0,
-				    "signal_shift", 0.5));
+				    "signal_shift", 0.75,
+				    "signal_space", 0.75));
 endfunction
 
 %% Gaussian background
@@ -45,13 +46,60 @@ function [ data, truth ] = data_gaussbg(dims)
 				    "noise_dist", P_SPHERICAL,
 				    "noise_size", 1000 * 2 ^ dims,
 				    "noise_mean", 0.0,
-				    "noise_var",  1.0,
+				    "noise_var",  2.0,
 
 				    "signal_dist",  P_GAUSSIAN,
 				    "signal_size",  [ 100, 150, 150, 200 ],
 				    "signal_var",   0.125,
 				    "signal_mean",  0.0,
-				    "signal_shift", 0.5));
+				    "signal_shift", 0.75,
+				    "signal_space", 0.75));
+endfunction
+
+%% Bernoullis
+function [ data, truth ] = data_bernoulli(dims)
+  %% Params
+  bg_size      = 4000;
+  bg_theta_max = 0.1;
+  sizes        = [ 100, 150, 150, 200 ];
+  thetas       = [ 0.8, 0.7, 0.6, 0.5 ];
+  active_frak  = 0.1;
+
+  %% Active dims
+  n_active_dims = round(dims * active_frak);
+
+  %% Bg theta
+  bg_theta = bg_theta_max * rand(dims, 1);
+
+  %% Background
+  data  = sparse(rand(dims, bg_size) < bg_theta * ones(1, bg_size));
+  truth = ones(1, bg_size);
+
+  %% Signals
+  for c = 1 : length(sizes)
+    %% Generate the subset of active dims
+    active_dims = randperm(dims)(1 : n_active_dims);
+
+    %% Signal theta
+    signal_theta = bg_theta;
+    signal_theta(active_dims, 1) = thetas(c);
+
+    %% Data
+    signal_data = ...
+	sparse(rand(dims, sizes(c)) < signal_theta * ones(1, sizes(c)));
+
+    %% Join
+    data  = [ data,  signal_data ];
+    truth = [ truth, (c + 1) * ones(1, sizes(c)) ];
+  endfor
+
+  %% Make it sparse
+  data = sparse(data);
+
+  %% Shuffle
+  shuffler = randperm(length(truth));
+  data  = data (:, shuffler);
+  truth = truth(shuffler);
 endfunction
 
 %% Special 1
@@ -100,9 +148,10 @@ function [ data, truth ] = data_special1(dims)
 endfunction
 
 %% Map
-data_gen = struct("unibg",    @data_unibg,
-		  "gaussbg",  @data_gaussbg,
-		  "special1", @data_special1);
+data_gen = struct("unibg",     @data_unibg,
+		  "gaussbg",   @data_gaussbg,
+		  "bernoulli", @data_bernoulli,
+		  "special1",  @data_special1);
 
 
 %%%%%%%%%%

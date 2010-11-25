@@ -16,6 +16,10 @@ function [ probability ] = distance_probability(alpha, distances)
     n_classes = 2;
   endif
 
+  %% Normalize
+  max_dist    = max(distances);
+  distances .-= ones(n_classes, 1) * max_dist;
+
   %% Convert to exponential
   probability = exp(alpha * distances);
 

@@ -5,18 +5,20 @@
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = KneeInterpolator(inner = @LogInterpolator, ...
+function [ this ] = KneeInterpolator(finder = DistanceKnee(), ...
+				     inner = @LogInterpolator, ...
 				     low = 0.0, mid = 0.5, high = 1.0)
 
   %% Check arguments
-  if ~any(nargin() == [ 0, 1, 4 ])
-    usage("[ this ] = KneeInterpolator([inner [, low, mid, high]])");
+  if ~any(nargin() == [ 1, 2, 5 ])
+    usage("[ this ] = KneeInterpolator([finder, [inner [, low, mid, high]]])");
   endif
 
   %% This object
   this = struct();
 
   %% Set fields
+  this.finder     = finder;
   this.low        = low;
   this.mid        = mid;
   this.high       = high;

@@ -37,14 +37,43 @@ function [ data, truth ] = gen_data(cmd_opts)
 		      eff_noise_mean, cmd_opts.noise_var);
   endswitch
 
+  %% Previous signal means
+  sqe = SqEuclideanDistance();
+  prev_signal_means = [];
+
   %% Signal
   cl   = 2;
   base = cmd_opts.noise_size;
   for cur_size = cmd_opts.signal_size
-    %% Effective signal mean
-    eff_signal_mean = ...
-	eff_noise_mean + gen_gaussian(cmd_opts.dimensions, 1, ...
-				      0, cmd_opts.signal_shift);
+    %% Try it!
+    tries      = 0;
+    far_enough = false();
+    while tries < 10 && ~far_enough
+      %% Generate an effective signal mean
+      eff_signal_mean = ...
+	  eff_noise_mean + gen_gaussian(cmd_opts.dimensions, 1, ...
+					0, cmd_opts.signal_shift);
+
+      %% Distance from previous
+      if isempty(prev_signal_means)
+	far_enough = true();
+      else
+	dists      = apply(sqe, prev_signal_means, eff_signal_mean);
+	far_enough = sqrt(min(dists)) >= cmd_opts.signal_space;
+      endif
+
+      %% One more try
+      tries += 1;
+    endwhile
+
+    %% OK?
+    if far_enough
+      %% Add it
+      prev_signal_means = [ prev_signal_means, eff_signal_mean ];
+    else
+      %% Error
+      error("Could not generate means far enough");
+    endif
 
     %% Generate each one
     switch cmd_opts.signal_dist

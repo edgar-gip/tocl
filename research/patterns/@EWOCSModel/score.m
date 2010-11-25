@@ -30,4 +30,7 @@ function [ scores ] = score(this, data)
     %% Add scores
     scores += this.cluster_scores{i} * ind_expec;
   endfor
+
+  %% Divide scores
+  scores ./= ensemble_size;
 endfunction
