@@ -137,8 +137,8 @@ def_opts.histo_bins      = 100;
 		"histo-bins=i",       "histo_bins");
 
 %% Set a seed
-if isempty(cmd_opts.seed)
-  cmd_opts.seed = floor(1000.0 * rand());
+if ~isempty(cmd_opts.seed)
+  rand("seed", cmd_opts.seed);
 endif
 
 %% No plots for more than three dimensions
@@ -683,20 +683,23 @@ function do_plot_recs(recs_fig, map_sort_idx, n_groups, truth, ...
 endfunction
 
 %% Do the ROC plot
-function do_roc_plot(window, scores, s_truth, pause_time)
+function do_roc_plot(window, sort_idx, s_truth, pause_time)
 
   %% ROC
-  [ sort_scores, sort_idx ] = sort(scores, "descend");
-  size = length(sort_idx);
+  n_data = length(sort_idx);
 
   %% Find accumulated positive and negative
-  roc_pos = cumsum( s_truth(sort_idx)); roc_pos ./= roc_pos(size);
-  roc_neg = cumsum(~s_truth(sort_idx)); roc_neg ./= roc_neg(size);
+  roc_pos = cumsum( s_truth(sort_idx)); roc_pos ./= roc_pos(n_data);
+  roc_neg = cumsum(~s_truth(sort_idx)); roc_neg ./= roc_neg(n_data);
+
+  %% AUC
+  auc = sum(diff(roc_neg) .* ...
+	    (roc_pos(1 : n_data - 1) + roc_pos(2 : n_data))) / 2;
 
   %% Plot
   figure(window);
-  plot(roc_neg, roc_pos, "-", ...
-       [ 0, 1 ], [ 0, 1 ], "-");
+  plot(roc_neg, roc_pos, sprintf("-;EWOCS(%.3f);", auc), ...
+       [ 0, 1 ], [ 0, 1 ], "-;Random (0.5);");
 
   %% Stop?
   if pause_time > 0
@@ -912,7 +915,8 @@ endfunction
 function do_score_histo_one(ewocs, data, truth, cmd_opts, ...
 			    truth_fig, expec_fig, mgauss_expec_fig, ...
 			    score_fig, prc_rec_fig, recs_fig, dist_fig, ...
-			    gauss_fig, gaussn_fig, mgauss_fig, hgauss_fig);
+			    gauss_fig, gaussn_fig, mgauss_fig, hgauss_fig, ...
+			    roc_fig);
 
   %% Sizes
   n_data   = length(truth);
@@ -980,9 +984,8 @@ function do_score_histo_one(ewocs, data, truth, cmd_opts, ...
     do_plot_prc_rec(prc_rec_fig, map_sort_scores, prc, rec, f1, ...
 		    min_knee_idx, gauss_idx, gaussn_idx, mgauss_idx, ...
 		    hgauss_idx, 0.0);
-    do_plot_recs(recs_fig, map_sort_idx, n_groups, truth, ...
-		 cmd_opts.pause_time);
-    %% do_roc_plot(roc_fig, scores, s_truth, cmd_opts.pause_time);
+    do_plot_recs(recs_fig, map_sort_idx, n_groups, truth, 0.0);
+    do_roc_plot(roc_fig, sort_idx, s_truth, cmd_opts.pause_time);
   endfor
 endfunction
 
@@ -1010,7 +1013,7 @@ function do_score_histo(ewocs, cmd_args, cmd_opts)
   gaussn_fig  = figure("name", "2-Gaussian/N");
   mgauss_fig  = figure("name", "M-Gaussian");
   hgauss_fig  = figure("name", "H-Gaussian");
-  %% roc_fig     = figure("name", "ROC");
+  roc_fig     = figure("name", "ROC");
 
   %% Arguments given?
   if length(cmd_args) == 0
@@ -1025,7 +1028,7 @@ function do_score_histo(ewocs, cmd_args, cmd_opts)
       do_score_histo_one(ewocs, data, truth, cmd_opts, truth_fig, expec_fig, ...
 			 mgauss_expec_fig, score_fig, prc_rec_fig, recs_fig, ...
 			 dist_fig, gauss_fig, gaussn_fig, mgauss_fig, ...
-			 hgauss_fig);
+			 hgauss_fig, roc_fig);
     endfor
 
   else
@@ -1042,7 +1045,7 @@ function do_score_histo(ewocs, cmd_args, cmd_opts)
       do_score_histo_one(ewocs, data, truth, cmd_opts, truth_fig, expec_fig, ...
 			 mgauss_expec_fig, score_fig, prc_rec_fig, recs_fig, ...
 			 dist_fig, gauss_fig, gaussn_fig, mgauss_fig, ...
-			 hgauss_fig);
+			 hgauss_fig, roc_fig);
     endfor
   endif
 endfunction
