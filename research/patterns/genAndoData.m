@@ -38,6 +38,24 @@ function [ data, truth ] = data_unibg(dims)
 				    "signal_space", 0.75));
 endfunction
 
+%% Uniform background (same size)
+function [ data, truth ] = data_unibg_ss(dims)
+  %% Generate it
+  [ data, truth ] = gen_data(struct("dimensions", dims,
+
+				    "noise_dist", P_UNIFORM,
+				    "noise_size", 5400,
+				    "noise_mean", 0.0,
+				    "noise_var",  2.0,
+
+				    "signal_dist",  P_GAUSSIAN,
+				    "signal_size",  [ 100, 150, 150, 200 ],
+				    "signal_var",   0.125,
+				    "signal_mean",  0.0,
+				    "signal_shift", 0.75,
+				    "signal_space", 0.75));
+endfunction
+
 %% Gaussian background
 function [ data, truth ] = data_gaussbg(dims)
   %% Generate it
@@ -149,6 +167,7 @@ endfunction
 
 %% Map
 data_gen = struct("unibg",     @data_unibg,
+		  "unibg_ss",  @data_unibg_ss,
 		  "gaussbg",   @data_gaussbg,
 		  "bernoulli", @data_bernoulli,
 		  "special1",  @data_special1);

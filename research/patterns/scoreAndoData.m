@@ -15,12 +15,12 @@ pkg load octopus
 
 %% Distances
 distances = ...
-    struct("none",   [], ...
-	   "sqe",    SqEuclideanDistance(),          ...
-	   "rbf_05", KernelDistance(RBFKernel(0.5)), ...
-	   "rbf_10", KernelDistance(RBFKernel(1.0)), ...
-	   "rbf_20", KernelDistance(RBFKernel(2.0)), ...
-	   "mah",    @(data)  MahalanobisDistance(data));
+    struct("none", [], ...
+	   "sqe",  SqEuclideanDistance(),          ...
+	   "rbf",  @(data, extra) ...
+	       KernelDistance(RBFKernel(str2double(extra{1}))), ...
+	   "mah",  @(data, extra) ...
+	       MahalanobisDistance(data));
 
 
 %%%%%%%%%%%%%
@@ -57,9 +57,9 @@ methods = ...
 
 %% Get the parameters
 args = argv();
-if ~any(length(args) == [ 6, 7, 8 ])
+if ~any(length(args) == [ 7, 8, 9 ])
   error(cstrcat("Wrong number of arguments: Expected", ...
-		" <input> <distance> <method> <extra>", ...
+		" <input> <distance> <d-extra> <method> <m-extra>", ...
 		" <k> <seed> [<output> [<scores>]]"));
 endif
 
@@ -77,30 +77,33 @@ if ~isfield(distances, dist)
   error("Wrong distance name '%s'", met);
 endif
 
+%% Extra arguments
+dextra = regex_split(args{3}, '(,|\s+,)\s*');
+
 %% Method
-met = args{3};
+met = args{4};
 if ~isfield(methods, met)
   error("Wrong method name '%s'", met);
 endif
 
 %% Extra arguments
-extra = regex_split(args{4}, '(,|\s+,)\s*');
+mextra = regex_split(args{5}, '(,|\s+,)\s*');
 
 %% k
-[ k, status ] = str2double(args{5});
+[ k, status ] = str2double(args{6});
 if status ~= 0
-  error("Wrong number of clusters '%s'", args{5})
+  error("Wrong number of clusters '%s'", args{6})
 endif
 
 %% Seed
-[ seed, status ] = str2double(args{6});
+[ seed, status ] = str2double(args{7});
 if status ~= 0
-  error("Wrong seed '%s'", args{6});
+  error("Wrong seed '%s'", args{7});
 endif
 
 %% Output
-if length(args) >= 7
-  output = args{7};
+if length(args) >= 8
+  output = args{8};
   [ fout, status ] = fopen(output, "wt");
   if fout == -1
     error("Cannot open output '%s': %s", output, status);
@@ -115,14 +118,14 @@ rand("seed", seed);
 %% Create distance
 distfun = getfield(distances, dist);
 if isfunctionhandle(distfun)
-  distance = distfun(data);
+  distance = distfun(data, dextra);
 else
   distance = distfun;
 endif
 
 %% Create clusterer
 clustfun  = getfield(methods, met);
-clusterer = clustfun(distance, data, truth, extra);
+clusterer = clustfun(distance, data, truth, mextra);
 
 
 %% Cluster
@@ -197,10 +200,10 @@ endif
 
 
 %% Save?
-if length(args) >= 8
+if length(args) >= 9
   try
-    save("-binary", "-zip", args{8}, "scores", "threshold");
+    save("-binary", "-zip", args{9}, "scores", "threshold");
   catch
-    error("Cannot save data to '%s': %s", args{8}, lasterr());
+    error("Cannot save data to '%s': %s", args{9}, lasterr());
   end_try_catch
 endif
