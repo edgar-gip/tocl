@@ -1,6 +1,6 @@
 %% -*- mode: octave; -*-
 
-%% Voronoi clustering
+%% Voronoi clustering (generated)
 %% Main procedure
 
 %% Author: Edgar Gonzalez
@@ -10,7 +10,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Check arguments
   if ~any(nargin() == [ 3, 4 ])
     usage(cstrcat("[ expec, model, info ] = ", ...
-		  "@Voronoi/cluster(this, data, k [, expec_0])"));
+		  "@GeneratedVoronoi/cluster(this, data, k [, expec_0])"));
   endif
 
   %% Size
@@ -32,8 +32,11 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
     [ dummy, seeds ] = max(expec_0');
   endif
 
+  %% Generate a distance
+  distance = generate(this.distance_gen);
+
   %% Create the model
-  model = VoronoiModel(this.soft_alpha, this.distance, data(:, seeds));
+  model = VoronoiModel(this.soft_alpha, distance, data(:, seeds));
 
   %% Find the expectation
   [ expec, log_like ] = expectation(model, data);
