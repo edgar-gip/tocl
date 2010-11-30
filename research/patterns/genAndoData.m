@@ -56,6 +56,29 @@ function [ data, truth ] = data_unibg_ss(dims)
 				    "signal_space", 0.75));
 endfunction
 
+%% Uniform background (random sizes)
+function [ data, truth ] = data_unibg_rs(dims)
+  %% Sizes
+  groups      = floor(   1 +   5 * rand())
+  signal_size = round( 150 +  50 * randn(1, groups))
+  noise_size  = round(1500 + 500 * randn())
+
+  %% Generate
+  [ data, truth ] = gen_data(struct("dimensions", dims,
+
+				    "noise_dist", P_UNIFORM,
+				    "noise_size", noise_size,
+				    "noise_mean", 0.0,
+				    "noise_var",  2.0,
+
+				    "signal_dist",  P_GAUSSIAN,
+				    "signal_size",  signal_size,
+				    "signal_var",   0.125,
+				    "signal_mean",  0.0,
+				    "signal_shift", 0.75,
+				    "signal_space", 0.75));
+endfunction
+
 %% Gaussian background
 function [ data, truth ] = data_gaussbg(dims)
   %% Generate it
@@ -168,6 +191,7 @@ endfunction
 %% Map
 data_gen = struct("unibg",     @data_unibg,
 		  "unibg_ss",  @data_unibg_ss,
+		  "unibg_rs",  @data_unibg_rs,
 		  "gaussbg",   @data_gaussbg,
 		  "bernoulli", @data_bernoulli,
 		  "special1",  @data_special1);
@@ -206,7 +230,8 @@ endif
 output = args{4};
 
 %% Initialize seed
-rand("seed", seed);
+rand ("seed", seed);
+randn("seed", seed);
 
 %% Generate
 genfun = getfield(data_gen, gen);
