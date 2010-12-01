@@ -138,7 +138,7 @@ def_opts.histo_bins      = 100;
 
 %% Set a seed
 if ~isempty(cmd_opts.seed)
-  rand("seed", cmd_opts.seed);
+  set_all_seeds(cmd_opts.seed);
 endif
 
 %% No plots for more than three dimensions

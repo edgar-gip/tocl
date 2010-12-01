@@ -79,6 +79,8 @@ function [ this ] = EWOCS(clusterer, opts = struct())
 	this.interpolator = LinearInterpolator();
       case "log"
 	this.interpolator = LogInterpolator();
+      case "null"
+	this.interpolator = NullInterpolator();
     endswitch
 
   else

@@ -103,7 +103,7 @@ endif
 
 
 %% Initialize seed
-rand("seed", seed);
+set_all_seeds(seed);
 
 %% Create distance
 distfun = getfield(distances, dist);

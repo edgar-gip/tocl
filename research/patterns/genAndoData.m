@@ -230,8 +230,7 @@ endif
 output = args{4};
 
 %% Initialize seed
-rand ("seed", seed);
-randn("seed", seed);
+set_all_seeds(seed);
 
 %% Generate
 genfun = getfield(data_gen, gen);

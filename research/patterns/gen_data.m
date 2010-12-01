@@ -48,7 +48,7 @@ function [ data, truth ] = gen_data(cmd_opts)
     %% Try it!
     tries      = 0;
     far_enough = false();
-    while tries < 10 && ~far_enough
+    while tries < 50 && ~far_enough
       %% Generate an effective signal mean
       eff_signal_mean = ...
 	  eff_noise_mean + gen_gaussian(cmd_opts.dimensions, 1, ...

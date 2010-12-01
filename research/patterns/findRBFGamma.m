@@ -324,8 +324,7 @@ if isempty(cmd_opts.seed)
 endif
 
 %% Initialize seed
-rand("seed", cmd_opts.seed);
-
+set_all_seeds(cmd_opts.seed);
 
 %% For each file
 for input = cmd_args

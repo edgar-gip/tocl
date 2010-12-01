@@ -131,7 +131,7 @@ test_file  = sprintf("%s/%s%s.matrix.gz", data_dir, cmd_opts.test,  th_infix);
 
 %% Prepare seed
 fprintf(2, "        Using %d as random seed\n", cmd_opts.seed);
-rand("seed", cmd_opts.seed);
+set_all_seeds(cmd_opts.seed);
 
 %% Read training data
 train_data = read_sparse(train_file);
