@@ -20,7 +20,7 @@ function [ data, truth ] = gen_data(cmd_opts)
   %% Noise
   switch cmd_opts.noise_dist
     case P_BERNOULLI
-      data(:, 1 : cmd_opts.noise_size) = ...
+      noise_data(:, 1 : cmd_opts.noise_size) = ...
 	  gen_bernoulli(cmd_opts.dimensions, cmd_opts.noise_size, ...
 			cmd_opts.noise_mean);
     case P_GAUSSIAN
@@ -37,6 +37,10 @@ function [ data, truth ] = gen_data(cmd_opts)
 		      eff_noise_mean, cmd_opts.noise_var);
   endswitch
 
+  %% Noise range
+  min_noise = min(data(:, 1 : cmd_opts.noise_size)')';
+  max_noise = max(data(:, 1 : cmd_opts.noise_size)')';
+
   %% Previous signal means
   sqe = SqEuclideanDistance();
   prev_signal_means = [];
@@ -46,20 +50,21 @@ function [ data, truth ] = gen_data(cmd_opts)
   base = cmd_opts.noise_size;
   for cur_size = cmd_opts.signal_size
     %% Try it!
-    tries      = 0;
-    far_enough = false();
-    while tries < 50 && ~far_enough
+    tries = 0;
+    ok    = false();
+    while tries < 50 && ~ok
       %% Generate an effective signal mean
       eff_signal_mean = ...
 	  eff_noise_mean + gen_gaussian(cmd_opts.dimensions, 1, ...
 					0, cmd_opts.signal_shift);
 
+      %% Not outside
+      ok = all(min_noise <= eff_signal_mean && eff_signal_mean <= max_noise);
+
       %% Distance from previous
-      if isempty(prev_signal_means)
-	far_enough = true();
-      else
-	dists      = apply(sqe, prev_signal_means, eff_signal_mean);
-	far_enough = sqrt(min(dists)) >= cmd_opts.signal_space;
+      if ok && ~isempty(prev_signal_means)
+	dists = apply(sqe, prev_signal_means, eff_signal_mean);
+	ok    = sqrt(min(dists)) >= cmd_opts.signal_space;
       endif
 
       %% One more try
@@ -67,7 +72,7 @@ function [ data, truth ] = gen_data(cmd_opts)
     endwhile
 
     %% OK?
-    if far_enough
+    if ok
       %% Add it
       prev_signal_means = [ prev_signal_means, eff_signal_mean ];
     else
