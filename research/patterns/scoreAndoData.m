@@ -127,7 +127,7 @@ function [ th ] = th_gaussNm_f(sort_scores, sort_truth, msort_scores, ...
     cut_idx   = max(find(expec_tru >= 0.5));
 
     %% Better?
-    if f1_c(cut_idx) > best_f1
+    if ~isempty(cut_idx) && f1_c(cut_idx) > best_f1
       best_f1  = f1_c(cut_idx);
       best_c   = c;
       best_idx = cut_idx;
@@ -135,7 +135,11 @@ function [ th ] = th_gaussNm_f(sort_scores, sort_truth, msort_scores, ...
   endfor
 
   %% Best
-  th = sort_scores(best_idx);
+  if best_idx == -1
+    th = sort_scores(length(sort_scores));
+  else
+    th = sort_scores(best_idx);
+  endif
 endfunction
 
 %%%% From N Gaussians + Noise (Mapped)
@@ -162,7 +166,7 @@ function [ th ] = th_gaussNnm_f(sort_scores, sort_truth, msort_scores, ...
     cut_idx   = max(find(expec_tru >= 0.5));
 
     %% Better?
-    if f1_c(cut_idx) > best_f1
+    if ~isempty(cut_idx) && f1_c(cut_idx) > best_f1
       best_f1  = f1_c(cut_idx);
       best_c   = c;
       best_idx = cut_idx;
@@ -170,7 +174,11 @@ function [ th ] = th_gaussNnm_f(sort_scores, sort_truth, msort_scores, ...
   endfor
 
   %% Best
-  th = sort_scores(best_idx);
+  if best_idx == -1
+    th = sort_scores(length(sort_scores));
+  else
+    th = sort_scores(best_idx);
+  endif
 endfunction
 
 %% Objects
