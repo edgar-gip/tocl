@@ -29,8 +29,8 @@ function [ model ] = maximization(this, data, expec)
   cl_sumsq = full((data .* data) * expec'); % 1 * k
 
   %% Mean and variance
-  cl_mean = cl_sum   ./ cl_sizes;
-  cl_var  = cl_sumsq ./ cl_sizes - cl_mean .* cl_mean;
+  cl_mean =     cl_sum   ./ cl_sizes;
+  cl_var  = max(cl_sumsq ./ cl_sizes - cl_mean .* cl_mean, 0);
 
   %% Use global mean and variance for background
   cl_mean(1, 1) = mean(data);
