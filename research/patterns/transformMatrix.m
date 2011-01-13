@@ -14,16 +14,18 @@ pkg load octopus
 %%%%%%%%%%%%%
 
 %% Default options
-def_opts          = struct();
-def_opts.freq_th  = [];
-def_opts.mi_feats = [];
-def_opts.sparse   = false();
+def_opts           = struct();
+def_opts.freq_th   = [];
+def_opts.mi_feats  = [];
+def_opts.normalize = false();
+def_opts.sparse    = false();
 
 %% Parse options
 [ cmd_args, cmd_opts ] = ...
     get_options(def_opts, ...
 		"freq-th=i",  "freq_th", ...
 		"mi-feats=i", "mi_feats", ...
+		"normalize!", "normalize", ...
 		"sparse!",    "sparse");
 
 %% Input and output
@@ -34,8 +36,9 @@ input  = cmd_args{1};
 output = cmd_args{2};
 
 %% Some of the two
-if isempty(cmd_opts.freq_th) && isempty(cmd_opts.mi_feats)
-  error("Must provide at least one criterion");
+if isempty(cmd_opts.freq_th) && isempty(cmd_opts.mi_feats) && ...
+   ~cmd_opts.normalize
+  error("Must provide at least one task");
 endif
 
 %% Load
@@ -101,6 +104,12 @@ if ~isempty(cmd_opts.mi_feats) && n_feats > cmd_opts.mi_feats
 
   %% New data
   data = data(rekept_feats, :);
+endif
+
+%% Normalize (as a distribution)
+if cmd_opts.normalize
+  %% Do it
+  data ./= ones(n_feats, 1) * sum(data);
 endif
 
 %% Save

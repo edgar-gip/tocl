@@ -1,5 +1,5 @@
 # Modules
-MODULES = mahalanobis_distance1
+MODULES = skl_divergence1
 
 # Include
 include ../../make/ModuleMakefile.inc

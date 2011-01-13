@@ -68,7 +68,7 @@ Find the mahalanobis distance between elements of @var{source}\n\
     Matrix distances;
 
     // Get data
-    if (args(0).is_sparse_type()) {
+    if (args(1).is_sparse_type()) {
       // As a sparse matrix
       SparseMatrix data = args(1).sparse_matrix_value();
 
@@ -151,7 +151,7 @@ Find the mahalanobis distance between elements of @var{source} and @var{target}\
     Matrix distances;
 
     // Get source
-    if (args(0).is_sparse_type()) {
+    if (args(1).is_sparse_type()) {
       // As a sparse matrix
       SparseMatrix source = args(1).sparse_matrix_value();
 

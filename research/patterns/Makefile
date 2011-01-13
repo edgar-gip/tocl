@@ -5,7 +5,9 @@ MKOCTFILE = mkoctfile
 OCTFLAGS = -Wall -Wextra
 
 # SUBDIRS
-SUBDIRS = @GaussianModel/private @MahalanobisDistance/private @Dirichlet/private
+SUBDIRS = @Dirichlet/private @GaussianModel/private \
+	  @KLDivergence/private @MahalanobisDistance/private \
+	  @SmoothKLDivergence/private
 
 # Modules
 MODULES = CPM3C read_redo read_seeds read_sparse
