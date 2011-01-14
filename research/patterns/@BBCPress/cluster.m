@@ -55,9 +55,12 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
     %% Effective target size
     effective_target_size = floor(target_size + factor);
 
-    %% Inner loop
+    %% Inner final
     inner_final = false();
-    while ~inner_final
+
+    %% Inner loop
+    i = 2;
+    while i <= this.max_iterations && ~inner_final
       %% Preserve previous expec, centroid and radius
       p_expec = expec;
       %% p_centroids = centroids;
@@ -96,6 +99,9 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
       %% Changes
       n_changes   = full(sum(sum(xor(expec, p_expec))));
       inner_final = n_changes < this.change_threshold;
+
+      %% Next iteration
+      ++i;
     endwhile
 
     %% Update factor

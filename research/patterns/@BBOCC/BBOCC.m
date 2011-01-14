@@ -27,6 +27,10 @@ function [ this ] = BBOCC(divergence, opts = struct())
   %% Default -> 0.1
   this.size_ratio = getfielddef(opts, "size_ratio", 0.1);
 
+  %% Maximum number of iterations
+  %% Default -> 100
+  this.max_iterations = getfielddef(opts, "max_iterations", 100);
+
   %% Change threshold
   %% Default -> 1
   this.change_threshold = getfielddef(opts, "change_threshold", 1);

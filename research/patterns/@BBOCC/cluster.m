@@ -39,14 +39,17 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
 
   %% Final
   final = false();
-  while ~final
+
+  %% Loop
+  i = 2;
+  while i <= this.max_iterations && ~final
     %% Preserve previous cluster, centroid and radius
     p_cluster  = cluster;
     %% p_centroid = centroid;
     %% p_radius   = radius;
 
     %% Find the divergences
-    divs = apply(this.divergence, centroid, data)
+    divs = apply(this.divergence, centroid, data);
 
     %% Sort the matrix
     [ sort_divs, sort_indices ] = sort(divs);
@@ -57,8 +60,11 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
     centroid = mean(data(:, cluster), 2);
 
     %% Changes
-    n_changes = length(setxor(cluster, p_cluster))
+    n_changes = length(setxor(cluster, p_cluster));
     final     = n_changes < this.change_threshold;
+
+    %% Next iteration
+    ++i;
   endwhile
 
   %% Model
@@ -70,5 +76,6 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
 		 1, n_samples);
 
   %% Info
-  info = struct();
+  info            = struct();
+  info.iterations = i;
 endfunction

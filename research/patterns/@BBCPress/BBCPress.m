@@ -32,6 +32,10 @@ function [ this ] = BBCPress(divergence, opts = struct())
   %% Default -> 0.75
   this.press_decay = getfielddef(opts, "press_decay", 0.75);
 
+  %% Maximum number of iterations
+  %% Default -> 100
+  this.max_iterations = getfielddef(opts, "max_iterations", 100);
+
   %% Change threshold
   %% Default -> 1
   this.change_threshold = getfielddef(opts, "change_threshold", 1);

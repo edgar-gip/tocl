@@ -58,9 +58,12 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
     eff_change_threshold = this.change_threshold;
   endif
 
-  %% Loop
+  %% Final
   final = false();
-  while ~final
+
+  %% Loop
+  i = 2;
+  while i <= this.max_iterations && ~final
     %% Preserve previous expec
     p_expec = expec;
 
@@ -83,11 +86,15 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
     %% Changes
     n_changes = full(sum(sum(xor(expec, p_expec))));
     final     = n_changes < eff_change_threshold;
+
+    %% Next iteration
+    ++i;
   endwhile
 
   %% Create the model
   model = KMeansModel(this.divergence, centroids);
 
   %% Return the information
-  info = struct();
+  info            = struct();
+  info.iterations = i;
 endfunction

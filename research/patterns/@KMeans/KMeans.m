@@ -18,6 +18,10 @@ function [ this ] = KMeans(divergence, opts = struct())
   %% Divergence
   this.divergence = divergence;
 
+  %% Maximum number of iterations
+  %% Default -> 100
+  this.max_iterations = getfielddef(opts, "max_iterations", 100);
+
   %% Change threshold
   %% Default -> 1
   this.change_threshold = getfielddef(opts, "change_threshold", 1);
