@@ -1,23 +1,23 @@
 %% -*- mode: octave; -*-
 
-%% Truly random clustering
+%% Random projection clustering
 %% Constructor
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = Random(opts = struct())
+function [ this ] = RandomProj(opts = struct())
 
   %% Check arguments
   if ~any(nargin() == [ 0, 1 ])
-    usage("[ this ] = Random([opts])");
+    usage("[ this ] = RandomProj([opts])");
   endif
 
   %% This object
   this = struct();
 
-  %% Concentration for Dirichlet distribution
-  %% Default -> 1.0
-  this.concentration = getfielddef(opts, "concentration", 1.0);
+  %% Softening alpha
+  %% Default -> 0.1
+  this.soft_alpha = getfielddef(opts, "soft_alpha", 0.1);
 
   %% Verbose
   %% Default -> false
@@ -25,6 +25,6 @@ function [ this ] = Random(opts = struct())
 
   %% Bless
   %% And add inheritance
-  this = class(this, "Random", ...
+  this = class(this, "RandomProj", ...
 	       Simple());
 endfunction

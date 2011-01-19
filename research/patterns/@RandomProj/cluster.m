@@ -1,6 +1,6 @@
 %% -*- mode: octave; -*-
 
-%% Truly random clustering
+%% Random projection clustering
 %% Main procedure
 
 %% Author: Edgar Gonzalez
@@ -10,7 +10,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Check arguments
   if ~any(nargin() == [ 3, 4 ])
     usage(cstrcat("[ expec, model, info ] = ", ...
-		  "@Random/cluster(this, data, k [, expec_0])"));
+		  "@RandomProj/cluster(this, data, k [, expec_0])"));
   endif
 
   %% Size
@@ -21,8 +21,11 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %%   warning("expec_0 is ignored");
   %% endif
 
+  %% Random projection matrix
+  projection = rand(k, n_dims) - 0.5;
+
   %% Create the model
-  model = RandomModel(this.concentration, k);
+  model = RandomProjModel(this.soft_alpha, projection);
 
   %% Find the expectation
   [ expec, log_like ] = expectation(model, data);

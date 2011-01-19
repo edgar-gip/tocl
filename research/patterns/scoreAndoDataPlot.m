@@ -8,6 +8,9 @@
 %% Octopus
 pkg load octopus
 
+%% Ando elements
+source andoElements.m
+
 
 %%%%%%%%%%%
 %% Plots %%
@@ -59,7 +62,7 @@ function histogram_plot(sort_scores, sort_full, th_cuts)
   for th = th_cuts
     %% Add the plot
     plots = cell_push(plots, ...
-		      [ th.value ], [ 0 ], ...
+		      [ th.value ], [ 1 ], ...
 		      sprintf("*;%s;", th.name), "linewidth", 4);
   endfor
 
@@ -120,219 +123,25 @@ function f1_plot(sort_truth, sort_full, th_cuts)
 endfunction
 
 
-%%%%%%%%%%%%%
-%% Helpers %%
-%%%%%%%%%%%%%
-
-%% Size ratio
-function [ ratio ] = size_ratio(s_truth)
-  %% Find it
-  ratio = sum(s_truth) / length(s_truth);
-endfunction
-
-%% Fields
-function [ joint ] = fields(s)
-  %% Field names
-  names = strcat(fieldnames(s), ",");
-  joint = strcat(names{:});
-  joint = substr(joint, 1, length(joint) - 1);
-endfunction
-
-
-%%%%%%%%%%%%%%%
-%% Distances %%
-%%%%%%%%%%%%%%%
-
-%% Distances
-distances = ...
-    struct("none", ...
-	       [], ...
-	   "sqe", ...
-	       SqEuclideanDistance(),          ...
-	   "rbf",   @(data, extra) ...
-	       KernelDistance(RBFKernel(str2double(extra{1}))), ...
-	   "rbf_g", @(data, extra) ...
-	       KernelDistanceGenerator(RBFKernelGenerator(...
-                   str2double(extra{1}),str2double(extra{2}))), ...
-	   "mah",   @(data, extra) ...
-	       MahalanobisDistance(data));
-
-
-%%%%%%%%%%%%%%%%
-%% Thresholds %%
-%%%%%%%%%%%%%%%%
-
-%% Functions
-
-%%%% Optimal
-function [ th ] = th_best_f(sort_scores, sort_truth, f1_c, model)
-  %% Best
-  [ best_f1, best_idx ] = max(f1_c);
-  th = sort_scores(best_idx);
-endfunction
-
-%%%% From model
-function [ th ] = th_model_f(sort_scores, sort_truth, f1_c, model)
-  th = threshold(model);
-endfunction
-
-%%% From size
-function [ th ] = th_size_f(sort_scores, sort_truth, f1_c, model)
-  th = sort_scores(round(length(sort_scores) * size_ratio(sort_truth)));
-endfunction
-
-%%%% From distance
-function [ th ] = th_dist_f(sort_scores, sort_truth, f1_c, model)
-  th = apply(DistanceKnee(), sort_scores);
-endfunction
-
-%%%% From 2 Gaussians
-function [ th ] = th_gauss2_f(sort_scores, sort_truth, f1_c, model)
-  th = apply(GaussianKnee(), sort_scores);
-endfunction
-
-%%%% From 2 Gaussians + Noise
-function [ th ] = th_gauss2n_f(sort_scores, sort_truth, f1_c, model)
-  th = apply(GaussianNoiseKnee(), sort_scores);
-endfunction
-
-%%%% From N Gaussians
-function [ th ] = th_gaussN_f(sort_scores, sort_truth, f1_c, model)
-  %% Model
-  [ expec, model ] = cluster(CriterionClusterer(Gaussian1D(), BIC(),  ...
-						struct("max_k", 10)), ...
-			     sort_scores);
-
-  %% Sort the clusters
-  model
-  [ sorted_mns, sorted_cl ] = sort(means(model), "descend");
-
-  %% Plots, and best cut point
-  best_f1  = 0.0;
-  best_c   = -1;
-  best_idx = -1;
-
-  %% Find it
-  for c = 1 : length(sorted_cl) - 1
-
-    %% Expec
-    expec_tru = sum(expec(sorted_cl(1 : c), :), 1);
-    cut_idx   = max(find(expec_tru >= 0.5));
-
-    %% Better?
-    if f1_c(cut_idx) > best_f1
-      best_f1  = f1_c(cut_idx);
-      best_c   = c;
-      best_idx = cut_idx;
-    endif
-  endfor
-
-  %% Best
-  th = sort_scores(best_idx);
-endfunction
-
-%%%% From N Gaussians + Noise
-function [ th ] = th_gaussNn_f(sort_scores, sort_truth, f1_c, model)
-  %% Model
-  [ expec, model ] = cluster(CriterionClusterer(Gaussian1DNoise(), BIC(), ...
-						struct("max_k", 10)),     ...
-			     sort_scores);
-
-  %% Sort the clusters
-  [ sorted_mns, sorted_cl ] = sort(means(model), "descend");
-
-  %% Plots, and best cut point
-  best_f1  = 0.0;
-  best_c   = -1;
-  best_idx = -1;
-
-  %% Find it
-  for c = 1 : length(sorted_cl) - 1
-
-    %% Expec
-    expec_tru = sum(expec(sorted_cl(1 : c), :), 1);
-    cut_idx   = max(find(expec_tru >= 0.5));
-
-    %% Better?
-    if f1_c(cut_idx) > best_f1
-      best_f1  = f1_c(cut_idx);
-      best_c   = c;
-      best_idx = cut_idx;
-    endif
-  endfor
-
-  %% Best
-  th = sort_scores(best_idx);
-endfunction
-
-%% Objects
-th_best    = struct("name", "Best",  "find", @th_best_f);
-th_model   = struct("name", "Model", "find", @th_model_f);
-th_size    = struct("name", "Size",  "find", @th_size_f);
-th_dist    = struct("name", "Dist",  "find", @th_dist_f);
-th_gauss2  = struct("name", "G-2",   "find", @th_gauss2_f);
-th_gauss2n = struct("name", "G-2N",  "find", @th_gauss2n_f);
-th_gaussN  = struct("name", "G-N",   "find", @th_gaussN_f);
-th_gaussNn = struct("name", "G-NN",  "find", @th_gaussNn_f);
-
-
-%%%%%%%%%%%%%
-%% Methods %%
-%%%%%%%%%%%%%
-
-%% Objects
-method_bbocc = ...
-    struct("make", @(dist, data, s_truth, extra) ...
-	       BBOCC(dist, struct("size_ratio", size_ratio(s_truth))), ...
-	   "ths", [ th_best, th_model, th_size ]);
-method_bbcpress = ...
-    struct("make", @(dist, data, s_truth, extra) ...
-	       BBCPress(dist, struct("size_ratio", size_ratio(s_truth))), ...
-	   "ths", [ th_best, th_model, th_size ]);
-method_ewocs_voro = ...
-    struct("make", @(dist, data, s_truth, extra) ...
-	       EWOCS(Voronoi(dist, struct("soft_alpha", 0.1)), ...
-		     struct("ensemble_size", str2double(extra{1}), ...
-			    "max_clusters", str2double(extra{2}), ...
-			    "interpolator", "null")), ...
-	   "ths", [ th_best, th_size, th_dist, th_gauss2, th_gauss2n, ...
-		    th_gaussN, th_gaussNn ]);
-method_ewocs_voro_g = ...
-    struct("make", @(dist, data, s_truth, extra) ...
-	       EWOCS(GeneratedVoronoi(dist, struct("soft_alpha", 0.1)), ...
-		     struct("ensemble_size", str2double(extra{1}), ...
-			    "max_clusters", str2double(extra{2}), ...
-			    "interpolator", "null")), ...
-	   "ths", [ th_best, th_size, th_dist, th_gauss2, th_gauss2n, ...
-		    th_gaussN, th_gaussNn ]);
-method_ewocs_bern = ...
-    struct("make", @(dist, data, s_truth, extra) ...
-	       EWOCS(Bernoulli(), ...
-		     struct("ensemble_size", str2double(extra{1}), ...
-			    "max_clusters", str2double(extra{2}), ...
-			    "interpolator", "null")), ...
-	   "ths", [ th_best, th_size, th_dist, th_gauss2, th_gauss2n, ...
-		    th_gaussN, th_gaussNn ]);
-
-%% Index
-methods = ...
-    struct("bbocc",        method_bbocc, ...
-	   "bbcpress",     method_bbcpress, ...
-	   "ewocs_voro",   method_ewocs_voro, ...
-	   "ewocs_voro_g", method_ewocs_voro_g, ...
-	   "ewocs_bern",   method_ewocs_bern);
-
-
 %%%%%%%%%%
 %% Main %%
 %%%%%%%%%%
 
 %% Get the parameters
 args = argv();
+
+%% Option?
+pairwise = true();
+if length(args) > 0 && strcmp(args{1}, "--no-pairwise")
+  pairwise = false();
+  args = { args{2 : length(args)} };
+endif
+
+%% Arguments
 if length(args) ~= 7
   error(cstrcat("Wrong number of arguments: Expected", ...
-		" <input> <distance> <d-extra> <method> <m-extra>", ...
-		" <k> <seed>"));
+		" [--no-pairwise] <input> <distance> <d-extra> <method> ", ...
+		"<m-extra> <k> <seed>"));
 endif
 
 %% Input file
@@ -375,7 +184,9 @@ endif
 
 
 %% Plot data
-pairwise_cluster_plot(data, truth, "Truth");
+if pairwise
+  pairwise_cluster_plot(data, truth, "Truth");
+endif
 
 %% Initialize seed
 set_all_seeds(seed);
@@ -411,8 +222,8 @@ scores = score(model, data);
 sort_truth = s_truth(sort_idx);
 sort_full  = truth(sort_idx);
 
-%% Range
-range = sort_scores(length(sort_scores)) - sort_scores(1)
+%% Map scores
+[ msort_scores, msort_model ] = apply(LinearInterpolator(), sort_scores);
 
 %% Truth classes
 pos_tr  = find( sort_truth); n_pos_tr = length(pos_tr);
@@ -451,7 +262,8 @@ for th = ths
 
   %% Find the threshold
   thfun    = getfield(th, "find");
-  th_value = thfun(sort_scores, sort_truth, f1_c, model);
+  th_value = thfun(sort_scores, sort_truth, msort_scores, msort_model, ...
+		   f1_c, model);
 
   %% Negative/positive cluster
   pos_cl = find(sort_scores >= th_value); n_pos_cl = length(pos_cl);
@@ -487,8 +299,10 @@ for th = ths
 	 getfield(th, "name"), n_pos_cl, prc, rec, nrec, f1);
 
   %% Plot data
-  th_truth = 1 + (scores >= th_value);
-  pairwise_cluster_plot(data, th_truth, th.name);
+  if pairwise
+    th_truth = 1 + (scores >= th_value);
+    pairwise_cluster_plot(data, th_truth, th.name);
+  endif
 
   %% Next
   i += 1;

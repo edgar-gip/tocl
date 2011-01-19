@@ -1,23 +1,23 @@
 %% -*- mode: octave; -*-
 
-%% Random clustering
+%% Truly random clustering
 %% Model constructor
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = RandomModel(soft_alpha, projection)
+function [ this ] = RandomModel(concentration, k)
 
   %% Check arguments
   if nargin() ~= 2
-    usage("[ this ] = RandomModel(soft_alpha, projection)");
+    usage("[ this ] = RandomModel(concentration, k)");
   endif
 
   %% This object
   this = struct();
 
   %% Set fields
-  this.soft_alpha = soft_alpha;
-  this.projection = projection;
+  this.concentration = concentration;
+  this.k             = k;
 
   %% Bless
   %% And add inheritance
