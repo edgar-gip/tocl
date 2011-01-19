@@ -9,8 +9,8 @@
 pkg load octopus
 
 %% Ando elements
-source andoElements.m
-source andoClusterers.m
+source(binrel("andoElements.m"));
+source(binrel("andoClusterers.m"));
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
