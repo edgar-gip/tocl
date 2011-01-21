@@ -50,6 +50,13 @@ endif
 %% Extra arguments
 mextra = regex_split(args{5}, '(,|\s+,)\s*');
 
+%% Enough args?
+req_args = getfield(methods, met, "args");
+if length(mextra) ~= req_args
+  error("Method '%s' requires %d extra arg(s): %s",
+	met, req_args, getfield(methods, met, "help"));
+endif
+
 %% k
 [ k, status ] = str2double(args{6});
 if status ~= 0

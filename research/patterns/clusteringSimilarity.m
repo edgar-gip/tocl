@@ -18,7 +18,14 @@ source(binrel("andoClusterers.m"));
 % As in (Strehl & Ghosh, 2002)  %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%% Normalized nutual information
+%% Entropy
+function [ e ] = entropy(marg)
+  %% Find it
+  e = full(-sum(marg .* log(marg)));
+endfunction
+
+%% Normalized mutual information
+%% And matched value
 function [ value ] = nmi(cl_1, marg_1, sqrt_h_1, cl_2, marg_2, sqrt_h_2)
   %% Size
   [ k_1, n_data ] = size(cl_1);
@@ -33,6 +40,38 @@ function [ value ] = nmi(cl_1, marg_1, sqrt_h_1, cl_2, marg_2, sqrt_h_2)
 
   %% Normalize
   value = full(mi) / sqrt_h_1 / sqrt_h_2;
+
+  %% From this on, this is a fail...
+
+  %% %% Match
+  %% [ match, map_1, map_2, groups ] = multi_assignment(act);
+
+  %% %% Map matrices
+  %% map_m_1 = sparse(map_1, 1 : k_1, ones(1, k_1), groups, k_1);
+  %% map_m_2 = sparse(map_2, 1 : k_2, ones(1, k_2), groups, k_2);
+
+  %% %% Convert average contingency table
+  %% map_act = map_m_1 * act * map_m_2';
+
+  %% %% Convert clusters
+  %% map_cl_1 = map_m_1 * cl_1;
+  %% map_cl_2 = map_m_2 * cl_2;
+
+  %% %% Convert marginals
+  %% map_marg_1 = map_m_1 * marg_1;
+  %% map_marg_2 = map_m_2 * marg_2;
+
+  %% %% Find entropies
+  %% map_sqrt_h_1 = sqrt(entropy(map_marg_1));
+  %% map_sqrt_h_2 = sqrt(entropy(map_marg_2));
+
+  %% %% Mi
+  %% map_mi = sum(sum(map_act .* ...
+  %% 		   log(map_act ./ ((map_marg_1 * ones(1, groups)) .* ...
+  %% 				   (ones(groups, 1) * map_marg_2')))));
+
+  %% %% Normalize
+  %% m_value = full(map_mi) / map_sqrt_h_1 / map_sqrt_h_2;
 endfunction
 
 
@@ -73,6 +112,13 @@ endif
 
 %% Extra arguments
 cextra = regex_split(args{5}, '(,|\s+,)\s*');
+
+%% Enough args?
+req_args = getfield(clusterers, clu, "args");
+if length(cextra) ~= req_args
+  error("Clusterer '%s' requires %d extra arg(s): %s",
+	clu, req_args, getfield(clusterers, clu, "help"));
+endif
 
 %% Repeats
 [ repeats, status ] = str2double(args{6});
@@ -146,10 +192,10 @@ for i = 1 : repeats
 
   %% Marginals and entroy
   ind_marg   = sum(ind_cl, 2) ./ n_data;
-  ind_sqrt_h = full(sqrt(-sum(ind_marg .* log(ind_marg))));
+  ind_sqrt_h = sqrt(entropy(ind_marg));
 
   %% Full!
-  ind_marg = full(ind_marg);
+  %% ind_marg = full(ind_marg);
 
   %% Compare to previous
   for j = 1 : (i - 1)
@@ -157,7 +203,7 @@ for i = 1 : repeats
     n = nmi(cl_i{j}, marg_i{j}, sqrt_h_i(j), ind_cl, ind_marg, ind_sqrt_h);
 
     %% Accumulate it
-    acc_nmi += n;
+    acc_nmi   += n;
   endfor
 
   %% Store it
@@ -167,7 +213,8 @@ for i = 1 : repeats
 endfor
 
 %% Average
-acc_nmi /= repeats * (repeats - 1) / 2;
+n_pairs  = repeats * (repeats - 1) / 2;
+acc_nmi /= n_pairs;
 
 %% Display
 printf("%5.3f\n", acc_nmi);
