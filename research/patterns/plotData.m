@@ -21,7 +21,7 @@ def_opts.pairwise = false();
 
 %% Arguments
 if length(cmd_args) < 1
-  error("Usage: plotData.m [-parallel] [-pairwise] <input> [<input>...]");
+  error("Usage: plotData.m [--parallel] [--pairwise] <input> [<input>...]");
 endif
 
 %% Not parallel?

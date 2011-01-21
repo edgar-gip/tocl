@@ -17,7 +17,7 @@ source(binrel("andoElements.m"));
 %%%%%%%%%%%
 
 %% Histogram plot
-function histogram_plot(sort_scores, sort_full, th_cuts)
+function histogram_plot(sort_scores, sort_full, th_cuts, do_log)
   %% Histogram bins
   histo_bins = 100;
 
@@ -68,8 +68,11 @@ function histogram_plot(sort_scores, sort_full, th_cuts)
 
   %% Plot
   figure("name", "Histogram");
-  %% plot(plots{:});
-  semilogy(plots{:});
+  if do_log
+    semilogy(plots{:});
+  else
+    plot(plots{:});
+  endif
 endfunction
 
 %% F1 plot
@@ -134,14 +137,21 @@ args = argv();
 pairwise = true();
 if length(args) > 0 && strcmp(args{1}, "--no-pairwise")
   pairwise = false();
-  args = { args{2 : length(args)} };
+  args     = { args{2 : length(args)} };
+endif
+
+%% Do log
+do_log = true();
+if length(args) > 0 && strcmp(args{1}, "--no-log")
+  do_log = false();
+  args   = { args{2 : length(args)} };
 endif
 
 %% Arguments
 if length(args) ~= 7
   error(cstrcat("Wrong number of arguments: Expected", ...
-		" [--no-pairwise] <input> <distance> <d-extra> <method> ", ...
-		"<m-extra> <k> <seed>"));
+		" [--no-pairwise] [--no-log] <input> <distance> <d-extra> ", ...
+		"<method> <m-extra> <k> <seed>"));
 endif
 
 %% Input file
@@ -316,7 +326,7 @@ for th = ths
 endfor
 
 %% Histogram plot
-histogram_plot(sort_scores, sort_full, th_cuts);
+histogram_plot(sort_scores, sort_full, th_cuts, do_log);
 
 %% F1 plot
 f1_plot(sort_truth, sort_full, th_cuts);
