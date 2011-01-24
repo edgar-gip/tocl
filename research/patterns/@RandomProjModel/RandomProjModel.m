@@ -5,11 +5,11 @@
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = RandomProjModel(soft_alpha, projection)
+function [ this ] = RandomProjModel(soft_alpha, projection, bias)
 
   %% Check arguments
-  if nargin() ~= 2
-    usage("[ this ] = RandomProjModel(soft_alpha, projection)");
+  if nargin() ~= 3
+    usage("[ this ] = RandomProjModel(soft_alpha, projection, bias)");
   endif
 
   %% This object
@@ -18,6 +18,7 @@ function [ this ] = RandomProjModel(soft_alpha, projection)
   %% Set fields
   this.soft_alpha = soft_alpha;
   this.projection = projection;
+  this.bias       = bias;
 
   %% Bless
   %% And add inheritance

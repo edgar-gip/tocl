@@ -12,8 +12,11 @@ function [ expec, log_like ] = expectation(this, data)
     usage("[ expec, log_like ] = @RandomProjModel/expectation(this, data)");
   endif
 
+  %% Sizes
+  [ n_dims, n_data ] = size(data);
+
   %% Apply the projection matrix
-  margin = this.projection * data;
+  margin = this.projection * data + this.bias * ones(1, n_data);
 
   %% Hard or soft?
   if isfinite(this.soft_alpha)

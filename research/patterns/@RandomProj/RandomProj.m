@@ -19,6 +19,10 @@ function [ this ] = RandomProj(opts = struct())
   %% Default -> 0.1
   this.soft_alpha = getfielddef(opts, "soft_alpha", 0.1);
 
+  %% Homogeneous
+  %% Default -> false
+  this.homogeneous = getfielddef(opts, "homogeneous", false());
+
   %% Verbose
   %% Default -> false
   this.verbose = getfielddef(opts, "verbose", false());

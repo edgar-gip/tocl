@@ -24,8 +24,15 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Random projection matrix
   projection = rand(k, n_dims) - 0.5;
 
+  %% Random bias
+  if this.homogeneous
+    bias = zeros(k, 1);
+  else
+    bias = rand(k, 1);
+  endif
+
   %% Create the model
-  model = RandomProjModel(this.soft_alpha, projection);
+  model = RandomProjModel(this.soft_alpha, projection, bias);
 
   %% Find the expectation
   [ expec, log_like ] = expectation(model, data);
