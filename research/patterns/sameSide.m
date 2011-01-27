@@ -431,7 +431,7 @@ function [ gauss_cut_idx ] = ...
 
   %% Cut point
   gauss_expec_tru = expec(sorted_cl(1), :);
-  gauss_cut_idx   = min(find(gauss_expec_tru < 0.5));
+  gauss_cut_idx   = last_downfall(gauss_expec_tru, 0.5);
 
   %% Plot
   figure(gauss_fig);
@@ -463,7 +463,7 @@ function [ gauss_cut_idx ] = ...
 
   %% Cut point
   gauss_expec_tru = expec(sorted_cl(1), :);
-  gauss_cut_idx   = min(find(gauss_expec_tru < 0.5));
+  gauss_cut_idx   = last_downfall(gauss_expec_tru, 0.5);
 
   %% Plot
   figure(gauss_fig);
@@ -507,7 +507,7 @@ function [ mgauss_cut_idx ] = ...
 
     %% Expec
     expec_tru = sum(expec(sorted_cl(1 : c), :), 1);
-    cut_idx   = max(find(expec_tru >= 0.5));
+    cut_idx   = last_downfall(expec_tru, 0.5);
 
     %% Add plots
     plots = cell_push(plots, ...

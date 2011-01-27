@@ -7,7 +7,8 @@ SUFFIXES = .oct
 
 # Modules
 noinst_DATA = array_zip.oct cell_cat.oct isfunctionhandle.oct \
-	      matrix_rankize.oct parse_qps.oct quadprog_turlach.oct
+	      last_downfall.oct matrix_rankize.oct parse_qps.oct \
+	      quadprog_turlach.oct
 EXTRA_DATA  = istream_open.oct psi.oct quadprog_cgal.oct regex_match.oct
 
 

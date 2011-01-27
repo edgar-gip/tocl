@@ -124,7 +124,7 @@ function [ th ] = th_gaussNm_f(sort_scores, sort_truth, msort_scores, ...
 
     %% Expec
     expec_tru = sum(expec(sorted_cl(1 : c), :), 1);
-    cut_idx   = max(find(expec_tru >= 0.5));
+    cut_idx   = last_downfall(expec_tru, 0.5);
 
     %% Better?
     if ~isempty(cut_idx) && f1_c(cut_idx) > best_f1
@@ -163,7 +163,7 @@ function [ th ] = th_gaussNnm_f(sort_scores, sort_truth, msort_scores, ...
 
     %% Expec
     expec_tru = sum(expec(sorted_cl(1 : c), :), 1);
-    cut_idx   = max(find(expec_tru >= 0.5));
+    cut_idx   = last_downfall(expec_tru, 0.5);
 
     %% Better?
     if ~isempty(cut_idx) && f1_c(cut_idx) > best_f1

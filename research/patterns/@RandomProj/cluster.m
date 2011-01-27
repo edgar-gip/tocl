@@ -28,7 +28,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   if this.homogeneous
     bias = zeros(k, 1);
   else
-    bias = rand(k, 1);
+    bias = rand(k, 1) - 0.5;
   endif
 
   %% Create the model

@@ -20,7 +20,7 @@ function [ mid, mid_idx ] = apply(this, input)
 
   %% Cut point
   expec_tru = expec(sorted_cl(1), :);
-  mid_idx   = min(find(expec_tru < 0.5));
+  mid_idx   = last_downfall(expec_tru, 0.5);
 
   %% Any?
   if isempty(mid_idx)
