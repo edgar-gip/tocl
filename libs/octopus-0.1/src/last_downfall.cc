@@ -54,11 +54,6 @@ struct Downfall {
   static bool active(double _left, double _right, double _threshold) {
     return _left >= _threshold and _right < _threshold;
   }
-
-  // Output
-  static octave_idx_type output(octave_idx_type _i) {
-    return _i;
-  }
 };
 
 // Uprise
@@ -66,11 +61,6 @@ struct Uprise {
   // Active
   static bool active(double _left, double _right, double _threshold) {
     return _left < _threshold and _right >= _threshold;
-  }
-
-  // Output
-  static octave_idx_type output(octave_idx_type _i) {
-    return _i + 1;
   }
 };
 
@@ -127,7 +117,7 @@ find_it(const octave_value_list& _args, int _nargout) {
       // Is the condition accomplished?
       if (FallP::active(data[i], data[i + 1], threshold)) {
 	// Found!
-	output = FallP::output(i);
+	output = i;
 	found  = true;
       }
     }
