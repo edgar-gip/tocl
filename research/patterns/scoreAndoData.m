@@ -18,6 +18,15 @@ source(binrel("andoElements.m"));
 
 %% Get the parameters
 args = argv();
+
+%% Full
+do_full = false();
+if length(args) > 1 && strcmp(args{1}, "--full")
+  do_full = true();
+  args    = { args{2 : length(args)} };
+endif
+
+%% Check parameter length
 if ~any(length(args) == [ 7, 8, 9 ])
   error(cstrcat("Wrong number of arguments: Expected", ...
 		" <input> <distance> <d-extra> <method> <m-extra>", ...
@@ -147,38 +156,43 @@ fprintf(fout, "*** %8g %5.3f ***\n", cluster_time, auc);
 ths = getfield(methods, met, "ths");
 for th = ths
 
-  %% Find the threshold
-  thfun    = getfield(th, "find");
-  th_value = thfun(sort_scores, sort_truth, msort_scores, msort_model, ...
-		   f1_c, model);
+  %% Must we do it?
+  %% -> Full output or basic threshold
+  if do_full || getfield(th, "basic")
 
-  %% Negative/positive cluster
-  pos_cl = find(sort_scores >= th_value); n_pos_cl = length(pos_cl);
-  neg_cl = find(sort_scores <  th_value);
+    %% Find the threshold
+    thfun    = getfield(th, "find");
+    th_value = thfun(sort_scores, sort_truth, msort_scores, msort_model, ...
+		     f1_c, model);
 
-  %% Intersections
-  pos_pos = intersect(pos_tr, pos_cl);
-  pos_neg = intersect(pos_tr, neg_cl);
-  neg_pos = intersect(neg_tr, pos_cl);
-  neg_neg = intersect(neg_tr, neg_cl);
+    %% Negative/positive cluster
+    pos_cl = find(sort_scores >= th_value); n_pos_cl = length(pos_cl);
+    neg_cl = find(sort_scores <  th_value);
 
-  %% Sizes
-  n_pos_pos = length(pos_pos);
-  n_pos_neg = length(pos_neg);
-  n_neg_pos = length(neg_pos);
-  n_neg_neg = length(neg_neg);
+    %% Intersections
+    pos_pos = intersect(pos_tr, pos_cl);
+    pos_neg = intersect(pos_tr, neg_cl);
+    neg_pos = intersect(neg_tr, pos_cl);
+    neg_neg = intersect(neg_tr, neg_cl);
 
-  %% Precision/Recall
-  prc  = n_pos_pos / (n_pos_pos + n_neg_pos);
-  rec  = n_pos_pos / (n_pos_pos + n_pos_neg);
-  nrec = n_neg_pos / (n_neg_pos + n_neg_neg);
-  f1   = 2 * prc * rec / (prc + rec);
+    %% Sizes
+    n_pos_pos = length(pos_pos);
+    n_pos_neg = length(pos_neg);
+    n_neg_pos = length(neg_pos);
+    n_neg_neg = length(neg_neg);
 
-  %% Output
+    %% Precision/Recall
+    prc  = n_pos_pos / (n_pos_pos + n_neg_pos);
+    rec  = n_pos_pos / (n_pos_pos + n_pos_neg);
+    nrec = n_neg_pos / (n_neg_pos + n_neg_neg);
+    f1   = 2 * prc * rec / (prc + rec);
 
-  %% Display
-  fprintf(fout, "%5s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
-	  getfield(th, "name"), n_pos_cl, prc, rec, nrec, f1);
+    %% Output
+
+    %% Display
+    fprintf(fout, "%5s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
+	    getfield(th, "name"), n_pos_cl, prc, rec, nrec, f1);
+  endif
 endfor
 
 %% Close output
