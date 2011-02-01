@@ -9,12 +9,24 @@ SUFFIXES = .oct
 noinst_DATA = array_zip.oct cell_cat.oct isfunctionhandle.oct \
 	      last_downfall.oct matrix_rankize.oct parse_qps.oct \
 	      quadprog_turlach.oct
-EXTRA_DATA  = istream_open.oct psi.oct quadprog_cgal.oct regex_match.oct
+EXTRA_DATA  = in_convex_hull.oct istream_open.oct psi.oct quadprog_cgal.oct \
+	      regex_match.oct
 
 
 # Generic
 .cc.oct:
 	$(MKOCTFILE) $(CPPFLAGS) $($*_OCTFLAGS) $(DEFS) $^ $($*_SOURCES) $(LDFLAGS) $($*_LDADD)
+
+
+# in_convex_hull
+if IN_CONVEX_HULL_MODULE
+noinst_DATA += in_convex_hull.oct
+in_convex_hull_LDADD = -lCGAL
+in_convex_hull_CXXFLAGS = -g -frounding-math -Wall -Wextra -fPIC
+
+in_convex_hull.oct: in_convex_hull.cc $(in_convex_hull_SOURCES)
+	CXXFLAGS="$(in_convex_hull_CXXFLAGS)" $(MKOCTFILE) $(CPPFLAGS) $(in_convex_hull_OCTFLAGS) $(DEFS) $^ $(LDFLAGS) $(in_convex_hull_LDADD)
+endif
 
 
 # istream

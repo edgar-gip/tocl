@@ -24,25 +24,11 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Random projection matrix
   projection = rand(k, n_dims) - 0.5;
 
-  %% Normalize
-  projection ./= sqrt(sum(projection .^ 2, 2)) * ones(1, n_dims);
-
   %% Random bias
   if this.homogeneous
-    %% No bias
     bias = zeros(k, 1);
-
   else
-    %% Apply the projection matrix
-    margin = projection * data;
-
-    %% Min, max and range
-    min_margin = min(margin')';
-    max_margin = max(margin')';
-    range      = max_margin - min_margin;
-
-    %% Biases should lie within the range
-    bias = min_margin + range .* rand(k, 1);
+    bias = rand(k, 1) - 0.5;
   endif
 
   %% Create the model

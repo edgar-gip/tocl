@@ -51,6 +51,8 @@ AC_CHECK_HEADERS([Rmath.h],
 OCTAVE_RESIZE_AND_FILL
 
 # Conditionals
+AM_CONDITIONAL([IN_CONVEX_HULL_MODULE],
+	       [test x$has_cgal_qp_models = xtrue])
 AM_CONDITIONAL([ISTREAM_MODULE],
 	       [test x$has_libbz2 = xtrue -a x$has_libz = xtrue -a x$has_ttcl_io_anystream = xtrue])
 AM_CONDITIONAL([QUADPROG_CGAL_MODULE],
