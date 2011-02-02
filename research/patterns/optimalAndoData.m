@@ -52,8 +52,8 @@ n_background = length(background);
 n_foreground = n_data - n_background;
 
 %% Debug
-fprintf(2, "There's %d foreground and %d background samples\n", ...
-	n_foreground, n_background);
+%% fprintf(2, "There's %d foreground and %d background samples\n", ...
+%%         n_foreground, n_background);
 
 %% Inside
 inside = zeros(1, n_background);
@@ -67,8 +67,9 @@ for c = 2 : n_groups
   this_inside = in_convex_hull(foreground, background);
 
   %% Debug
-  fprintf(2, "Group %d contains %d foreground and %d background samples\n", ...
-	  c, length(foreground), sum(this_inside));
+  %% fprintf(2, ...
+  %%         "Group %d contains %d foreground and %d background samples\n", ...
+  %%         c, length(foreground), sum(this_inside));
 
   %% Or the inside
   inside |= this_inside;
@@ -79,8 +80,8 @@ n_inside = sum(inside);
 n_pos_cl = n_foreground + n_inside;
 
 %% Debug
-fprintf(2, "Overall, %d background samples fall in foreground groups\n", ...
-	n_inside);
+%% fprintf(2, "Overall, %d background samples fall in foreground groups\n", ...
+%%         n_inside);
 
 %% End timing
 [ total1, user1, system1 ] = cputime();
@@ -101,8 +102,8 @@ f1  = 2 * prc * rec / (prc + rec);
 fprintf(fout, "*** %8g %5.3f ***\n", cluster_time, auc);
 
 %% Display
-printf("%5s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
-       "Best", n_pos_cl, prc, rec, nrec, f1);
+fprintf(fout, "%5s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
+	"Best", n_pos_cl, prc, rec, nrec, f1);
 
 %% Close output
 if fout ~= 1
