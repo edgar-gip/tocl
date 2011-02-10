@@ -50,7 +50,7 @@ end_try_catch
 %% Distance
 dist = args{2};
 if ~isfield(distances, dist)
-  error("Wrong distance name '%s'. Must be: %s", met, fields(distances));
+  error("Wrong distance name '%s'. Must be: %s", dist, fields(distances));
 endif
 
 %% Extra arguments

@@ -10,6 +10,44 @@ pkg load octopus
 
 
 %%%%%%%%%%%%%
+%% Helpers %%
+%%%%%%%%%%%%%
+
+%% Read lines
+function [ lines ] = read_lines(file)
+  %% Open the file
+  f = fopen(file, "r");
+
+  %% Starting size and position
+  size = 16;
+  pos  =  0;
+
+  %% Result
+  lines = resize({}, size, 1);
+
+  %% Can we read a line
+  line = fgetl(f);
+  while line ~= -1
+    %% One more
+    pos += 1;
+    if pos > size
+      %% Double
+      lines = resize(lines, size *= 2, 1);
+    endif
+
+    %% Add it
+    lines{pos} = line;
+
+    %% Next
+    line = fgetl(f);
+  endwhile
+
+  %% Remove unused
+  lines = resize(lines, pos, 1);
+endfunction
+
+
+%%%%%%%%%%%%%
 %% Options %%
 %%%%%%%%%%%%%
 
@@ -19,6 +57,7 @@ def_opts.freq_th   = [];
 def_opts.mi_feats  = [];
 def_opts.normalize = false();
 def_opts.sparse    = false();
+def_opts.words     = [];
 
 %% Parse options
 [ cmd_args, cmd_opts ] = ...
@@ -26,7 +65,8 @@ def_opts.sparse    = false();
 		"freq-th=i",  "freq_th", ...
 		"mi-feats=i", "mi_feats", ...
 		"normalize!", "normalize", ...
-		"sparse!",    "sparse");
+		"sparse!",    "sparse", ...
+		"words=s",    "words");
 
 %% Input and output
 if length(cmd_args) ~= 2
@@ -52,6 +92,18 @@ catch
   error("Cannot load data from '%s': %s", input, lasterr());
 end_try_catch
 
+%% Word list
+if ~isempty(cmd_opts.words)
+  %% Read it
+  try
+    [ words ] = read_lines(cmd_opts.words);
+  catch
+    error("Cannot load word list from '%s': %s", cmd_opts.words, lasterr());
+  end_try_catch
+else
+  words = {};
+endif
+
 %% Size
 [ n_feats, n_data ] = size(data);
 
@@ -67,6 +119,10 @@ if ~isempty(cmd_opts.freq_th)
   %% Keep only those above it
   data = data(kept_feats, :);
 
+  %% Words
+  if ~isempty(words)
+    words = words{kept_feats};
+  endif
 else
   %% Keep all
   kept_feats = 1 : n_feats;
@@ -104,6 +160,17 @@ if ~isempty(cmd_opts.mi_feats) && n_feats > cmd_opts.mi_feats
 
   %% New data
   data = data(rekept_feats, :);
+
+  %% Words
+  if ~isempty(words)
+    %% Display
+    for f = rekept_feats
+      fprintf(2, "%d(%s) -> %.3f", kept_feats(f), words(f), mi(f));
+    endfor
+
+    %% Update
+    words = words{rekept_feats};
+  endif
 endif
 
 %% Normalize (as a distribution)
