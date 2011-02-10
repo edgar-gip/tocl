@@ -238,11 +238,19 @@ endfunction
 %%%%%%%%%%
 
 %% Default options
-def_opts          = struct();
-def_opts.pairwise = true();
-def_opts.do_log   = true();
-def_opts.n_model  = false();
-def_opts.do_full  = false();
+def_opts            = struct();
+def_opts.pairwise   = true();
+def_opts.do_log     = true();
+def_opts.n_model    = false();
+def_opts.full_level = 1;
+
+%% Helper functions
+function [ opts ] = s_full(opts, value)
+  opts.full_level = 2;
+endfunction
+function [ opts ] = s_extra(opts, value)
+  opts.full_level = 3;
+endfunction
 
 %% Parse options
 [ args, opts ] = ...
@@ -250,13 +258,13 @@ def_opts.do_full  = false();
 		"pairwise!", "pairwise", ...
 		"log!",      "do_log", ...
 		"n-model!",  "n_model", ...
-		"full!",     "do_full");
+		"full",      @s_full, ...
+		"extra",     @s_extra);
 
 %% Arguments
 if length(args) ~= 7
-  error(cstrcat("Wrong number of arguments: Expected", ...
-		" [--no-pairwise] [--no-log] <input> <distance> <d-extra> ", ...
-		"<method> <m-extra> <k> <seed>"));
+  error(cstrcat("Wrong number of arguments: Expected [options]", ...
+		" <input> <distance> <d-extra> <method> <m-extra> <k> <seed>"));
 endif
 
 %% Input file
@@ -384,7 +392,7 @@ for th = ths
 
   %% Must we do it?
   %% -> Full output or basic threshold
-  if opts.do_full || getfield(th, "basic")
+  if opts.full_level >= getfield(th, "level")
 
     %% Find the threshold
     thfun    = getfield(th, "find");
@@ -421,7 +429,7 @@ for th = ths
     %% Output
 
     %% Display
-    printf("%5s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
+    printf("%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
 	   getfield(th, "name"), n_pos_cl, prc, rec, nrec, f1);
 
     %% Plot data

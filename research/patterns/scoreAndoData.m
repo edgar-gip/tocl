@@ -19,11 +19,17 @@ source(binrel("andoElements.m"));
 %% Get the parameters
 args = argv();
 
-%% Full
-do_full = false();
-if length(args) > 1 && strcmp(args{1}, "--full")
-  do_full = true();
-  args    = { args{2 : length(args)} };
+%% Full level
+full_level = 1;
+if length(args) > 1
+  switch args{1}
+    case "--full"
+      full_level = 2;
+      args       = { args{2 : length(args)} };
+    case "--extra"
+      full_level = 3;
+      args       = { args{2 : length(args)} };
+  endswitch
 endif
 
 %% Check parameter length
@@ -158,7 +164,7 @@ for th = ths
 
   %% Must we do it?
   %% -> Full output or basic threshold
-  if do_full || getfield(th, "basic")
+  if full_level >= getfield(th, "level")
 
     %% Find the threshold
     thfun    = getfield(th, "find");
@@ -190,7 +196,7 @@ for th = ths
     %% Output
 
     %% Display
-    fprintf(fout, "%5s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
+    fprintf(fout, "%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
 	    getfield(th, "name"), n_pos_cl, prc, rec, nrec, f1);
   endif
 endfor

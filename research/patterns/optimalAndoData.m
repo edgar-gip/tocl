@@ -102,7 +102,7 @@ f1  = 2 * prc * rec / (prc + rec);
 fprintf(fout, "*** %8g %5.3f ***\n", cluster_time, auc);
 
 %% Display
-fprintf(fout, "%5s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
+fprintf(fout, "%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
 	"Best", n_pos_cl, prc, rec, nrec, f1);
 
 %% Close output
