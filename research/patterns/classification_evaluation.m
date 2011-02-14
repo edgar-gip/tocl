@@ -4,7 +4,8 @@
 
 %% Author: Edgar Gonzalez
 
-function [ purity, ipurity, f1 ] = classification_evaluation(system, truth)
+function [ purity, ipurity, f1, co_occ ] = ...
+  classification_evaluation(system, truth)
   %% Find the co-occurrence matrix
   co_occ = system * truth'; % n_system * n_truth
   total  = sum(sum(co_occ));

@@ -174,6 +174,54 @@ function [ th ] = gaussN_bic2(expec, model, sort_scores, msort_scores)
 
     %% Better?
     if bic > best_bic
+      %% Expec
+      expec_tru = sum(expec(sorted_cl(1 : c), :), 1);
+      cut_idx   = last_downfall(expec_tru, 0.5);
+
+      %% Empty?
+      if ~isempty(cut_idx)
+	best_bic = bic;
+	best_c   = c;
+	best_idx = cut_idx;
+      endif
+    endif
+  endfor
+
+  %% Best
+  if best_idx == -1
+    th = sort_scores(length(sort_scores));
+  else
+    th = sort_scores(best_idx);
+  endif
+endfunction
+
+%% * + 2-BIC (Recalculate)
+function [ th ] = gaussN_bic2r(expec, model, sort_scores, msort_scores)
+  %% Sort the clusters
+  [ sorted_mns, sorted_cl ] = sort(means(model), "descend");
+  k = length(sorted_cl);
+
+  %% Plots, and best cut point
+  best_bic  = -inf;
+  best_c    =   -1;
+  best_idx  =   -1;
+
+  %% Find it
+  for c = 1 : k - 1
+    %% Map expectation (1 .. c -> 1, (c + 1) .. k -> 2)
+    map    = sparse([ 1 * ones(1, c), 2 * ones(1, k - c) ], sorted_cl, ...
+		    ones(1, k), 2, k);
+    mexpec = map * expec;
+
+    %% Model and expectation
+    [ model_2 ]             = maximization(Gaussian1D(), msort_scores, mexpec);
+    [ expec_2, log_like_2 ] = expectation(model_2, msort_scores);
+
+    %% BIC!
+    [ bic ] = apply(BIC(), msort_scores, expec_2, model_2, log_like_2);
+
+    %% Better?
+    if bic > best_bic
       %% Cut point
       expec_tru = expec_2(1, :);
       cut_idx   = last_downfall(expec_tru, 0.5);
@@ -402,6 +450,16 @@ function [ th ] = th_gaussNm_bic2_f(sort_scores, sort_truth, msort_scores, ...
   [ th ] = gaussN_bic2(expec, model, sort_scores, msort_scores);
 endfunction
 
+%%%% From N Gaussians (Mapped) -> 2-BIC (Recalculate)
+function [ th ] = th_gaussNm_bic2r_f(sort_scores, sort_truth, msort_scores, ...
+				     msort_model, f1_c, model)
+  %% Model
+  [ expec, model ] = gaussNm(msort_scores);
+
+  %% Dist
+  [ th ] = gaussN_bic2r(expec, model, sort_scores, msort_scores);
+endfunction
+
 %%%% From N Gaussians (Mapped) -> n-BIC
 function [ th ] = th_gaussNm_bicN_f(sort_scores, sort_truth, msort_scores, ...
 				    msort_model, f1_c, model)
@@ -467,9 +525,11 @@ th_gaussNm_dist  = struct("name", "GM-N-D",  "find", @th_gaussNm_dist_f,  ...
 			  "level", 2);
 th_gaussNm_bic2  = struct("name", "GM-N-B2", "find", @th_gaussNm_bic2_f,  ...
 			  "level", 2);
+th_gaussNm_bic2r = struct("name", "GM-N-BR", "find", @th_gaussNm_bic2r_f, ...
+			  "level", 2);
 th_gaussNm_bicN  = struct("name", "GM-N-BN", "find", @th_gaussNm_bicN_f,  ...
 			  "level", 2);
-th_gaussNm_var   = struct("name", "GM-N-V",  "find", @th_gaussNm_var_f,  ...
+th_gaussNm_var   = struct("name", "GM-N-V",  "find", @th_gaussNm_var_f,   ...
 			  "level", 2);
 th_gaussNnm      = struct("name", "GM-NN",   "find", @th_gaussNnm_f,      ...
 			  "level", 3);
@@ -482,8 +542,8 @@ ths_simple = [ th_all, th_best, th_model, th_size ];
 ths_ewocs  = [ th_all, th_best, th_size, th_dist, ...
 	       th_gauss2, th_gauss2n, th_gauss2m, th_gauss2nm, ...
 	       th_gaussNm, th_gaussNm_dist, ...
-	       th_gaussNm_bic2, th_gaussNm_bicN, th_gaussNm_var, ...
-	       th_gaussNnm, th_gaussNnm_dist ];
+	       th_gaussNm_bic2, th_gaussNm_bic2r, th_gaussNm_bicN, ...
+	       th_gaussNm_var, th_gaussNnm, th_gaussNnm_dist ];
 
 
 %%%%%%%%%%%%%
