@@ -73,7 +73,8 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
     fg_c = feval(this.fg_component, data(:, seed_idx));
 
     %% Extend it
-    fg_idxs = un_idxs(add(fg_c, data(:, un_idxs), eff_start_size));
+    [ fg_c, fg_idxs ] = shift(fg_c, data(:, un_idxs), eff_start_size);
+    fg_idxs = un_idxs(fg_idxs);
 
     %% Inner loop
     final = false();
@@ -88,15 +89,15 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
       fg_idxs = setdiff(fg_idxs, out_idxs);
 
       %% Update component
-      remove(fg_c, data(:, out_idxs));
+      fg_c = remove(fg_c, data(:, out_idxs));
 
       %% Changes below the threshold?
-      final = length(out_idxs) < eff_change_threshold || length(fg_idxs) == 0;
+      final = length(out_idxs) < eff_change_threshold || ...
+	      length(fg_idxs)  < eff_min_size;
     endwhile
 
     %% Is the size more than the threshold?
-    size = length(fg_idxs);
-    if size >= eff_min_size
+    if length(fg_idxs) >= eff_min_size
       %% One more cluster
       fg_k += 1;
 

@@ -2,15 +2,16 @@
 
 %% k-Minority Detection
 
-%% Multinomial Component Extension
+%% Generic Component Extension
+%% Uses the template pattern
 
 %% Author: Edgar Gonzalez
 
-function [ idx ] = add(this, data, tsize)
+function [ new, idx ] = shift(this, data, tsize)
 
   %% Check arguments
   if ~any(nargin() ~= [ 2, 3 ])
-    usage("[ l_p ] = @KMDMultinomial/add(this, data [, tsize])");
+    usage("[ l_p ] = @KMDComponent/readd(this, data [, tsize])");
   endif
 
   %% Size
@@ -32,12 +33,6 @@ function [ idx ] = add(this, data, tsize)
     idx = sort(best_idx(1 : tsize));
   endif
 
-  %% Update unnormalized thetas
-  this.un_theta += sum(data(:, idx), 2)';
-
-  %% Find the total vocabulary size
-  this.un_total = sum(this.un_theta);
-
-  %% Find the log-thetas
-  this.log_theta = log((1 + this.un_theta) / (this.n_dims + this.un_total));
+  %% Call specific version
+  new = _shift(this, data, idx);
 endfunction

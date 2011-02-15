@@ -6,33 +6,41 @@
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = KMDMultinomial(data)
+function [ this ] = KMDMultinomial(first, un_theta)
 
   %% Check arguments
-  if nargin() ~= 1
-    usage("[ this ] = KMDMultinomial(data)");
+  if ~any(nargin() == [ 1, 2 ])
+    usage("[ this ] = KMDMultinomial(data | n_dims, un_theta)");
+  endif
+
+  %% Data was given?
+  if nargin() == 1
+    %% Size
+    [ n_dims, n_data ] = size(first);
+
+    %% Find the unnormalized thetas
+    un_theta = sum(first, 2)';
+
+  else
+    %% Fetch
+    n_dims = first;
   endif
 
   %% This object
   this = struct();
 
-  %% Size
-  [ n_dims, n_data ] = size(data);
-
-  %% Store the number of dimensions
-  this.n_dims = n_dims;
-
-  %% Find the unnormalized thetas
-  this.un_theta = sum(data, 2)';
+  %% Set fields
+  this.n_dims   = n_dims;
+  this.un_theta = un_theta;
 
   %% Find the total vocabulary size
-  this.un_total = sum(this.un_theta);
+  un_total = sum(un_theta);
 
   %% Find the log-thetas
-  this.log_theta = log((1 + this.un_theta) / (this.n_dims + this.un_total));
+  this.log_theta = log((1 + un_theta) / (n_dims + un_total));
 
   %% Bless
   %% And add inheritance
   this = class(this, "KMDMultinomial", ...
-	       Simple());
+	       KMDComponent());
 endfunction
