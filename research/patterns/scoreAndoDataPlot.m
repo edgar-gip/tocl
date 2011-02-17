@@ -16,105 +16,9 @@ source(binrel("andoElements.m"));
 %% Plots %%
 %%%%%%%%%%%
 
-%% Gaussian model plots
-%% From sameSide.m
-function [ model_plots, sorted_cl ] = ...
-      gaussian_model_plots(model, max_histo, color)
-
-  %% Model info
-  als = alphas(model);
-  mns = means(model);
-  std = sqrt(variances(model));
-
-  %% Number of clusters
-  k = length(als);
-
-  %% Sort the clusters
-  [ sorted_mns, sorted_cl ] = sort(mns, "descend");
-
-  %% Xs and Ps
-  xs = zeros(k, 21);
-  ps = zeros(k, 21);
-
-  %% For each cluster
-  for c = 1 : k
-    %% Get 21 points Within 2 stdevs
-    xs(c, :) = mns(c) + (-10 : 10) * std(c) / 10;
-
-    %% Find a scaled density
-    ps(c, :) = als(c) * normpdf(xs(c, :), mns(c), std(c));
-  endfor
-
-  %% Scale
-  max_p = max(max(ps));
-  ps   *= max_histo / max_p;
-
-  %% For each cluster
-  model_plots = {};
-  for c = 1 : k
-    %% Add it
-    model_plots = cell_push(model_plots, xs(c, :), ps(c, :), color);
-  endfor
-endfunction
-
-%% Nmodel plot
-function n_model_plot(msort_scores, msort_model, max_histo, ...
-		      all_limits, all_histo, do_log)
-  %% Fit the model
-  %% I know I'm remaking it, but it's for the sake of code reusal...
-  [ nm_expec, nm_model ] = ...
-      cluster(CriterionClusterer(Gaussian1D(), BIC(),  ...
-				 struct("max_k",  10, ...
-					"repeats", 1)), ...
-	      msort_scores);
-
-  %% Map the overall histogram
-  mhisto_plots = { apply(msort_model, all_limits), all_histo, "-k" };
-
-  %% Plot it
-  [ model_plots, sorted_cl ] = gaussian_model_plots(nm_model, max_histo, "-m");
-
-  %% Plot model
-  figure("name", "Model");
-  if do_log
-    semilogy(mhisto_plots{:}, model_plots{:});
-  else
-    plot(mhisto_plots{:}, model_plots{:});
-  endif
-
-
-  %% Size
-  n_data = length(msort_scores);
-
-  %% Distance
-  dist = (((1 : n_data) - 1) / (n_data - 1)) .^ 2 + msort_scores .^ 2;
-
-  %% Dist plots
-  dist_plots = { 1 : n_data, dist };
-
-  %% Find it
-  for c = 1 : length(sorted_cl) - 1
-
-    %% Expec
-    expec_tru = sum(nm_expec(sorted_cl(1 : c), :), 1);
-    cut_idx   = last_downfall(expec_tru, 0.5);
-
-    %% Not empty?
-    if ~isempty(cut_idx)
-
-      %% Add the plot
-      dist_plots = cell_push(dist_plots, [ cut_idx ], [ dist(cut_idx) ], "*r");
-    endif
-  endfor
-
-  %% Plot distance
-  figure("name", "Distance");
-  plot(dist_plots{:});
-endfunction
-
 %% Histogram plot
 function histogram_plot(sort_scores, msort_scores, msort_model, sort_full, ...
-			th_cuts, do_log, n_model)
+			th_cuts, do_log)
   %% Histogram bins
   histo_bins = 100;
 
@@ -166,12 +70,6 @@ function histogram_plot(sort_scores, msort_scores, msort_model, sort_full, ...
 		      sprintf("*;%s;", th.name), "linewidth", 4);
   endfor
 
-
-  %% Model plots?
-  if n_model
-    n_model_plot(msort_scores, msort_model, max_histo, ...
-		 bin_limits, histo, do_log)
-  endif
 
   %% Plot histogram
   figure("name", "Histogram");
@@ -290,7 +188,7 @@ if ~isfield(methods, met)
   error("Wrong method name '%s'. Must be: %s", met, fields(methods));
 endif
 
-%% Extra arguments
+% Extra arguments
 mextra = regex_split(args{5}, '(,|\s+,)\s*');
 
 %% Enough args?
@@ -345,110 +243,148 @@ clusterer = clustfun(distance, data, s_truth, mextra);
 %% Time difference
 cluster_time = total1 - total0;
 
+%% Is it a scored method?
+if getfield(methods, met, "scor")
+  %% Scored
 
-%% Sort by score
-scores = score(model, data);
-[ sort_scores, sort_idx ] = sort(scores, "descend");
-sort_truth = s_truth(sort_idx);
-sort_full  = truth(sort_idx);
+  %% Sort by score
+  scores = score(model, data);
+  [ sort_scores, sort_idx ] = sort(scores, "descend");
+  sort_truth = s_truth(sort_idx);
+  sort_full  = truth(sort_idx);
 
-%% Map scores
-[ msort_scores, msort_model ] = apply(LinearInterpolator(), sort_scores);
+  %% Map scores
+  [ msort_scores, msort_model ] = apply(LinearInterpolator(), sort_scores);
 
-%% Truth classes
-pos_tr  = find( sort_truth); n_pos_tr = length(pos_tr);
-neg_tr  = find(~sort_truth); n_neg_tr = length(neg_tr);
+  %% Truth classes
+  pos_tr  = find( sort_truth); n_pos_tr = length(pos_tr);
+  neg_tr  = find(~sort_truth); n_neg_tr = length(neg_tr);
 
-%% ROC
+  %% ROC
 
-%% Find accumulated positive and negative
-acc_pos = cumsum( sort_truth);
-acc_neg = cumsum(~sort_truth);
+  %% Find accumulated positive and negative
+  acc_pos = cumsum( sort_truth);
+  acc_neg = cumsum(~sort_truth);
 
-%% Find ROC
-roc_pos = acc_pos ./ n_pos_tr;
-roc_neg = acc_neg ./ n_neg_tr;
+  %% Find ROC
+  roc_pos = acc_pos ./ n_pos_tr;
+  roc_neg = acc_neg ./ n_neg_tr;
 
-%% AUC
-auc = sum(diff(roc_neg) .* ...
-	  (roc_pos(1 : n_data - 1) + roc_pos(2 : n_data))) / 2;
+  %% AUC
+  auc = sum(diff(roc_neg) .* ...
+	    (roc_pos(1 : n_data - 1) + roc_pos(2 : n_data))) / 2;
 
-%% Prc/Rec/F1 curves
-prc_c = acc_pos ./ (acc_pos .+ acc_neg);
-rec_c = acc_pos ./  acc_pos(n_data);
-f1_c  = (2 .* prc_c .* rec_c) ./ (prc_c .+ rec_c);
+  %% Prc/Rec/F1 curves
+  prc_c = acc_pos ./ (acc_pos .+ acc_neg);
+  rec_c = acc_pos ./  acc_pos(n_data);
+  f1_c  = (2 .* prc_c .* rec_c) ./ (prc_c .+ rec_c);
 
-%% Display
-printf("*** %8g %5.3f ***\n", cluster_time, auc);
+  %% Display
+  printf("*** %8g %5.3f ***\n", cluster_time, auc);
 
 
-%% Threshold cut points
-th_cuts = struct();
+  %% Threshold cut points
+  th_cuts = struct();
 
-%% For each threshold
-i   = 1;
-ths = getfield(methods, met, "ths");
-for th = ths
+  %% For each threshold
+  i   = 1;
+  ths = getfield(methods, met, "ths");
+  for th = ths
 
-  %% Must we do it?
-  %% -> Full output or basic threshold
-  if opts.full_level >= getfield(th, "level")
+    %% Must we do it?
+    %% -> Full output or basic threshold
+    if opts.full_level >= getfield(th, "level")
 
-    %% Find the threshold
-    thfun    = getfield(th, "find");
-    th_value = thfun(sort_scores, sort_truth, msort_scores, msort_model, ...
-		     f1_c, model);
+      %% Find the threshold
+      thfun    = getfield(th, "find");
+      th_value = thfun(sort_scores, sort_truth, msort_scores, msort_model, ...
+		       f1_c, model);
 
-    %% Negative/positive cluster
-    pos_cl = find(sort_scores >= th_value); n_pos_cl = length(pos_cl);
-    neg_cl = find(sort_scores <  th_value);
+      %% Negative/positive cluster
+      pos_cl = find(sort_scores >= th_value); n_pos_cl = length(pos_cl);
+      neg_cl = find(sort_scores <  th_value);
 
-    %% Set
-    th_cuts(i).name  = th.name;
-    th_cuts(i).value = th_value;
-    th_cuts(i).index = max(pos_cl);
+      %% Set
+      th_cuts(i).name  = th.name;
+      th_cuts(i).value = th_value;
+      th_cuts(i).index = max(pos_cl);
 
-    %% Intersections
-    pos_pos = intersect(pos_tr, pos_cl);
-    pos_neg = intersect(pos_tr, neg_cl);
-    neg_pos = intersect(neg_tr, pos_cl);
-    neg_neg = intersect(neg_tr, neg_cl);
+      %% Intersections
+      pos_pos = intersect(pos_tr, pos_cl);
+      pos_neg = intersect(pos_tr, neg_cl);
+      neg_pos = intersect(neg_tr, pos_cl);
+      neg_neg = intersect(neg_tr, neg_cl);
 
-    %% Sizes
-    n_pos_pos = length(pos_pos);
-    n_pos_neg = length(pos_neg);
-    n_neg_pos = length(neg_pos);
-    n_neg_neg = length(neg_neg);
+      %% Sizes
+      n_pos_pos = length(pos_pos);
+      n_pos_neg = length(pos_neg);
+      n_neg_pos = length(neg_pos);
+      n_neg_neg = length(neg_neg);
 
-    %% Precision/Recall
-    prc  = n_pos_pos / (n_pos_pos + n_neg_pos);
-    rec  = n_pos_pos / (n_pos_pos + n_pos_neg);
-    nrec = n_neg_pos / (n_neg_pos + n_neg_neg);
-    f1   = 2 * prc * rec / (prc + rec);
+      %% Precision/Recall
+      prc  = n_pos_pos / (n_pos_pos + n_neg_pos);
+      rec  = n_pos_pos / (n_pos_pos + n_pos_neg);
+      nrec = n_neg_pos / (n_neg_pos + n_neg_neg);
+      f1   = 2 * prc * rec / (prc + rec);
 
-    %% Output
+      %% Output
 
-    %% Display
-    printf("%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
-	   getfield(th, "name"), n_pos_cl, prc, rec, nrec, f1);
+      %% Display
+      printf("%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
+	     getfield(th, "name"), n_pos_cl, prc, rec, nrec, f1);
 
-    %% Plot data
-    if opts.pairwise
-      th_truth = 1 + (scores >= th_value);
-      pairwise_cluster_plot(data, th_truth, th.name);
+      %% Plot data
+      if opts.pairwise
+	th_truth = 1 + (scores >= th_value);
+	pairwise_cluster_plot(data, th_truth, th.name);
+      endif
+
+      %% Next
+      i += 1;
     endif
+  endfor
 
-    %% Next
-    i += 1;
+  %% Histogram plot
+  histogram_plot(sort_scores, msort_scores, msort_model, sort_full, th_cuts, ...
+		 opts.do_log);
+
+  %% F1 plot
+  f1_plot(sort_truth, sort_full, th_cuts);
+
+else
+  %% Non-scored method
+
+  %% AUC is not defined
+  auc = nan;
+
+  %% Positive cluster
+  pos_cl = find(sum(expec, 1)); n_pos_cl = length(pos_cl);
+
+  %% Truth
+  pos_tr = find( s_truth); n_pos_tr = length(pos_tr);
+  n_neg_tr = n_data - n_pos_tr;
+
+  %% The good (and the bad) ones
+  n_pos_pos = length(intersect(pos_cl, pos_tr));
+  n_neg_pos = n_pos_cl - n_pos_pos;
+
+  %% Prc/Rec/F1 curves
+  prc  = n_pos_pos / n_pos_cl;
+  rec  = n_pos_pos / n_pos_tr;
+  nrec = n_neg_pos / n_neg_tr;
+  f1  = 2 * prc * rec / (prc + rec);
+
+  %% Display
+  printf("*** %8g %5.3f ***\n", cluster_time, auc);
+  printf("%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
+	 "Model", n_pos_cl, prc, rec, nrec, f1);
+
+  %% Plot data
+  if opts.pairwise
+    [ hard_e, hard_cl ] = harden_expectation(expec, true());
+    pairwise_cluster_plot(data, hard_cl, "Model");
   endif
-endfor
-
-%% Histogram plot
-histogram_plot(sort_scores, msort_scores, msort_model, sort_full, th_cuts, ...
-	       opts.do_log, opts.n_model);
-
-%% F1 plot
-f1_plot(sort_truth, sort_full, th_cuts);
+endif
 
 %% Pause
 pause();

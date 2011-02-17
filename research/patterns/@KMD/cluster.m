@@ -76,6 +76,13 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
     [ fg_c, fg_idxs ] = shift(fg_c, data(:, un_idxs), eff_start_size);
     fg_idxs = un_idxs(fg_idxs);
 
+    %% Component probability
+    n_fg  = length(fg_idxs);
+    fg_lp = log(n_fg / n_data);
+
+    %% Background probability
+    bg_lp = log((n_un - n_fg) / n_data);
+
     %% Inner loop
     final = false();
     while ~final
@@ -83,13 +90,20 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
       fg_ll = log_likelihood(fg_c, data(:, fg_idxs));
 
       %% Which are below it?
-      out_idxs = fg_idxs(find(fg_ll < bg_ll(fg_idxs)));
+      out_idxs = fg_idxs(find(fg_lp + fg_ll < bg_lp + bg_ll(fg_idxs)));
 
       %% Remove
       fg_idxs = setdiff(fg_idxs, out_idxs);
 
       %% Update component
       fg_c = remove(fg_c, data(:, out_idxs));
+
+      %% Component probability
+      n_fg  = length(fg_idxs);
+      fg_lp = log(n_fg / n_data);
+
+      %% Background probability
+      bg_lp = log((n_un - n_fg) / n_data);
 
       %% Changes below the threshold?
       final = length(out_idxs) < eff_change_threshold || ...

@@ -17,11 +17,10 @@ function [ log_like ] = log_likelihood(this, data)
   [ n_dims, n_data ] = size(data);
 
   %% Center the data
-  this.mu
   cdata = data - this.mu * ones(1, n_data);
 
   %% Distance
-  dist = sum(cdata .* (isigma * cdata), 1);
+  dist = sum(cdata .* (this.isigma * cdata), 1);
 
   %% Find it
   log_like = this.norm - 0.5 * dist;

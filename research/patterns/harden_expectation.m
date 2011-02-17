@@ -4,7 +4,7 @@
 
 %% Author: Edgar Gonzalez
 
-function [ hard ] = harden_expectation(soft, add_bg = false())
+function [ hard, best_cl ] = harden_expectation(soft, add_bg = false())
   %% Size
   [ k, n_data ] = size(soft);
 

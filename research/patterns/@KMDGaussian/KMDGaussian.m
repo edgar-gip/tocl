@@ -41,19 +41,36 @@ function [ this ] = KMDGaussian(first, sum0, sum1, sum2)
   this.sum1   = sum1;
   this.sum2   = sum2;
 
-  %% Mean
-  this.mu = sum1 / sum0;
+  %% How many of them?
+  if sum0 == 0
+    %% None!
+    this.mu     = [];
+    this.isigma = [];
+    this.norm   = nan;
 
-  %% Covariance
-  sigma = sum0 / (sum0 - 1) * ...
-          (sum2 / sum0 - this.mu * this.mu');
+  elseif sum0 == 1
+    %% One
+    this.mu     = this.sum1;
+    this.isigma = eye(n_dims);
+    this.norm   = -0.5 * n_dims * log(2 * pi);
 
-  %% Inverse
-  this.isigma = inv(sigma);
+  else
+    %% More!
 
-  %% Normalization factor
-  %% \log \frac{1}{\sqrt{(2 \pi)^k \cdot | \Sigma |}}
-  this.norm = -0.5 * (n_dims * log(2 * pi) + log(det(sigma)));
+    %% Mean
+    this.mu = sum1 / sum0;
+
+    %% Covariance
+    sigma = sum0 / (sum0 - 1) * ...
+            (sum2 / sum0 - this.mu * this.mu');
+
+    %% Inverse
+    this.isigma = inv(sigma);
+
+    %% Normalization factor
+    %% \log \frac{1}{\sqrt{(2 \pi)^k \cdot | \Sigma |}}
+    this.norm = -0.5 * (n_dims * log(2 * pi) + log(det(sigma)));
+  endif
 
   %% Bless
   %% And add inheritance

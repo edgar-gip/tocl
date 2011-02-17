@@ -5,6 +5,9 @@
 %% Author: Edgar Gonzàlez i Pellicer
 
 
+%% Division by zero
+%% warning error Octave:divide-by-zero;
+
 %% Octopus
 pkg load octopus
 
@@ -123,83 +126,115 @@ clusterer = clustfun(distance, data, s_truth, mextra);
 %% Time difference
 cluster_time = total1 - total0;
 
+%% Is it a scored method?
+if getfield(methods, met, "scor")
+  %% Scored method
 
-%% Sort by score
-scores = score(model, data);
-[ sort_scores, sort_idx ] = sort(scores, "descend");
-sort_truth = s_truth(sort_idx);
+  %% Sort by score
+  scores = score(model, data);
+  [ sort_scores, sort_idx ] = sort(scores, "descend");
+  sort_truth = s_truth(sort_idx);
 
-%% Map scores
-[ msort_scores, msort_model ] = apply(LinearInterpolator(), sort_scores);
+  %% Map scores
+  [ msort_scores, msort_model ] = apply(LinearInterpolator(), sort_scores);
 
-%% Truth classes
-pos_tr  = find( sort_truth); n_pos_tr = length(pos_tr);
-neg_tr  = find(~sort_truth); n_neg_tr = length(neg_tr);
+  %% Truth classes
+  pos_tr  = find( sort_truth); n_pos_tr = length(pos_tr);
+  neg_tr  = find(~sort_truth); n_neg_tr = length(neg_tr);
 
-%% ROC
+  %% ROC
 
-%% Find accumulated positive and negative
-acc_pos = cumsum( sort_truth);
-acc_neg = cumsum(~sort_truth);
+  %% Find accumulated positive and negative
+  acc_pos = cumsum( sort_truth);
+  acc_neg = cumsum(~sort_truth);
 
-%% Find ROC
-roc_pos = acc_pos ./ n_pos_tr;
-roc_neg = acc_neg ./ n_neg_tr;
+  %% Find ROC
+  roc_pos = acc_pos ./ n_pos_tr;
+  roc_neg = acc_neg ./ n_neg_tr;
 
-%% AUC
-auc = sum(diff(roc_neg) .* ...
-	  (roc_pos(1 : n_data - 1) + roc_pos(2 : n_data))) / 2;
+  %% AUC
+  auc = sum(diff(roc_neg) .* ...
+	    (roc_pos(1 : n_data - 1) + roc_pos(2 : n_data))) / 2;
 
-%% Prc/Rec/F1 curves
-prc_c = acc_pos ./ (acc_pos .+ acc_neg);
-rec_c = acc_pos ./  acc_pos(n_data);
-f1_c  = (2 .* prc_c .* rec_c) ./ (prc_c .+ rec_c);
+  %% Prc/Rec/F1 curves
+  prc_c = acc_pos ./ (acc_pos .+ acc_neg);
+  rec_c = acc_pos ./  acc_pos(n_data);
+  f1_c  = (2 .* prc_c .* rec_c) ./ (prc_c .+ rec_c);
 
-%% Display
-fprintf(fout, "*** %8g %5.3f ***\n", cluster_time, auc);
+  %% Display
+  fprintf(fout, "*** %8g %5.3f ***\n", cluster_time, auc);
 
-%% For each threshold
-ths = getfield(methods, met, "ths");
-for th = ths
+  %% For each threshold
+  ths = getfield(methods, met, "ths");
+  for th = ths
 
-  %% Must we do it?
-  %% -> Full output or basic threshold
-  if full_level >= getfield(th, "level")
+    %% Must we do it?
+    %% -> Full output or basic threshold
+    if full_level >= getfield(th, "level")
 
-    %% Find the threshold
-    thfun    = getfield(th, "find");
-    th_value = thfun(sort_scores, sort_truth, msort_scores, msort_model, ...
-		     f1_c, model);
+      %% Find the threshold
+      thfun    = getfield(th, "find");
+      th_value = thfun(sort_scores, sort_truth, msort_scores, msort_model, ...
+		       f1_c, model);
 
-    %% Negative/positive cluster
-    pos_cl = find(sort_scores >= th_value); n_pos_cl = length(pos_cl);
-    neg_cl = find(sort_scores <  th_value);
+      %% Negative/positive cluster
+      pos_cl = find(sort_scores >= th_value); n_pos_cl = length(pos_cl);
+      neg_cl = find(sort_scores <  th_value);
 
-    %% Intersections
-    pos_pos = intersect(pos_tr, pos_cl);
-    pos_neg = intersect(pos_tr, neg_cl);
-    neg_pos = intersect(neg_tr, pos_cl);
-    neg_neg = intersect(neg_tr, neg_cl);
+      %% Intersections
+      pos_pos = intersect(pos_tr, pos_cl);
+      pos_neg = intersect(pos_tr, neg_cl);
+      neg_pos = intersect(neg_tr, pos_cl);
+      neg_neg = intersect(neg_tr, neg_cl);
 
-    %% Sizes
-    n_pos_pos = length(pos_pos);
-    n_pos_neg = length(pos_neg);
-    n_neg_pos = length(neg_pos);
-    n_neg_neg = length(neg_neg);
+      %% Sizes
+      n_pos_pos = length(pos_pos);
+      n_pos_neg = length(pos_neg);
+      n_neg_pos = length(neg_pos);
+      n_neg_neg = length(neg_neg);
 
-    %% Precision/Recall
-    prc  = n_pos_pos / (n_pos_pos + n_neg_pos);
-    rec  = n_pos_pos / (n_pos_pos + n_pos_neg);
-    nrec = n_neg_pos / (n_neg_pos + n_neg_neg);
-    f1   = 2 * prc * rec / (prc + rec);
+      %% Precision/Recall
+      prc  = n_pos_pos / (n_pos_pos + n_neg_pos);
+      rec  = n_pos_pos / (n_pos_pos + n_pos_neg);
+      nrec = n_neg_pos / (n_neg_pos + n_neg_neg);
+      f1   = 2 * prc * rec / (prc + rec);
 
-    %% Output
+      %% Output
 
-    %% Display
-    fprintf(fout, "%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
-	    getfield(th, "name"), n_pos_cl, prc, rec, nrec, f1);
-  endif
-endfor
+      %% Display
+      fprintf(fout, "%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
+	      getfield(th, "name"), n_pos_cl, prc, rec, nrec, f1);
+    endif
+  endfor
+
+else
+  %% Non-scored method
+
+  %% AUC is not defined
+  auc = nan;
+
+  %% Positive cluster
+  pos_cl = find(sum(expec, 1)); n_pos_cl = length(pos_cl);
+
+  %% Truth
+  pos_tr = find( s_truth); n_pos_tr = length(pos_tr);
+  n_neg_tr = n_data - n_pos_tr;
+
+  %% The good (and the bad) ones
+  n_pos_pos = length(intersect(pos_cl, pos_tr));
+  n_neg_pos = n_pos_cl - n_pos_pos;
+
+  %% Prc/Rec/F1 curves
+  prc  = n_pos_pos / n_pos_cl;
+  rec  = n_pos_pos / n_pos_tr;
+  nrec = n_neg_pos / n_neg_tr;
+  f1  = 2 * prc * rec / (prc + rec);
+
+  %% Display
+  fprintf(fout, "*** %8g %5.3f ***\n", cluster_time, auc);
+  fprintf(fout, "%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
+	  "Model", n_pos_cl, prc, rec, nrec, f1);
+endif
 
 %% Close output
 if fout ~= 1
