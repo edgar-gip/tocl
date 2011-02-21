@@ -11,6 +11,10 @@ pkg load octopus
 %% Ando elements
 source(binrel("andoElements.m"));
 
+%% Debugging
+debug_on_warning(true());
+debug_on_error(true());
+
 
 %%%%%%%%%%%%%%%%%
 %% Performance %%
@@ -120,84 +124,25 @@ endfunction
 %%%%%%%%%%%
 
 %% Fit the model
-function [ nm_expec, nm_model ] = fit_gaussian_model(msort_scores)
-  %% Fit the model
-  [ nm_expec, nm_model ] = ...
-      cluster(CriterionClusterer(Gaussian1D(), BIC(),  ...
-				 struct("max_k",  10, ...
-					"repeats", 1)), ...
-	      msort_scores);
-endfunction
-
-%% Gaussian model plots
-%% From sameSide.m
-function [ model_plots, sorted_mns, sorted_cl ] = ...
-      gaussian_model_plots(model, max_histo, msort_model, color)
-
-  %% Model info
-  als = alphas(model);
-  mns = means(model);
-  std = sqrt(variances(model));
-
-  %% Number of clusters
-  k = length(als);
-
-  %% Sort the clusters
-  [ sorted_mns, sorted_cl ] = sort(mns, "descend");
-
-  %% Sort the other properties
-  sorted_als = als(sorted_cl);
-  sorted_std = std(sorted_cl);
-
-  %% Xs and Ps
-  xs = zeros(k, 21);
-  ps = zeros(k, 21);
-
-  %% For each cluster
-  for c = 1 : k
-    %% Get 21 points Within 2 stdevs
-    xs(c, :) = sorted_mns(c) + (-10 : 10) * sorted_std(c) / 10;
-
-    %% Find a scaled density
-    ps(c, :) = sorted_als(c) * normpdf(xs(c, :), sorted_mns(c), sorted_std(c));
-  endfor
-
-  %% Scale
-  max_p = max(max(ps));
-  ps   *= max_histo / max_p;
-
-  %% Map the x's
-  xs = inverse(msort_model, xs);
-
-  %% For each cluster
-  model_plots = {};
-  for c = 1 : k
-    %% Add it
-    model_plots = cell_push(model_plots, xs(c, :), ps(c, :), ...
-			    color, "linewidth", 2);
-  endfor
-endfunction
-
-
-%%%%%%%%%%%
-%% Model %%
-%%%%%%%%%%%
-
-%% Fit the model
 function [ nm_expec, nm_model ] = ...
-      fit_full_gaussian_model(msort_scores, sort_data)
+      fit_gaussian_model(msort_scores, sort_data)
   %% Fit the model
-  [ nm_expec, nm_model ] = ...
+  [ raw_expec, raw_model ] = ...
       cluster(CriterionClusterer(Gaussian1D(), BIC(),  ...
 				 struct("max_k",  10, ...
 					"repeats", 1)), ...
 	      msort_scores);
+
+  %% Sort the model
+  [ nm_model, sorted_cl ] = sort_means(raw_model, "descend");
+
+  %% Sort the expectation
+  nm_expec = raw_expec(sorted_cl, :);
 endfunction
 
 %% Gaussian model plots
 %% From sameSide.m
-function [ model_plots, sorted_mns, sorted_cl ] = ...
-      gaussian_model_plots(model, max_histo, msort_model, color)
+function [ model_plots ] = gaussian_model_plots(model, max_histo, msort_model)
 
   %% Model info
   als = alphas(model);
@@ -207,13 +152,6 @@ function [ model_plots, sorted_mns, sorted_cl ] = ...
   %% Number of clusters
   k = length(als);
 
-  %% Sort the clusters
-  [ sorted_mns, sorted_cl ] = sort(mns, "descend");
-
-  %% Sort the other properties
-  sorted_als = als(sorted_cl);
-  sorted_std = std(sorted_cl);
-
   %% Xs and Ps
   xs = zeros(k, 21);
   ps = zeros(k, 21);
@@ -221,10 +159,10 @@ function [ model_plots, sorted_mns, sorted_cl ] = ...
   %% For each cluster
   for c = 1 : k
     %% Get 21 points Within 2 stdevs
-    xs(c, :) = sorted_mns(c) + (-10 : 10) * sorted_std(c) / 10;
+    xs(c, :) = mns(c) + (-10 : 10) * std(c) / 10;
 
     %% Find a scaled density
-    ps(c, :) = sorted_als(c) * normpdf(xs(c, :), sorted_mns(c), sorted_std(c));
+    ps(c, :) = als(c) * normpdf(xs(c, :), mns(c), std(c));
   endfor
 
   %% Scale
@@ -239,7 +177,33 @@ function [ model_plots, sorted_mns, sorted_cl ] = ...
   for c = 1 : k
     %% Add it
     model_plots = cell_push(model_plots, xs(c, :), ps(c, :), ...
-			    color, "linewidth", 2);
+			    sprintf("-%d", mod(c - 1, 6)), ...
+			    "linewidth", 2);
+  endfor
+endfunction
+
+%% Find the cut points
+function [ nm_th_idxs ] = model_th_cutpoints(nm_expec, sort_scores)
+  %% Size
+  [ n_cl, n_data ] = size(nm_expec);
+
+  %% Cut points
+  nm_th_idxs = [];
+
+  %% Find it
+  for c = 1 : n_cl - 1
+    %% Expec
+    expec_tru = sum(nm_expec(1 : c, :), 1);
+    cut_idx   = last_downfall(expec_tru, 0.5);
+
+    %% Not empty?
+    if ~isempty(cut_idx)
+      %% Add it
+      nm_th_idxs = [ nm_th_idxs, ...
+		    struct("name",  sprintf("1:%d", c), ...
+			   "index", cut_idx,
+			   "score", sort_scores(cut_idx)) ];
+    endif
   endfor
 endfunction
 
@@ -249,15 +213,25 @@ endfunction
 %%%%%%%%%%%%%%%%
 
 %% Model heterogenousness
-function [ hetero ] = model_heterogeneousness(data, nm_class, nm_k)
+function [ hetero, lhetero, rhetero ] = ...
+      model_heterogeneousness(sort_data, nm_class, nm_k)
   %% Initialize
-  hetero = zeros(1, nm_k);
+  hetero  = zeros(1, nm_k);
+  lhetero = zeros(1, nm_k);
+  rhetero = zeros(1, nm_k);
 
   %% For each one
   for cl = 1 : nm_k
     %% Find the trace of the covariance matrix
     %% i.e., the sum of variances
-    hetero(cl) = sum(var(data(:, find(nm_class == cl))'));
+    idx = find(nm_class == cl);
+    if ~isempty(idx)
+      hetero(cl) = sum(var(sort_data(:, idx)'));
+    else
+      hetero(cl) = nan;
+    endif
+    lhetero(cl) = sum(var(sort_data(:, find(nm_class <= cl))'));
+    rhetero(cl) = sum(var(sort_data(:, find(nm_class >= cl))'));
   endfor
 endfunction
 
@@ -268,22 +242,27 @@ endfunction
 
 %% Push bar plots
 %% From ../../../production/journals/jmlr/plots/scores.m:add_th_plots
-function [ out_plots ] =  push_bar_plots(in_plots, points, low, high, cmd_opts)
+function [ out_plots ] = push_bar_plots(in_plots, points, low, high, cmd_opts)
   %% Initially...
   out_plots = in_plots;
 
   %% For each one
+  i = 0;
   for p = points
     %% Add'em
     if cmd_opts.bars
       out_plots = cell_push(out_plots, ...
-			    [ p.value, p.value ], [ low, high ], ...
-			    sprintf("-;%s;", p.name), "linewidth", 2);
+			    [ p.score, p.score ], [ low, high ], ...
+			    sprintf("-%d;%s;", mod(i, 6), p.name), ...
+			    "linewidth", 2);
     else
       out_plots = cell_push(out_plots, ...
-			    [ p.value ], [ low ], ...
-			    sprintf("*;%s;", p.name));
+			    [ p.score ], [ low ], ...
+			    sprintf("*%d;%s;", mod(i, 6), p.name));
     endif
+
+    %% Next
+    i += 1;
   endfor
 endfunction
 
@@ -303,11 +282,16 @@ function plot_performance(prc_c, rec_c, f1_c, points)
 	    1 : n_data, f1_c,  "-;F1;" };
 
   %% For each one
+  i = 0;
   for p = points
     %% Add'em
     plots = cell_push(plots, ...
 		      [ p.index ], [ f1_c(p.index) ], ...
-		      sprintf("*;%s;", p.name), "linewidth", 4);
+		      sprintf("*%d;%s;", mod(i, 6), p.name), ...
+		      "linewidth", 4);
+
+    %% Next
+    i += 1;
   endfor
 
   %% Figure
@@ -333,7 +317,8 @@ function plot_histogram(curves, points, max_histo, min_score, max_score, ...
     subplot(2, 1, 1);
 
     %% Add bars
-    plots = push_bar_plots(curves, points, cmd_opts.histo_top, max_histo);
+    plots = push_bar_plots(curves, points, cmd_opts.histo_top, max_histo, ...
+			   cmd_opts);
 
     %% Log?
     if cmd_opts.log
@@ -354,7 +339,7 @@ function plot_histogram(curves, points, max_histo, min_score, max_score, ...
     %% Log?
     if cmd_opts.log
       %% Add bars
-      plots = push_bar_plots(curves, points, 1, cmd_opts.histo_top);
+      plots = push_bar_plots(curves, points, 1, cmd_opts.histo_top, cmd_opts);
 
       %% Log Plot
       semilogy(plots{:});
@@ -362,7 +347,7 @@ function plot_histogram(curves, points, max_histo, min_score, max_score, ...
 	     1, cmd_opts.histo_top ]);
     else
       %% Add bars
-      plots = push_bar_plots(curves, points, 0, cmd_opts.histo_top);
+      plots = push_bar_plots(curves, points, 0, cmd_opts.histo_top, cmd_opts);
 
       %% Regular Plot
       plot(plots{:});
@@ -380,7 +365,7 @@ function plot_histogram(curves, points, max_histo, min_score, max_score, ...
     %% Log?
     if cmd_opts.log
       %% Add bars
-      plots = push_bar_plots(curves, points, 1, max_histo);
+      plots = push_bar_plots(curves, points, 1, max_histo, cmd_opts);
 
       %% Log Plot
       semilogy(plots{:});
@@ -388,7 +373,7 @@ function plot_histogram(curves, points, max_histo, min_score, max_score, ...
 	     1, max_histo ]);
     else
       %% Add bars
-      plots = push_bar_plots(curves, points, 0, max_histo);
+      plots = push_bar_plots(curves, points, 0, max_histo, cmd_opts);
 
       %% Regular Plot
       plot(plots{:});
@@ -402,7 +387,7 @@ function plot_histogram(curves, points, max_histo, min_score, max_score, ...
 endfunction
 
 %% Plot heterogenousness
-function plot_heterogeneousness(nm_means, hetero)
+function plot_heterogeneousness(nm_means, hetero, lhetero, rhetero)
   %% Figure
   figure("name", "Cluster info");
 
@@ -410,16 +395,41 @@ function plot_heterogeneousness(nm_means, hetero)
   plots = {};
 
   %% For each one
-  for i = 1 : length(nm_means)
+  k = length(nm_means);
+  for i = 1 : k
     %% Add it
-    plots = cell_push(plots, [ nm_means(i) ], [ hetero(i) ], "*");
+    plots = cell_push(plots, [ nm_means(i) ], [ hetero(i) ], ...
+		      sprintf("*%d", mod(i - 1, 6)), ...
+		      "linewidth", 4);
   endfor
 
-  %% Add the line
-  plots = cell_push(plots, nm_means, hetero, "-;Heterogeneousness;");
+  %% Good hetero's
+  good_h = ~isnan(hetero);
+
+  %% Add the lines
+  plots = cell_push(plots, ...
+		    nm_means(good_h), hetero(good_h), "-;Het.;", ...
+		    nm_means, lhetero, "-;L-Het.;", ...
+		    nm_means, rhetero, "-;R-Het.;");
+
+  %% Range
+  min_mn = nm_means(k);
+  max_mn = nm_means(1);
+  margin = 0.01 * (max_mn - min_mn);
 
   %% Plot
+  subplot(2, 1, 1);
   plot(plots{:});
+  axis([ min_mn - margin, max_mn + margin ]);
+
+  %% Differences
+  nm_means_mid = (nm_means(1 : k - 1) + nm_means(2 : k)) / 2;
+  hetero_diff  = (rhetero(2 : k) - lhetero(1 : k - 1));
+
+  %% Plot
+  subplot(2, 1, 2);
+  plot(nm_means_mid, hetero_diff, "-;Difference;");
+  axis([ min_mn - margin, max_mn + margin ]);
 endfunction
 
 
@@ -432,6 +442,7 @@ def_opts           = struct();
 def_opts.bars      = false();
 def_opts.histo_top = [];
 def_opts.log       = false();
+def_opts.pairwise  = false();
 def_opts.simple    = false();
 
 %% Parse options
@@ -440,6 +451,7 @@ def_opts.simple    = false();
 		"bars!",       "bars", ...
 		"histo-top=f", "histo_top", ...
 		"log!",        "log",  ...
+		"pairwise!",   "pairwise", ...
 		"simple!",     "simple");
 
 %% Arguments
@@ -546,29 +558,32 @@ sort_truth  = truth(sort_idx);
     histogram_plot(sort_scores, sort_truth, sort_struth, opts);
 
 %% Fit and plot the model
-[ nm_expec, nm_model ]     = fit_gaussian_model(msort_scores);
-[ model_plots, model_sorted_mns, model_sorted_cl ] = ...
-    gaussian_model_plots(nm_model, max_histo, msort_model, "-");
+[ nm_expec, nm_model ] = fit_gaussian_model(msort_scores);
+[ model_plots ] = gaussian_model_plots(nm_model, max_histo, msort_model);
 
 %% Convert model information
-[ nm_hard, nm_class ] = harden_expectation(nm_expec(model_sorted_cl, :));
-nm_means = inverse(msort_model, model_sorted_mns);
+[ nm_hard, nm_class ] = harden_expectation(nm_expec);
+nm_means = inverse(msort_model, means(nm_model));
 nm_k     = length(nm_means);
 
+%% Model cut points
+th_cuts = model_th_cutpoints(nm_expec, sort_scores);
+
 %% Model heterogeneousness
-hetero = model_heterogeneousness(data, nm_class, nm_k);
+[ hetero, lhetero, rhetero ] = ...
+    model_heterogeneousness(sort_data, nm_class, nm_k)
 
 %% Plot everything
-plot_performance(prc_c, rec_c, f1_c, {});
-plot_histogram({ model_plots{:}, histo_plots{:} }, {}, ...
+plot_performance(prc_c, rec_c, f1_c, th_cuts);
+plot_histogram({ model_plots{:}, histo_plots{:} }, th_cuts, ...
 	       max_histo, min_score, max_score, opts);
-plot_heterogeneousness(nm_means, hetero);
-
-%%
+plot_heterogeneousness(nm_means, hetero, lhetero, rhetero);
 
 %% Pairwise plots
-pairwise_cluster_plot(sort_data, sort_truth, "Truth");
-pairwise_cluster_plot(sort_data, nm_class, "Cluster membership");
+if opts.pairwise
+  pairwise_cluster_plot(sort_data, sort_truth, "Truth");
+  pairwise_cluster_plot(sort_data, nm_class, "Cluster membership");
+endif
 
 %% Pause
 pause();

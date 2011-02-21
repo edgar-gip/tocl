@@ -19,6 +19,10 @@ function [ this ] = CriterionClusterer(clusterer, criterion, opts = struct())
   this.clusterer = clusterer;
   this.criterion = criterion;
 
+  %% Minimum k
+  %% Default -> 1
+  this.min_k = getfielddef(opts, "min_k", 1);
+
   %% Maximum k
   %% Default -> 1.0 (all)
   this.max_k = getfielddef(opts, "max_k", 1.0);

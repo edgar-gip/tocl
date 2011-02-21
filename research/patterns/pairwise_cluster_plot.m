@@ -34,7 +34,8 @@ function pairwise_cluster_plot(data, truth, name = [], fig = [])
 
 	%% Add their data
 	plots = cell_push(plots, ...
-			  data(d1, cluster), data(d2, cluster), "x");
+			  data(d1, cluster), data(d2, cluster), ...
+			  sprintf("x%d", mod(cl - 1, 6)));
       endfor
 
       %% Subplot

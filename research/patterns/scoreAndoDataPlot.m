@@ -17,13 +17,13 @@ source(binrel("andoElements.m"));
 %%%%%%%%%%%
 
 %% Histogram plot
-function histogram_plot(sort_scores, msort_scores, msort_model, sort_full, ...
+function histogram_plot(sort_scores, msort_scores, msort_model, sort_truth, ...
 			th_cuts, do_log)
   %% Histogram bins
   histo_bins = 100;
 
   %% Number of groups
-  n_groups = max(sort_full);
+  n_groups = max(sort_truth);
 
   %% Min/max
   min_score = min(sort_scores);
@@ -40,7 +40,7 @@ function histogram_plot(sort_scores, msort_scores, msort_model, sort_full, ...
   for cl = 1 : n_groups
 
     %% Cluster
-    xcluster = find(sort_full == cl);
+    xcluster = find(sort_truth == cl);
 
     %% Histogram
     [ histo, bin_limits ] = ...
@@ -81,10 +81,10 @@ function histogram_plot(sort_scores, msort_scores, msort_model, sort_full, ...
 endfunction
 
 %% F1 plot
-function f1_plot(sort_truth, sort_full, th_cuts)
+function f1_plot(sort_struth, sort_truth, th_cuts)
   %% Find accumulated positive and negative
-  cum_pos = cumsum( sort_truth);
-  cum_neg = cumsum(~sort_truth);
+  cum_pos = cumsum( sort_struth);
+  cum_neg = cumsum(~sort_struth);
 
   %% Length
   n_data = length(cum_pos);
@@ -103,12 +103,12 @@ function f1_plot(sort_truth, sort_full, th_cuts)
 	    1 : n_data, f1,  "-;F1;" };
 
   %% Number of groups
-  n_groups = max(sort_full);
+  n_groups = max(sort_truth);
 
   %% Cluster recall
   for cl = 1 : n_groups
     %% Find accumulated
-    cum_cl = cumsum(sort_full == cl);
+    cum_cl = cumsum(sort_truth == cl);
     cl_rec = cum_cl ./ cum_cl(n_data);
 
     %% Plot
@@ -228,12 +228,12 @@ else
 endif
 
 %% Truth information
-n_data  = length(truth);
-s_truth = truth > 1;
+n_data = length(truth);
+struth = truth > 1;
 
 %% Create clusterer
 clustfun  = getfield(methods, met, "make");
-clusterer = clustfun(distance, data, s_truth, mextra);
+clusterer = clustfun(distance, data, struth, mextra);
 
 %% Cluster
 [ total0, user0, system0 ] = cputime();
@@ -250,21 +250,21 @@ if getfield(methods, met, "scor")
   %% Sort by score
   scores = score(model, data);
   [ sort_scores, sort_idx ] = sort(scores, "descend");
-  sort_truth = s_truth(sort_idx);
-  sort_full  = truth(sort_idx);
+  sort_struth = struth(sort_idx);
+  sort_truth  = truth(sort_idx);
 
   %% Map scores
   [ msort_scores, msort_model ] = apply(LinearInterpolator(), sort_scores);
 
   %% Truth classes
-  pos_tr  = find( sort_truth); n_pos_tr = length(pos_tr);
-  neg_tr  = find(~sort_truth); n_neg_tr = length(neg_tr);
+  pos_tr  = find( sort_struth); n_pos_tr = length(pos_tr);
+  neg_tr  = find(~sort_struth); n_neg_tr = length(neg_tr);
 
   %% ROC
 
   %% Find accumulated positive and negative
-  acc_pos = cumsum( sort_truth);
-  acc_neg = cumsum(~sort_truth);
+  acc_pos = cumsum( sort_struth);
+  acc_neg = cumsum(~sort_struth);
 
   %% Find ROC
   roc_pos = acc_pos ./ n_pos_tr;
@@ -297,7 +297,7 @@ if getfield(methods, met, "scor")
 
       %% Find the threshold
       thfun    = getfield(th, "find");
-      th_value = thfun(sort_scores, sort_truth, msort_scores, msort_model, ...
+      th_value = thfun(sort_scores, sort_struth, msort_scores, msort_model, ...
 		       f1_c, model);
 
       %% Negative/positive cluster
@@ -345,11 +345,11 @@ if getfield(methods, met, "scor")
   endfor
 
   %% Histogram plot
-  histogram_plot(sort_scores, msort_scores, msort_model, sort_full, th_cuts, ...
-		 opts.do_log);
+  histogram_plot(sort_scores, msort_scores, msort_model, sort_truth, ...
+		 th_cuts, opts.do_log);
 
   %% F1 plot
-  f1_plot(sort_truth, sort_full, th_cuts);
+  f1_plot(sort_struth, sort_truth, th_cuts);
 
 else
   %% Non-scored method
@@ -361,7 +361,7 @@ else
   pos_cl = find(sum(expec, 1)); n_pos_cl = length(pos_cl);
 
   %% Truth
-  pos_tr = find( s_truth); n_pos_tr = length(pos_tr);
+  pos_tr = find(struth); n_pos_tr = length(pos_tr);
   n_neg_tr = n_data - n_pos_tr;
 
   %% The good (and the bad) ones

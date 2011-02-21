@@ -111,12 +111,12 @@ else
 endif
 
 %% Truth information
-n_data  = length(truth);
-s_truth = truth > 1;
+n_data = length(truth);
+struth = truth > 1;
 
 %% Create clusterer
 clustfun  = getfield(methods, met, "make");
-clusterer = clustfun(distance, data, s_truth, mextra);
+clusterer = clustfun(distance, data, struth, mextra);
 
 %% Cluster
 [ total0, user0, system0 ] = cputime();
@@ -133,20 +133,21 @@ if getfield(methods, met, "scor")
   %% Sort by score
   scores = score(model, data);
   [ sort_scores, sort_idx ] = sort(scores, "descend");
-  sort_truth = s_truth(sort_idx);
+  sort_data   = data(:, sort_idx);
+  sort_struth = struth(sort_idx);
 
   %% Map scores
   [ msort_scores, msort_model ] = apply(LinearInterpolator(), sort_scores);
 
   %% Truth classes
-  pos_tr  = find( sort_truth); n_pos_tr = length(pos_tr);
-  neg_tr  = find(~sort_truth); n_neg_tr = length(neg_tr);
+  pos_tr  = find( sort_struth); n_pos_tr = length(pos_tr);
+  neg_tr  = find(~sort_struth); n_neg_tr = length(neg_tr);
 
   %% ROC
 
   %% Find accumulated positive and negative
-  acc_pos = cumsum( sort_truth);
-  acc_neg = cumsum(~sort_truth);
+  acc_pos = cumsum( sort_struth);
+  acc_neg = cumsum(~sort_struth);
 
   %% Find ROC
   roc_pos = acc_pos ./ n_pos_tr;
@@ -174,8 +175,8 @@ if getfield(methods, met, "scor")
 
       %% Find the threshold
       thfun    = getfield(th, "find");
-      th_value = thfun(sort_scores, sort_truth, msort_scores, msort_model, ...
-		       f1_c, model);
+      th_value = thfun(sort_scores, sort_data, sort_struth, msort_scores, ...
+		       msort_model, f1_c, model);
 
       %% Negative/positive cluster
       pos_cl = find(sort_scores >= th_value); n_pos_cl = length(pos_cl);
@@ -217,7 +218,7 @@ else
   pos_cl = find(sum(expec, 1)); n_pos_cl = length(pos_cl);
 
   %% Truth
-  pos_tr = find( s_truth); n_pos_tr = length(pos_tr);
+  pos_tr = find(struth); n_pos_tr = length(pos_tr);
   n_neg_tr = n_data - n_pos_tr;
 
   %% The good (and the bad) ones

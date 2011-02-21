@@ -27,12 +27,16 @@ function [ best_expec, best_model, best_info ] = cluster(this, data, k, expec_0)
       eff_min_k = eff_max_k = k
 
     else
-      eff_min_k = 1;
+      if this.min_k < 1
+	eff_min_k = floor(this.max_k * n_data);
+      else
+	eff_min_k = min([ this.min_k, n_data ]);
+      endif
 
       if this.max_k <= 1
 	eff_max_k = floor(this.max_k * n_data);
       else
-	eff_max_k = min([ this.max_k, n_data ]);
+	eff_max_k = max([ eff_min_k, min([ this.max_k, n_data ]) ]);
       endif
     endif
 
@@ -45,6 +49,10 @@ function [ best_expec, best_model, best_info ] = cluster(this, data, k, expec_0)
       %% Criterion
       best_crit = ...
 	  apply(this.criterion, data, best_expec, best_model, best_info);
+
+      %% Add
+      best_info.k         = 1;
+      best_info.criterion = best_crit;
 
       %% Update
       eff_min_k = 2;
