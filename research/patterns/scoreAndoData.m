@@ -211,9 +211,6 @@ if getfield(methods, met, "scor")
 else
   %% Non-scored method
 
-  %% AUC is not defined
-  auc = nan;
-
   %% Positive cluster
   pos_cl = find(sum(expec, 1)); n_pos_cl = length(pos_cl);
 
@@ -230,6 +227,10 @@ else
   rec  = n_pos_pos / n_pos_tr;
   nrec = n_neg_pos / n_neg_tr;
   f1  = 2 * prc * rec / (prc + rec);
+
+  %% ROC is a quadrilateral
+  %% AUC = rec * nrec / 2 + rec * (1 - nrec) + (1 - rec) * (1 - nrec) / 2
+  auc = (1 + rec - nrec) / 2;
 
   %% Display
   fprintf(fout, "*** %8g %5.3f ***\n", cluster_time, auc);
