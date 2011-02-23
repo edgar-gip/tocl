@@ -1,15 +1,15 @@
 %% -*- mode: octave; -*-
 
-%% Gaussian distribution clustering
+%% Gaussian distribution EM clustering
 %% Constructor
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = Gaussian(opts = struct())
+function [ this ] = GaussianEM(opts = struct())
 
   %% Check arguments
   if ~any(nargin() == [ 0, 1 ])
-    usage("[ this ] = Gaussian([opts])");
+    usage("[ this ] = GaussianEM([opts])");
   endif
 
   %% This object
@@ -23,12 +23,8 @@ function [ this ] = Gaussian(opts = struct())
   %% Default -> eps
   this.min_covar = getfielddef(opts, "min_covar", eps);
 
-  %% Verbose
-  %% Default -> false
-  this.verbose = getfielddef(opts, "verbose", false());
-
   %% Bless
   %% And add inheritance
-  this = class(this, "Gaussian", ...
+  this = class(this, "GaussianEM", ...
 	       EM(opts));
 endfunction

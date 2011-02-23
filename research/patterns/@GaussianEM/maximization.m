@@ -1,6 +1,6 @@
 %% -*- mode: octave; -*-
 
-%% Gaussian distribution clustering
+%% Gaussian distribution EM clustering
 %% Maximization
 
 %% Author: Edgar Gonzalez
@@ -9,7 +9,7 @@ function [ model ] = maximization(this, data, expec)
 
   %% Check arguments
   if nargin() ~= 3
-    usage("[ model ] = @Gaussian/maximization(this, data, expec)");
+    usage("[ model ] = @GaussianEM/maximization(this, data, expec)");
   endif
 
   %% Number of data and features
@@ -59,8 +59,8 @@ function [ model ] = maximization(this, data, expec)
   cl_sizes   = log(cl_sizes);
 
   %% Create the model
-  model = GaussianModel(k, ...
-			cl_sizes + cl_norm, ... % 1 * k
-			cl_mu,              ... % n_dims * k
-			cl_isigma);             % n_dims * n_dims * k
+  model = GaussianEMModel(k, ...
+			  cl_sizes + cl_norm, ... % 1 * k
+			  cl_mu,              ... % n_dims * k
+			  cl_isigma);             % n_dims * n_dims * k
 endfunction

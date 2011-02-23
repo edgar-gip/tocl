@@ -130,7 +130,7 @@ function [ nm_expec, nm_model, gs_expec ] = ...
   %% Two-step?
   if cmd_opts.two_step
     %% Inner clusterer
-    inner = SeqEM({ Gaussian1D() }, struct("final_model", 1));
+    inner = SeqEM({ Gaussian1D(), GaussianEM() }, struct("final_model", 1));
 
     %% Fit the model
     [ raw_expec, raw_model, raw_info ] = ...

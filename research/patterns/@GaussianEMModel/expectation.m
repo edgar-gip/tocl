@@ -1,6 +1,6 @@
 %% -*- mode: octave; -*-
 
-%% Gaussian distribution clustering
+%% Gaussian distribution EM clustering
 %% Expectation
 
 %% Author: Edgar Gonzalez
@@ -9,7 +9,7 @@ function [ expec, log_like ] = expectation(this, data)
 
   %% Check arguments
   if nargin() ~= 2
-    usage("[ expec, log_like ] = @GaussianModel/expectation(this, data)");
+    usage("[ expec, log_like ] = @GaussianEMModel/expectation(this, data)");
   endif
 
   %% Number of data

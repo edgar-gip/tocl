@@ -1,15 +1,15 @@
 %% -*- mode: octave; -*-
 
-%% Gaussian distribution clustering
+%% Gaussian distribution EM clustering
 %% Model constructor
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = GaussianModel(k, alpha_norm, mu, isigma)
+function [ this ] = GaussianEMModel(k, alpha_norm, mu, isigma)
 
   %% Check arguments
   if nargin() ~= 4
-    usage("[ this ] = GaussianModel(k, alpha_norm, mu, isigma)");
+    usage("[ this ] = GaussianEMModel(k, alpha_norm, mu, isigma)");
   endif
 
   %% This object
@@ -23,6 +23,6 @@ function [ this ] = GaussianModel(k, alpha_norm, mu, isigma)
 
   %% Bless
   %% And add inheritance
-  this = class(this, "GaussianModel", ...
+  this = class(this, "GaussianEMModel", ...
 	       Simple());
 endfunction

@@ -1,5 +1,5 @@
 # SUBDIRS
-SUBDIRS = @Dirichlet/private @GaussianModel/private \
+SUBDIRS = @Dirichlet/private @GaussianEMModel/private \
 	  @KLDivergence/private @MahalanobisDistance/private \
 	  @SmoothKLDivergence/private
 
