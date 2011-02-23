@@ -124,14 +124,35 @@ endfunction
 %%%%%%%%%%%
 
 %% Fit the model
-function [ nm_expec, nm_model ] = ...
-      fit_gaussian_model(msort_scores, sort_data)
-  %% Fit the model
-  [ raw_expec, raw_model ] = ...
-      cluster(CriterionClusterer(Gaussian1D(), BIC(),  ...
-				 struct("max_k",  10, ...
-					"repeats", 1)), ...
-	      msort_scores);
+function [ nm_expec, nm_model, gs_expec ] = ...
+      fit_gaussian_model(msort_scores, sort_data, cmd_opts)
+
+  %% Two-step?
+  if cmd_opts.two_step
+    %% Inner clusterer
+    inner = SeqEM({ Gaussian1D() }, struct("final_model", 1));
+
+    %% Fit the model
+    [ raw_expec, raw_model, raw_info ] = ...
+	cluster(CriterionClusterer(inner, BIC(),  ...
+				   struct("max_k",  10, ...
+					  "repeats", 1)), ...
+		{ msort_scores, [ msort_scores ; sort_data ] });
+
+    %% Gaussian expectation
+    gs_expec = raw_info.expec_f;
+
+  else
+    %% Fit the model
+    [ raw_expec, raw_model ] = ...
+	cluster(CriterionClusterer(Gaussian1D(), BIC(),  ...
+				   struct("max_k",  10, ...
+					  "repeats", 1)), ...
+		msort_scores);
+
+    %% No Gaussian expectation
+    gs_expec = [];
+  endif
 
   %% Sort the model
   [ nm_model, sorted_cl ] = sort_means(raw_model, "descend");
@@ -440,19 +461,23 @@ endfunction
 %% Default options
 def_opts           = struct();
 def_opts.bars      = false();
+def_opts.hetero    = false();
 def_opts.histo_top = [];
 def_opts.log       = false();
 def_opts.pairwise  = false();
 def_opts.simple    = false();
+def_opts.two_step  = false();
 
 %% Parse options
 [ args, opts ] = ...
     get_options(def_opts, ...
 		"bars!",       "bars", ...
+		"hetero!",     "hetero", ...
 		"histo-top=f", "histo_top", ...
 		"log!",        "log",  ...
 		"pairwise!",   "pairwise", ...
-		"simple!",     "simple");
+		"simple!",     "simple", ...
+		"two-step!",   "two_step");
 
 %% Arguments
 if length(args) ~= 7
@@ -558,7 +583,8 @@ sort_truth  = truth(sort_idx);
     histogram_plot(sort_scores, sort_truth, sort_struth, opts);
 
 %% Fit and plot the model
-[ nm_expec, nm_model ] = fit_gaussian_model(msort_scores);
+[ nm_expec, nm_model, gs_expec ] = ...
+    fit_gaussian_model(msort_scores, sort_data, opts);
 [ model_plots ] = gaussian_model_plots(nm_model, max_histo, msort_model);
 
 %% Convert model information
@@ -569,20 +595,28 @@ nm_k     = length(nm_means);
 %% Model cut points
 th_cuts = model_th_cutpoints(nm_expec, sort_scores);
 
-%% Model heterogeneousness
-[ hetero, lhetero, rhetero ] = ...
-    model_heterogeneousness(sort_data, nm_class, nm_k)
-
 %% Plot everything
 plot_performance(prc_c, rec_c, f1_c, th_cuts);
 plot_histogram({ model_plots{:}, histo_plots{:} }, th_cuts, ...
 	       max_histo, min_score, max_score, opts);
-plot_heterogeneousness(nm_means, hetero, lhetero, rhetero);
+
+%% Model heterogeneousness
+if opts.hetero
+  [ hetero, lhetero, rhetero ] = ...
+      model_heterogeneousness(sort_data, nm_class, nm_k);
+  plot_heterogeneousness(nm_means, hetero, lhetero, rhetero);
+endif
 
 %% Pairwise plots
 if opts.pairwise
   pairwise_cluster_plot(sort_data, sort_truth, "Truth");
   pairwise_cluster_plot(sort_data, nm_class, "Cluster membership");
+
+  %% Gaussian?
+  if ~isempty(gs_expec)
+    [ gs_hard, gs_class ] = harden_expectation(gs_expec);
+    pairwise_cluster_plot(sort_data, gs_class, "Gaussian cluster membership");
+  endif
 endif
 
 %% Pause

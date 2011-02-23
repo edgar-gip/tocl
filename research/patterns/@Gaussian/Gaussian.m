@@ -19,9 +19,9 @@ function [ this ] = Gaussian(opts = struct())
   %% Default -> 1
   this.alpha_prior = getfielddef(opts, "alpha_prior", 1);
 
-  %% Stdev prior
-  %% Default -> 0.1
-  this.stdev_prior = getfielddef(opts, "stdev_prior", 0.1);
+  %% Minimum covariance
+  %% Default -> eps
+  this.min_covar = getfielddef(opts, "min_covar", eps);
 
   %% Verbose
   %% Default -> false

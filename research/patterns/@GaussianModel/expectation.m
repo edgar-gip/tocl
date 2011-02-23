@@ -16,16 +16,19 @@ function [ expec, log_like ] = expectation(this, data)
   [ n_dims, n_data ] = size(data);
 
   %% Raw probability
-  %% Start with the a priori probabilities
-  expec = this.alpha_pvar' * ones(1, n_data);
+  %% Start with the a priori probabilities and normalization terms
+  expec = this.alpha_norm' * ones(1, n_data);
 
   %% For each cluster
   for c = 1 : this.k
-    %% Scale data
-    s_data = data ./ (this.stdev(:, c) * ones(1, n_data));
+    %% Center the data
+    cdata = data - this.mu(:, c) * ones(1, n_data);
 
-    %% Distances
-    expec(c, :) -= sq_euclidean_distance2(this.mean_stdev(:, c), s_data);
+    %% Distance
+    dist = sum(cdata .* (this.isigma(:, :, c) * cdata), 1);
+
+    %% Find it
+    expec(c, :) -= 0.5 * dist;
   endfor
 
   %% Normalize

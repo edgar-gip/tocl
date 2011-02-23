@@ -5,11 +5,11 @@
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = GaussianModel(k, alpha_pvar, mean_stdev, stdev)
+function [ this ] = GaussianModel(k, alpha_norm, mu, isigma)
 
   %% Check arguments
   if nargin() ~= 4
-    usage("[ this ] = GaussianModel(k, alpha_pvar, mean_stdev, stdev)");
+    usage("[ this ] = GaussianModel(k, alpha_norm, mu, isigma)");
   endif
 
   %% This object
@@ -17,9 +17,9 @@ function [ this ] = GaussianModel(k, alpha_pvar, mean_stdev, stdev)
 
   %% Set fields
   this.k          = k;
-  this.alpha_pvar = alpha_pvar; % 1 * k
-  this.mean_stdev = mean_stdev; % n_dims * k
-  this.stdev      = stdev;      % n_dims * k
+  this.alpha_norm = alpha_norm; % 1 * k
+  this.mu         = mu;         % n_dims * k
+  this.isigma     = isigma;     % n_dims * n_dims * k
 
   %% Bless
   %% And add inheritance

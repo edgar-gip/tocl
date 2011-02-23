@@ -10,7 +10,7 @@ function [ this ] = KMDComponent()
 
   %% Check arguments
   if nargin() ~= 0
-    usage("[ this ] = KMDCompoenent()");
+    usage("[ this ] = KMDComponent()");
   endif
 
   %% Bless

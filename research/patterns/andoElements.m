@@ -55,6 +55,36 @@ function [ expec, model ] = gaussNm(msort_scores)
   model = cached_model;
 endfunction
 
+%% 3 * n-Gauss
+function [ expec, model ] = gaussN3(msort_scores, sort_data)
+  %% Cache
+  persistent cached_expec = [];
+  persistent cached_model = [];
+
+  %% Fill the cache?
+  if isempty(cached_model)
+    %% Inner clusterer
+    inner = SeqEM({ Gaussian1D(), Gaussian() }, struct("final_model", 1));
+
+    %% Model
+    [ raw_expec, raw_model ] = ...
+	cluster(CriterionClusterer(inner, BIC(),  ...
+				   struct("max_k",  10, ...
+					  "repeats", 1)), ...
+		msort_scores);
+
+    %% Sort the model
+    [ cached_model, sorted_cl ] = sort_means(raw_model, "descend");
+
+    %% Sort the expectation
+    cached_expec = raw_expec(sorted_cl, :);
+  endif
+
+  %% Access it
+  expec = cached_expec;
+  model = cached_model;
+endfunction
+
 %% n-Gauss + Noise
 function [ expec, model ] = gaussSm(msort_scores)
   %% Cache

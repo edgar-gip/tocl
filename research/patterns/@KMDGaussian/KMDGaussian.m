@@ -61,8 +61,8 @@ function [ this ] = KMDGaussian(first, sum0, sum1, sum2)
     this.mu = sum1 / sum0;
 
     %% Covariance
-    sigma = sum0 / (sum0 - 1) * ...
-            (sum2 / sum0 - this.mu * this.mu');
+    sigma =  sum0 / (sum0 - 1) * ...
+            (sum2 /  sum0 - this.mu * this.mu');
 
     %% Inverse
     this.isigma = inv(sigma);

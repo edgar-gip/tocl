@@ -9,7 +9,7 @@ function [ this ] = EM(opts = struct())
 
   %% Check arguments
   if ~any(nargin() == [ 0, 1 ])
-    usage("[ this ] = EM(opts = struct())");
+    usage("[ this ] = EM([ opts ])");
   endif
 
   %% This object

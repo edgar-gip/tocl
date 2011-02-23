@@ -28,5 +28,5 @@ function [ expec ] = random_expec(this, data, k)
   endfor
 
   %% Sparse
-  expec   = sparse(clusters, 1 : n_data, ones(1, n_data), k, n_data);
+  expec = sparse(clusters, 1 : n_data, ones(1, n_data), k, n_data);
 endfunction

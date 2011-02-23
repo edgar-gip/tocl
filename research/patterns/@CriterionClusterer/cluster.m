@@ -20,11 +20,11 @@ function [ best_expec, best_model, best_info ] = cluster(this, data, k, expec_0)
 
   else
     %% Size
-    [ n_dims, n_data ] = size(data);
+    n_data = data_size(data);
 
     %% Effective min and max k
-    if nargin() == 3
-      eff_min_k = eff_max_k = k
+    if nargin() == 3 && ~isempty(k)
+      eff_min_k = eff_max_k = k;
 
     else
       if this.min_k < 1
