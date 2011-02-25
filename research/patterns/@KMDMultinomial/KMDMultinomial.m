@@ -19,7 +19,7 @@ function [ this ] = KMDMultinomial(first, un_theta)
     [ n_dims, n_data ] = size(first);
 
     %% Find the unnormalized thetas
-    un_theta = sum(first, 2)';
+    un_theta = full(sum(first, 2))';
 
   else
     %% Fetch

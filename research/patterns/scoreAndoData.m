@@ -232,8 +232,14 @@ else
   %% AUC = rec * nrec / 2 + rec * (1 - nrec) + (1 - rec) * (1 - nrec) / 2
   auc = (1 + rec - nrec) / 2;
 
+  %% All Prc/F1
+  all_prc = n_pos_tr / n_data;
+  all_f1  = 2 * all_prc / (1 + all_prc);
+
   %% Display
   fprintf(fout, "*** %8g %5.3f ***\n", cluster_time, auc);
+  fprintf(fout, "%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
+	  "All", n_data, all_prc, 1.0, 1.0, all_f1);
   fprintf(fout, "%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
 	  "Model", n_pos_cl, prc, rec, nrec, f1);
 endif

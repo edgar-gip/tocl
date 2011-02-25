@@ -137,8 +137,8 @@ endfunction
 
 %% Default options
 def_opts            = struct();
-def_opts.pairwise   = true();
-def_opts.do_log     = true();
+def_opts.pairwise   = false();
+def_opts.do_log     = false();
 def_opts.n_model    = false();
 def_opts.full_level = 1;
 
@@ -354,9 +354,6 @@ if getfield(methods, met, "scor")
 else
   %% Non-scored method
 
-  %% AUC is not defined
-  auc = nan;
-
   %% Positive cluster
   pos_cl = find(sum(expec, 1)); n_pos_cl = length(pos_cl);
 
@@ -374,8 +371,18 @@ else
   nrec = n_neg_pos / n_neg_tr;
   f1  = 2 * prc * rec / (prc + rec);
 
+  %% ROC is a quadrilateral
+  %% AUC = rec * nrec / 2 + rec * (1 - nrec) + (1 - rec) * (1 - nrec) / 2
+  auc = (1 + rec - nrec) / 2;
+
+  %% All Prc/F1
+  all_prc = n_pos_tr / n_data;
+  all_f1  = 2 * all_prc / (1 + all_prc);
+
   %% Display
   printf("*** %8g %5.3f ***\n", cluster_time, auc);
+  fprintf(fout, "%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
+	  "All", n_data, all_prc, 1.0, 1.0, all_f1);
   printf("%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
 	 "Model", n_pos_cl, prc, rec, nrec, f1);
 

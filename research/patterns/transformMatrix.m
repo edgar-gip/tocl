@@ -75,12 +75,6 @@ endif
 input  = cmd_args{1};
 output = cmd_args{2};
 
-%% Some of the two
-if isempty(cmd_opts.freq_th) && isempty(cmd_opts.mi_feats) && ...
-   ~cmd_opts.normalize
-  error("Must provide at least one task");
-endif
-
 %% Load
 try
   if cmd_opts.sparse
