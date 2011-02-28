@@ -1,6 +1,6 @@
 %% -*- mode: octave; -*-
 
-%% Bregman Ball clustering
+%% Bregman Divergence EM-like clustering
 %% Centroids accessor
 
 %% Author: Edgar Gonzalez
