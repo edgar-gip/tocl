@@ -11,6 +11,9 @@ pkg load octopus
 %% Extra path
 addpath(binrel("private"));
 
+%% Epsilon parameter
+epsilon = 1e-12;
+
 
 %%%%%%%%%%%%%
 %% Helpers %%
@@ -26,6 +29,20 @@ function [ values ] = log_stepped_values(min_value, max_value, n_steps)
 
   %% Values
   values = exp(log_min + step * ((1 : n_steps) - 1));
+endfunction
+
+function log_contour(xl, yl, zl, x, y, z)
+  %% Plot
+  figure("name", zl);
+  contour(x, y, z);
+
+  %% Log-plots
+  set(gca(), "xscale", "log");
+  set(gca(), "yscale", "log");
+
+  %% Labels
+  xlabel(xl);
+  ylabel(yl);
 endfunction
 
 
@@ -65,55 +82,40 @@ function [ data, truth, centr ] = gen_data(clusters, csize, radius, variance)
 endfunction
 
 
-%%%%%%%%%%%%%%
-%% Criteria %%
-%%%%%%%%%%%%%%
+%%%%%%%%%%%%
+%% Bounds %%
+%%%%%%%%%%%%
 
-%% Partition coefficient
-function [ pc, mpc ] = partition_coefficient(probability)
-  %% Sizes
-  [ k, n_data ] = size(probability);
+%% From autoFuzzyParams.m
 
-  %% Add
-  pc = sum(sum(probability .^ 2)) / n_data;
+%% Minimum alpha value
+%% \min \alpha s.t.
+%% \frac{e^{-\alpha d_{min}}}
+%%      {e^{-\alpha d_{min}} + (k - 1) e^{-\alpha d_{max}}} >
+%% \frac{1}{k} + \epsilon
+function [ alpha_min ] = mininum_alpha(d_min, d_max, k, epsilon)
+  %% Delta
+  %% \delta = \frac{1}{k} + \epsilon
+  delta = 1 / k + epsilon;
 
-  %% Modified
-  mpc = 1 - k / (k - 1) * (1 - pc);
+  %% \alpha > \frac{\log \frac{(k - 1) \delta}{1 - \delta}}{d_{max} - d_{min}}
+  alpha_min = log((k - 1) * delta / (1 - delta)) / (d_max - d_min);
 endfunction
 
-%% Partition entropy
-function [ pe ] = partition_entropy(probability)
-  %% Length
-  n_data = size(probability, 2);
-
-  %% Add
-  pe = -sum(sum(probability .* log(probability))) / n_data;
+%% Maximum gamma value
+%% \max \gamma s.t.
+%% 2 (1 - e^{-\gamma d_{min}}) < 2 - \epsilon
+function [ gamma_max ] = maximum_gamma(d_min, epsilon)
+  %% \gamma < - \frac{\log \frac{\epsilon}{2}}{d_{min}}
+  gamma_max = - log(epsilon / 2) / d_min;
 endfunction
 
-%% Sum of distances
-function [ sod ] = sum_of_distances(probability, dists)
-  %% Length
-  n_data = size(probability, 2);
-
-  %% Multiply and add
-  sod = sum(sum(probability .* dists));
-endfunction
-
-%% Fukuyama-Sugeno
-function [ fs ] = fukuyama_sugeno(probability, dists, cdists)
-  %% Length
-  n_data = size(probability, 2);
-
-  %% Correct distances
-  dists -= cdists' * ones(1, n_data);
-
-  %% Multiply and add
-  fs = sum(sum(probability .* dists));
-endfunction
-
-%% FHV
-function [ fhv ] = fuzzy_hypervolume(probability, dists);
-
+%% Minimum gamma value
+%% \max \gamma s.t.
+%% 2 (1 - e^{-\gamma d_{max}}) > \epsilon
+function [ gamma_min ] = minimum_gamma(d_max, epsilon)
+  %% \gamma < - \frac{\log (1 - \frac{\epsilon}{2})}{d_{max}}
+  gamma_min = - log(1 - epsilon / 2) / d_max;
 endfunction
 
 
@@ -121,46 +123,71 @@ endfunction
 %% Main %%
 %%%%%%%%%%
 
-%% Parse double
-function [ value ] = parse_double(label, string)
-  [ value, status ] = str2double(string);
-  if status ~= 0
-    error("Wrong %s '%s'", label, string)
-  endif
-endfunction
-
 %% Get the parameters
 args = argv();
 
 %% Check parameter length
-if length(args) ~= 10
+if length(args) ~= 7
   error(cstrcat("Wrong number of arguments: Expected", ...
-		" <clusters> <size> <radius> <variance>", ...
+		" <input>", ...
 		" <min_alpha> <max_alpha> <alpha_steps>", ...
 		" <min_gamma> <max_gamma> <gamma_steps>"));
 endif
 
-%% Parse argumets
-clusters  = parse_double("number of clusters", args{1});
-csize     = parse_double("size",               args{2});
-radius    = parse_double("radius",             args{3});
-variance  = parse_double("variance",           args{4});
-min_alpha = parse_double("minimum alpha",      args{5});
-max_alpha = parse_double("maximum alpha",      args{6});
-n_alpha   = parse_double("alpha steps",        args{7});
-min_gamma = parse_double("minimum gamma",      args{8});
-max_gamma = parse_double("maximum gamma",      args{9});
-n_gamma   = parse_double("gamma steps",        args{10});
+%% Input argument format
+if ~isempty(tokens =
+	    regexp(args{1}, ...
+		   "^(\\d+)x(\\d+)xN\\(([\\d\\.]+),([\\d\\.]+)\\)$", ...
+		   "once", "tokens"))
+  %% Generate the data
+  clusters  = parse_double(tokens{1}, "number of clusters");
+  csize     = parse_double(tokens{2}, "size");
+  radius    = parse_double(tokens{3}, "radius");
+  variance  = parse_double(tokens{4}, "variance");
 
-%% Generate the data
-[ data, truth, centr ] = gen_data(clusters, csize, radius, variance);
+  %% Generate the data
+  [ data, truth, centr ] = gen_data(clusters, csize, radius, variance);
+
+else
+  %% With a scaling prefix?
+  if ~isempty(tokens = regexp(args{1}, "^(\\d+)x(.+)$", "once", "tokens"))
+    %% Scale
+    scale_factor = parse_double(tokens{1}, "scaling factor");
+    file         = tokens{2};
+
+  else
+    %% Raw file
+    scale_factor = [];
+    file         = args{1};
+  endif
+
+  %% Load a file
+  load(file, "data", "truth");
+
+  %% Scale the data
+  if ~isempty(scale_factor)
+    data *= scale_factor;
+  endif
+
+  %% Number of clusters
+  clusters = max(truth);
+endif
+
+%% Parse the rest of argumets
+min_alpha = parse_double(args{2}, "minimum alpha");
+max_alpha = parse_double(args{3}, "maximum alpha");
+n_alpha   = parse_double(args{4}, "alpha steps");
+min_gamma = parse_double(args{5}, "minimum gamma");
+max_gamma = parse_double(args{6}, "maximum gamma");
+n_gamma   = parse_double(args{7}, "gamma steps");
+
+%% Size
+[ n_dims, n_data ] = size(data);
 
 %% Plot it
-pairwise_cluster_plot(data, truth, "Truth");
-
-%% Distance matrix
-%% dists  = apply(SqEuclideanDistance(), centr,       data);
-%% cdists = apply(SqEuclideanDistance(), zeros(2, 1), centr);
+if size(data, 1) == 2
+  pairwise_cluster_plot(data, truth, "Truth");
+endif
 
 %% Functions
 sods = pcs = mpcs = pes = fss = zeros(1, n_alpha);
@@ -176,11 +203,22 @@ gamma_values = log_stepped_values(min_gamma, max_gamma, n_gamma);
 centroid_distance_true = zeros(n_gamma, n_alpha);
 centroid_distance_sqrt = zeros(n_gamma, n_alpha);
 
-%% Size
-[ n_dims, n_data ] = size(data);
-
 %% Estimated clusters
 sqrt_clusters = max([ 2, floor(sqrt(n_data)) ]);
+
+%% All-distance matrix
+dists    = apply(SqEuclideanDistance(), data);
+min_dist = min(min(dists + inf * eye(n_data)));
+max_dist = max(max(dists));
+clear dists
+
+%% Bounds
+printf("alpha > %8g / %8g\n", ...
+       mininum_alpha(0, 2, clusters, epsilon), ...
+       mininum_alpha(0, 2, sqrt_clusters, epsilon));
+printf("%g < gamma < %8g\n", ...
+       minimum_gamma(max_dist, epsilon), ...
+       maximum_gamma(min_dist, epsilon));
 
 %% For each one
 for i = 1 : n_gamma
@@ -201,57 +239,41 @@ for i = 1 : n_gamma
     dists         = apply(SqEuclideanDistance(), cs) + inf * eye(clusters);
     min_dist_true = min(min(dists));
 
-    %% Sqrt
+    %% %% Sqrt
 
-    %% Cluster
-    [ expec, model ] = cluster(clusterer, data, sqrt_clusters);
+    %% %% Cluster
+    %% [ expec, model ] = cluster(clusterer, data, sqrt_clusters);
 
-    %% Centroids
-    cs = centroids(model);
+    %% %% Centroids
+    %% cs = centroids(model);
 
-    %% Distance
-    dists = apply(SqEuclideanDistance(), cs) + inf * eye(sqrt_clusters);
+    %% %% Distance
+    %% dists = apply(SqEuclideanDistance(), cs) + inf * eye(sqrt_clusters);
 
-    %% Minimum distance
-    min_dist_sqrt = min(min(dists));
+    %% %% Minimum distance
+    %% min_dist_sqrt = min(min(dists));
 
-    %% Log
+    %% %% Log
     fprintf("a_%3d=%8g g_%3d = %8g --> %8g / %8g\n", ...
-	    j, alpha(i, j), i, gamma(i, j), min_dist_true, min_dist_sqrt);
+     	    j, alpha(i, j), i, gamma(i, j), min_dist_true, min_dist_true);
 
     %% Store it
     centroid_distance_true(i, j) = min_dist_true;
-    centroid_distance_sqrt(i, j) = min_dist_sqrt;
+    centroid_distance_sqrt(i, j) = min_dist_true;
   endfor
 endfor
 
 %% True
-
-%% Plot
-figure("name", "True clusters");
-contour(alpha, gamma, centroid_distance_true);
-
-%% Log-plots
-set(gca(), "xscale", "log");
-set(gca(), "yscale", "log");
-
-%% Labels
-xlabel("alpha");
-ylabel("gamma");
+log_contour("alpha", "gamma", "True clusters", ...
+	    alpha, gamma, centroid_distance_true);
+log_contour("alpha", "gamma", "True clusters", ...
+	    alpha, gamma, centroid_distance_true > epsilon);
 
 %% Sqrt
-
-%% Plot
-figure("name", "SPQR clusters");
-contour(alpha, gamma, centroid_distance_sqrt);
-
-%% Log-plots
-set(gca(), "xscale", "log");
-set(gca(), "yscale", "log");
-
-%% Labels
-xlabel("alpha");
-ylabel("gamma");
+log_contour("alpha", "gamma", "SPQR clusters", ...
+	    alpha, gamma, centroid_distance_sqrt);
+log_contour("alpha", "gamma", "SPQR clusters", ...
+	    alpha, gamma, centroid_distance_sqrt > epsilon);
 
 %% Wait
 pause();
