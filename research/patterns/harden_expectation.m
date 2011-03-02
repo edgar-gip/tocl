@@ -11,11 +11,10 @@ function [ hard, best_cl ] = harden_expectation(soft, add_bg = false())
   %% Add a background component?
   if add_bg
     %% Find the background cluster
-    bg_cl = find(~sum(soft));
-    n_bg  = length(bg_cl);
+    bg_cl = 1.0 - sum(soft);
 
     %% Add it
-    soft = [ sparse(1, bg_cl, ones(1, n_bg), 1, n_data) ; soft ];
+    soft = [ bg_cl ; soft ];
 
     %% One more cluster
     k += 1;
