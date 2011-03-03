@@ -38,11 +38,8 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
     expec = sparse(cl(on), on, ones(1, n_on), k, n_samples);
 
   else %% nargin() < 4
-    %% Select seeds
-    seeds = sort(randperm(n_samples)(1 : k));
-
-    %% Make the expectation
-    expec = sparse(1 : k, seeds, ones(1, k), k, n_samples);
+    %% Take it at random
+    expec = random_expec(this, data, k);
   endif
 
   %% Cluster sizes

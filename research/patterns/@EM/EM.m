@@ -23,6 +23,14 @@ function [ this ] = EM(opts = struct())
   %% Default -> 1e-6
   this.em_threshold = getfielddef(opts, "em_threshold", 1e-6);
 
+  %% Plot
+  %% Default -> false
+  this.plot = getfielddef(opts, "plot", false());
+
+  %% Plot delay
+  %% Default -> []
+  this.plot_delay = getfielddef(opts, "plot_delay", []);
+
   %% Verbose
   %% Default -> false
   this.verbose = getfielddef(opts, "verbose", false());

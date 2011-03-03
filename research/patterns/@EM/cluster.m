@@ -29,6 +29,13 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
     endif
   endif
 
+  %% Plot?
+  if this.plot
+    fig = figure();
+  else
+    fig = [];
+  endif
+
   %% First maximization
   model = maximization(this, data, expec_0);
 
@@ -36,6 +43,17 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   prev_log_like       = -Inf;
   [ expec, log_like ] = expectation(model, data);
   change              = Inf;
+
+  %% Plot
+  if this.plot
+    figure(fig, "name", sprintf("EM: Iteration 1"));
+    expectation_plot(data, model, expec, true, fig);
+    if isempty(this.plot_delay)
+      replot();
+    else
+      pause(this.plot_delay);
+    endif
+  endif
 
   %% Info
   if this.verbose
@@ -64,6 +82,17 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
       endif
     endif
 
+    %% Plot
+    if this.plot
+      figure(fig, "name", sprintf("EM: Iteration %d", i));
+      expectation_plot(data, model, expec, true, fig);
+      if isempty(this.plot_delay)
+	replot();
+      else
+	pause(this.plot_delay);
+      endif
+    endif
+
     %% Next iteration
     ++i;
   endwhile
@@ -71,6 +100,11 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Display final output
   if this.verbose
     fprintf(2, " %6d %8g %8g %8g\n", i, log_like, change);
+  endif
+
+  %% Plot
+  if this.plot
+    figure(fig, "name", "EM");
   endif
 
   %% Return the information
@@ -82,4 +116,5 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   info.log_like      = log_like;
   info.prev_log_like = prev_log_like;
   info.change        = change;
+  info.fig           = fig;
 endfunction
