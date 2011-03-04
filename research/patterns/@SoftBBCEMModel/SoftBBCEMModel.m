@@ -28,5 +28,5 @@ function [ this ] = SoftBBCEMModel(divergence, beta, k, ...
   %% Bless
   %% And add inheritance
   this = class(this, "SoftBBCEMModel", ...
-	       Simple());
+	       EMModel());
 endfunction

@@ -1,6 +1,6 @@
 %% -*- mode: octave; -*-
 
-%% Bregman Ball clustering
+%% Expectation-Maximization clustering
 %% Score threshold
 
 %% Author: Edgar Gonzalez
@@ -9,9 +9,9 @@ function [ score_threshold ] = threshold(this)
 
   %% Check arguments
   if nargin() ~= 1
-    usage("[ score_threshold ] = @BregmanBallModel/threshold(this)");
+    usage("[ score_threshold ] = @EMModel/threshold(this)");
   endif
 
-  %% The threshold is the negated radius
-  score_threshold = -this.radius;
+  %% The threshold is 0.5
+  score_threshold = 0.5;
 endfunction

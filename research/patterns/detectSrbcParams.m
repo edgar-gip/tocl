@@ -14,6 +14,9 @@ addpath(binrel("private"));
 %% Clusterer types
 enum BREGMAN SOFT_BBC
 
+%% Left-most Criterion
+enum LM_MAX LM_MEDIAN
+
 
 %%%%%%%%%%%%%%
 %% Clusters %%
@@ -166,7 +169,7 @@ function [ dist_min ] = ...
 
   %% Log
   if opts.verbose
-    fprintf(2, "f(%12g, %12g) = m(", alpha, gamma);
+    fprintf(2, "mcd(%12g, %12g) = m(", alpha, gamma);
   endif
 
   %% Do it again, Sam
@@ -180,6 +183,12 @@ function [ dist_min ] = ...
     %% Distance
     dists        = apply(SqEuclideanDistance(), cs) + inf * eye(k);
     dist_mins(r) = min(min(dists));
+
+    %% Correction for infinite distances
+    %% This means that only one centroid is left alive...
+    if ~isfinite(dist_mins(r))
+      dist_mins(r) = 0;
+    endif
 
     %% Log
     if opts.verbose
@@ -309,27 +318,66 @@ endfunction
 function [ lm_alpha, lm_gamma, th_mcd, th_curve ] = ...
       leftmost_search(alpha, gamma, mcd, opts)
 
-  %% Max
-  max_mcd = max(max(mcd));
-  th_mcd  = max_mcd * opts.max_fraction;
+  %% Reference
+  switch opts.g_lm_criterion
+    case LM_MAX
+      %% Maximum
+      ref_mcd = max(max(mcd));
 
-  %% Find contour level
-  all_curves = contour_curves(alpha, gamma, mcd, [ th_mcd, th_mcd ]);
+    case LM_MEDIAN
+      %% Median
+      [ rows, cols ] = size(mcd);
+      mcd_vec = reshape(mcd, 1, rows * cols);
+      ref_mcd = median(mcd_vec(mcd_vec > opts.epsilon_up));
+  endswitch
 
-  %% Empty?
-  if isempty(all_curves)
-    %% All empty
+  %% Current fraction
+  fraction = opts.max_fraction;
+
+  %% Log
+  fprintf(2, "\ncontour: ref_mcd = %12g\n", ref_mcd);
+
+  %% Loop
+  found = false;
+  while ~found && fraction >= opts.min_max_fraction
+    %% Max
+    th_mcd = ref_mcd * fraction;
+
+    %% Log
+    fprintf(2, "* mcd = %12g -> ", th_mcd);
+
+    %% Find contour level
+    all_curves = contour_curves(alpha, gamma, mcd, [ th_mcd, th_mcd ]);
+
+    %% Empty?
+    if isempty(all_curves)
+      %% Log
+      fprintf(2, "none\n");
+
+      %% Reduce fraction
+      fraction /= 2;
+
+    else
+      %% Take the largest
+      th_curve = largest_curve(all_curves);
+
+      %% Left-most alpha
+      lm_alpha = min(th_curve(1, :));
+
+      %% Average gamma
+      lm_gamma = mean(th_curve(2, th_curve(1, :) == lm_alpha));
+
+      %% Log
+      fprintf(2, "alpha = %12g, gamma = %12g\n", lm_alpha, lm_gamma);
+
+      %% Found
+      found = true();
+    endif
+  endwhile
+
+  %% Not found?
+  if ~found
     lm_alpha = lm_gamma = lm_mcd = th_curve = [];
-
-  else
-    %% Take the largest
-    th_curve = largest_curve(all_curves);
-
-    %% Left-most alpha
-    lm_alpha = min(th_curve(1, :));
-
-    %% Average gamma
-    lm_gamma = mean(th_curve(2, th_curve(1, :) == lm_alpha));
   endif
 endfunction
 
@@ -337,7 +385,7 @@ endfunction
 %% Do the grid
 function do_grid(data, k, opts)
   %% Log
-  fprintf(2, "\npp: alpha in [ %8g .. %8g ], gamma in [ %8g .. %8g ]\n", ...
+  fprintf(2, "\ngrid: alpha in [ %8g .. %8g ], gamma in [ %8g .. %8g ]\n", ...
 	  opts.min_alpha, opts.max_alpha, opts.min_gamma, ...
 	  opts.max_gamma);
 
@@ -923,19 +971,20 @@ endfunction
 %%%%%%%%%%
 
 %% General options
-def_opts               = struct();
-def_opts.clusterer     = BREGMAN;
-def_opts.clusters      = "sqrt";
-def_opts.em_threshold  = 1e-6;
-def_opts.em_iterations =   20;
-def_opts.epsilon_down  = 1e-4;
-def_opts.epsilon_up    = 1e-3;
-def_opts.max_fraction  =    0.5;
-def_opts.min_alpha     =    0.01;
-def_opts.max_alpha     = 1000.0;
-def_opts.min_gamma     =    0.01;
-def_opts.max_gamma     = 1000.0;
-def_opts.verbose       = false();
+def_opts               	  = struct();
+def_opts.clusterer     	  = BREGMAN;
+def_opts.clusters      	  = "sqrt";
+def_opts.em_threshold  	  = 1e-6;
+def_opts.em_iterations 	  =   20;
+def_opts.epsilon_down  	  = 1e-4;
+def_opts.epsilon_up    	  = 1e-3;
+def_opts.max_fraction     =    0.5;
+def_opts.min_max_fraction =    0.125;
+def_opts.min_alpha     	  =    0.01;
+def_opts.max_alpha     	  = 1000.0;
+def_opts.min_gamma     	  =    0.01;
+def_opts.max_gamma     	  = 1000.0;
+def_opts.verbose       	  = false();
 
 %% Plot options
 def_opts.plot      = false();
@@ -951,11 +1000,12 @@ def_opts.man_gamma = [];
 def_opts.man_run   = false();
 
 %% Grid options
-def_opts.grid        = false();
-def_opts.g_repeats   =  1;
-def_opts.g_n_alpha   = 21;
-def_opts.g_n_gamma   = 21;
-def_opts.g_run       = false();
+def_opts.grid           = false();
+def_opts.g_lm_criterion = LM_MAX;
+def_opts.g_n_alpha      = 21;
+def_opts.g_n_gamma      = 21;
+def_opts.g_repeats      =  1;
+def_opts.g_run          = false();
 
 %% Search options
 def_opts.search         = true();
@@ -997,6 +1047,7 @@ endfunction
 		"epsilon-down=f",     "epsilon_down",     ...
 		"epsilon-up=f",       "epsilon_up",       ...
 		"max-fraction=f",     "max_fraction",     ...
+		"min-max-fraction=f", "min_max_fraction", ...
 		"min-alpha=f",        "min_alpha",        ...
 		"max-alpha=f",        "max_alpha",        ...
 		"min-gamma=f",        "min_gamma",        ...
@@ -1015,9 +1066,11 @@ endfunction
 		"man-run!",           "man_run",          ...
 		...
 		"grid!",              "grid",             ...
-		"g-repeats=i",        "g_repeats",        ...
+		"g-lm-max=r0",        "g_lm_criterion",   ...
+		"g-lm-median=r1",     "g_lm_criterion",   ...
 		"g-n-alpha=i",        "g_n_alpha",        ...
 		"g-n-gamma=i",        "g_n_gamma",        ...
+		"g-repeats=i",        "g_repeats",        ...
 		"g-run!",             "g_run",            ...
 		...
 		"search!",            "search",           ...
