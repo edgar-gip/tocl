@@ -146,13 +146,19 @@ function [ dist_min ] = ...
   %% (Yes, alpha is beta)
   switch opts.clusterer
     case BREGMAN
-      clusterer = BregmanEM(KernelDistance(RBFKernel(gamma)), ...
-			    struct("beta", alpha));
+      clusterer = BregmanEM(KernelDistance(RBFKernel(gamma)),          ...
+			    struct("beta",          alpha,             ...
+				   "em_threshold",  opts.em_threshold, ...
+				   "em_iterations", opts.em_iterations));
 
     case SOFT_BBC
       clusterer = SeqEM({ KMeans(KernelDistance(RBFKernel(gamma))),
 			  SoftBBCEM(KernelDistance(RBFKernel(gamma)), ...
-				    struct("beta", alpha)) });
+				    struct("beta", alpha,             ...
+					   "em_threshold",            ...
+					       opts.em_threshold,     ...
+					   "em_iterations",           ...
+					       opts.em_iterations)) });
   endswitch
 
   %% Accumulate
@@ -253,6 +259,52 @@ endfunction
 %% Grid search %%
 %%%%%%%%%%%%%%%%%
 
+%% Contour curves
+function [ curves ] = contour_curves(x, y, z, value)
+  %% Call native function
+  [ raw_curves ] = contourc(x, y, z, [ value, value ]);
+
+  %% Output
+  curves = {};
+
+  %% Follow each
+  i = 1;
+  while i < size(raw_curves, 2)
+    %% Length
+    l = raw_curves(2, i);
+
+    %% Copy it
+    curves = cell_push(curves, raw_curves(:, i + 1 : (i + l)));
+
+    %% Next
+    i += l + 1;
+  endwhile
+endfunction
+
+
+%% Largest curve
+function [ curve ] = largest_curve(curves)
+  %% How many
+  n_curves = length(curves);
+
+  %% Only one?
+  if n_curves == 1
+    %% Return it
+    curve = curves{1};
+
+  else
+    %% Create them
+    areas = cellfun(@(c) prod(max(c, [], 2) - min(c, [], 2)), curves);
+
+    %% Find the largest one
+    [ max_area, max_idx ] = max(areas);
+
+    %% Return it
+    curve = curves{max_idx};
+  endif
+endfunction
+
+
 %% Left-most search
 function [ lm_alpha, lm_gamma, th_mcd, th_curve ] = ...
       leftmost_search(alpha, gamma, mcd, opts)
@@ -262,16 +314,16 @@ function [ lm_alpha, lm_gamma, th_mcd, th_curve ] = ...
   th_mcd  = max_mcd * opts.max_fraction;
 
   %% Find contour level
-  [ th_curve ] = contourc(alpha, gamma, mcd, [ th_mcd, th_mcd ]);
+  all_curves = contour_curves(alpha, gamma, mcd, [ th_mcd, th_mcd ]);
 
   %% Empty?
-  if isempty(th_curve)
+  if isempty(all_curves)
     %% All empty
-    lm_alpha = lm_gamma = lm_mcd = [];
+    lm_alpha = lm_gamma = lm_mcd = th_curve = [];
 
   else
-    %% Remove contour info
-    th_curve = th_curve(:, 2 : size(th_curve, 2));
+    %% Take the largest
+    th_curve = largest_curve(all_curves);
 
     %% Left-most alpha
     lm_alpha = min(th_curve(1, :));
@@ -313,19 +365,6 @@ function do_grid(data, k, opts)
   if opts.plot
     %% Plot the grid
     plot_grid(alpha, gamma, centroid_distance, opts);
-
-    %% Find contour level
-    [ th_curve ] = contourc(alpha, gamma, centroid_distance, ...
-			    [ opts.epsilon_up, opts.epsilon_up ]);
-
-    %% Empty?
-    if ~isempty(th_curve)
-      %% Remove contour info
-      th_curve = th_curve(:, 2 : size(th_curve, 2))
-
-      %% Plot
-      plot_curve(th_curve, opts.epsilon_up, true(), opts);
-    endif
   endif
 
   %% Detect
@@ -884,17 +923,19 @@ endfunction
 %%%%%%%%%%
 
 %% General options
-def_opts              = struct();
-def_opts.clusterer    = BREGMAN;
-def_opts.clusters     = "sqrt";
-def_opts.epsilon_down = 1e-4;
-def_opts.epsilon_up   = 1e-3;
-def_opts.max_fraction =   0.5;
-def_opts.min_alpha    =   0.01;
-def_opts.max_alpha    = 100.0;
-def_opts.min_gamma    =   0.01;
-def_opts.max_gamma    = 100.0;
-def_opts.verbose      = false();
+def_opts               = struct();
+def_opts.clusterer     = BREGMAN;
+def_opts.clusters      = "sqrt";
+def_opts.em_threshold  = 1e-6;
+def_opts.em_iterations =   20;
+def_opts.epsilon_down  = 1e-4;
+def_opts.epsilon_up    = 1e-3;
+def_opts.max_fraction  =    0.5;
+def_opts.min_alpha     =    0.01;
+def_opts.max_alpha     = 1000.0;
+def_opts.min_gamma     =    0.01;
+def_opts.max_gamma     = 1000.0;
+def_opts.verbose       = false();
 
 %% Plot options
 def_opts.plot      = false();
@@ -948,9 +989,11 @@ endfunction
     get_options(def_opts, ...
 		"cl-bregman=r0",      "clusterer",        ...
 		"cl-soft-bbc=r1",     "clusterer",        ...
-		"sqrt-clusters",      @_sqrt_clusters,     ...
-		"true-clusters",      @_true_clusters,     ...
+		"sqrt-clusters",      @_sqrt_clusters,    ...
+		"true-clusters",      @_true_clusters,    ...
 		"clusters=i",         "clusters",         ...
+		"em-iterations=i",    "em_iterations",    ...
+		"em-threshold=f",     "em_threshold",     ...
 		"epsilon-down=f",     "epsilon_down",     ...
 		"epsilon-up=f",       "epsilon_up",       ...
 		"max-fraction=f",     "max_fraction",     ...
