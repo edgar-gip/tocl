@@ -12,5 +12,9 @@ function [ absolute ] = binrel(relative)
   [ bin_dir, bin_name, bin_ext, bin_ver ] = fileparts(bin_path);
 
   %% Convert to absolute
-  absolute = fullfile(bin_dir, relative);
+  if nargin() > 0
+    absolute = fullfile(bin_dir, relative);
+  else
+    absolute = bin_dir;
+  endif
 endfunction

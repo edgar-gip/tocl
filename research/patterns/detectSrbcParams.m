@@ -224,13 +224,14 @@ endfunction
 %% Result
 function result(label, alpha, gamma, run, opts)
   %% Display the label and the values
-  printf("%10s: alpha = %12g gamma = %12g\n", label, alpha, gamma);
+  printf("# %10s: alpha = %12g gamma = %12g\n", label, alpha, gamma);
 
   %% Run?
   if ~isnan(alpha) && run
     %% Command string
-    cmd = sprintf(cstrcat("octave -q scoreAndoData.m %s rbf %g", ...
-			  " ewocs_voro %g,%d,%d 1 %d"),          ...
+    cmd = sprintf(cstrcat("octave -p %s -q %s %s rbf %g",     ...
+			  " ewocs_voro %g,%d,%d 1 %d"),       ...
+		  binrel(), binrel("scoreAndoData.m"),     ...
 		  opts.input, gamma, alpha, opts.run_repeats, ...
 		  opts.run_clusters, opts.seed);
 
@@ -972,7 +973,7 @@ endfunction
 
 %% General options
 def_opts               	  = struct();
-def_opts.clusterer     	  = BREGMAN;
+def_opts.clusterer     	  = SOFT_BBC;
 def_opts.clusters      	  = "sqrt";
 def_opts.em_threshold  	  = 1e-6;
 def_opts.em_iterations 	  =   20;
@@ -1002,13 +1003,13 @@ def_opts.man_run   = false();
 %% Grid options
 def_opts.grid           = false();
 def_opts.g_lm_criterion = LM_MAX;
-def_opts.g_n_alpha      = 21;
-def_opts.g_n_gamma      = 21;
-def_opts.g_repeats      =  1;
+def_opts.g_n_alpha      = 26;
+def_opts.g_n_gamma      = 26;
+def_opts.g_repeats      =  5;
 def_opts.g_run          = false();
 
 %% Search options
-def_opts.search         = true();
+def_opts.search         = false();
 def_opts.s_epsilon_dist	= 1e-10;
 def_opts.s_lemming     	=  2;
 def_opts.s_max_denom   	= 10;
@@ -1133,4 +1134,6 @@ if opts.search
 endif
 
 %% Pause
-pause();
+if opts.plot
+  pause();
+endif
