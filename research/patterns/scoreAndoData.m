@@ -9,7 +9,7 @@
 %% warning error Octave:divide-by-zero;
 
 %% Octopus
-pkg load octopus
+pkg load octopus;
 
 %% Ando elements
 source(binrel("andoElements.m"));
@@ -26,6 +26,9 @@ args = argv();
 full_level = 1;
 if length(args) > 1
   switch args{1}
+    case "--basic"
+      %% full_level = 1
+      args       = { args{2 : length(args)} };
     case "--full"
       full_level = 2;
       args       = { args{2 : length(args)} };

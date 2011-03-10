@@ -1,21 +1,26 @@
 %% -*- mode: octave; -*-
 
 %% Find RBFKernel Bregman Clustering optimal parameters
+%% Adapting
+%% V. Schwämmle, O.N. Jensen
+%% "A simple and fast method to determine the parameters for fuzzy
+%%  c-means cluster analysis"
+%% Bioinformatics, 26(22), pp. 2841--2848, 2010
 
 %% Author: Edgar Gonzàlez i Pellicer
 
 
 %% Octopus
-pkg load octopus
+pkg load octopus;
 
 %% Extra path
 addpath(binrel("private"));
 
 %% Clusterer types
-enum BREGMAN SOFT_BBC
+enum BREGMAN SOFT_BBC;
 
-%% Left-most Criterion
-enum LM_MAX LM_MEDIAN
+%% Left-most version
+enum LM_EPSILON LM_MAX LM_MEDIAN;
 
 
 %%%%%%%%%%%%%%
@@ -41,36 +46,59 @@ endfunction
 %% Plot %%
 %%%%%%%%%%
 
-%% Create the figure
-function create_figure(opts)
-  %% Figure
-  figure("name", "MCD");
+%% Ensure the figure is created
+function ensure_figure(opts)
+  persistent fig_handle = [];
 
-  %% Clear
-  plot([ opts.min_alpha, opts.min_alpha, opts.max_alpha, opts.max_alpha ], ...
-       [ opts.min_gamma, opts.max_gamma, opts.max_gamma, opts.min_gamma ], ...
-       "6*", "linewidth", 4);
+  %% Empty?
+  if isempty(fig_handle)
+    %% Figure
+    fig_handle = figure("name", "MCD");
 
-  %% Log-plots
-  set(gca(), "xscale", "log");
-  set(gca(), "yscale", "log");
+    %% Clear
+    plot([ opts.min_alpha, opts.min_alpha, opts.max_alpha, opts.max_alpha ], ...
+	 [ opts.min_gamma, opts.max_gamma, opts.max_gamma, opts.min_gamma ], ...
+	 "6*", "linewidth", 4);
 
-  %% Labels
-  xlabel("alpha");
-  ylabel("gamma");
+    %% Log-plots
+    set(gca(), "xscale", "log");
+    set(gca(), "yscale", "log");
 
-  %% Hold
-  hold("on");
+    %% Labels
+    xlabel("alpha");
+    ylabel("gamma");
 
-  %% Update
-  replot();
+    %% Hold
+    hold("on");
+
+    %% Update
+    replot();
+
+  else
+    %% Just select
+    figure(fig_handle);
+  endif
 endfunction
 
 %% Plot grid
 function plot_grid(alpha, gamma, mcd, opts)
+  %% Ensure
+  ensure_figure(opts);
+
   %% Plot
   if opts.p_contour
     contour(alpha, gamma, mcd);
+    if opts.p_c_grid
+      r_idx = find(opts.epsilon_down > mcd);
+      y_idx = find(opts.epsilon_down <= mcd & mcd < opts.epsilon_up);
+      g_idx = find(mcd >= opts.epsilon_up);
+
+      [ aa, gg ] = meshgrid(alpha, gamma);
+
+      plot(aa(r_idx), gg(r_idx), "r*", ...
+	   aa(y_idx), gg(y_idx), "y*", ...
+	   aa(g_idx), gg(g_idx), "g*");
+    endif
   else
     mesh(alpha, gamma, mcd);
   endif
@@ -81,6 +109,9 @@ endfunction
 
 %% Plot curve
 function plot_curve(curve, mcd, big, opts)
+  %% Ensure
+  ensure_figure(opts);
+
   %% Big?
   if opts.p_contour
     if big
@@ -107,6 +138,9 @@ function plot_point(alpha0, gamma0, mcd0, big, opts)
 	(opts.min_alpha <= alpha0 && alpha0 <= opts.max_alpha && ...
 	 opts.min_gamma <= gamma0 && gamma0 <= opts.max_gamma)
 
+    %% Ensure
+    ensure_figure(opts);
+
     %% Colour
     if mcd0 < opts.epsilon_down
       colour = "r*";
@@ -121,13 +155,13 @@ function plot_point(alpha0, gamma0, mcd0, big, opts)
       if big
 	plot(alpha0, gamma0, colour, "linewidth", 8);
       else
-	plot(alpha0, gamma0, colour);
+	plot(alpha0, gamma0, colour, "linewidth", 2);
       endif
     else
       if big
 	plot3(alpha0, gamma0, mcd0, colour, "linewidth", 8);
       else
-	plot3(alpha0, gamma0, mcd0, colour);
+	plot3(alpha0, gamma0, mcd0, colour, "linewidth", 2);
       endif
     endif
 
@@ -229,10 +263,10 @@ function result(label, alpha, gamma, run, opts)
   %% Run?
   if ~isnan(alpha) && run
     %% Command string
-    cmd = sprintf(cstrcat("octave -p %s -q %s %s rbf %g",     ...
-			  " ewocs_voro %g,%d,%d 1 %d"),       ...
-		  binrel(), binrel("scoreAndoData.m"),     ...
-		  opts.input, gamma, alpha, opts.run_repeats, ...
+    cmd = sprintf(cstrcat("octave -p %s -q %s %s %s rbf %g",          ...
+			  " ewocs_voro %g,%d,%d 1 %d"),               ...
+		  binrel(), binrel("scoreAndoData.m"), opts.run_mode, ...
+		  opts.input, gamma, alpha, opts.run_repeats,         ...
 		  opts.run_clusters, opts.seed);
 
     %% Display it
@@ -315,9 +349,49 @@ function [ curve ] = largest_curve(curves)
 endfunction
 
 
-%% Left-most search
+%% Left-most search (epsilon)
 function [ lm_alpha, lm_gamma, th_mcd, th_curve ] = ...
-      leftmost_search(alpha, gamma, mcd, opts)
+      leftmost_search_epsilon(alpha, gamma, mcd, opts)
+
+  %% Values above epsilon
+  height = mcd > opts.epsilon_up;
+
+  %% Log
+  fprintf(2, "\ncontour: epsilon\n");
+
+  %% Find the 0.5 contour level
+  all_curves = contour_curves(alpha, gamma, height, 0.5);
+
+  %% Empty?
+  if isempty(all_curves)
+    %% Nothing
+    lm_alpha = lm_gamma = lm_mcd = th_curve = [];
+
+    %% Log
+    fprintf(2, "none\n");
+
+  else
+    %% Take the largest
+    th_curve = largest_curve(all_curves);
+
+    %% Left-most alpha
+    lm_alpha = min(th_curve(1, :));
+
+    %% Average gamma
+    lm_gamma = mean(th_curve(2, th_curve(1, :) == lm_alpha));
+
+    %% Threshold value
+    th_mcd = opts.epsilon_up;
+
+    %% Log
+    fprintf(2, "alpha = %12g, gamma = %12g\n", lm_alpha, lm_gamma);
+  endif
+endfunction
+
+
+%% Left-most search (max)
+function [ lm_alpha, lm_gamma, th_mcd, th_curve ] = ...
+      leftmost_search_max(alpha, gamma, mcd, opts)
 
   %% Reference
   switch opts.g_lm_criterion
@@ -348,7 +422,7 @@ function [ lm_alpha, lm_gamma, th_mcd, th_curve ] = ...
     fprintf(2, "* mcd = %12g -> ", th_mcd);
 
     %% Find contour level
-    all_curves = contour_curves(alpha, gamma, mcd, [ th_mcd, th_mcd ]);
+    all_curves = contour_curves(alpha, gamma, mcd, th_mcd);
 
     %% Empty?
     if isempty(all_curves)
@@ -417,8 +491,15 @@ function do_grid(data, k, opts)
   endif
 
   %% Detect
-  [ lm_alpha, lm_gamma, th_mcd, th_curve ] = ...
-      leftmost_search(alpha, gamma, centroid_distance, opts);
+  switch opts.g_lm_criterion
+    case LM_EPSILON
+      [ lm_alpha, lm_gamma, th_mcd, th_curve ] = ...
+	  leftmost_search_epsilon(alpha, gamma, centroid_distance, opts);
+
+    case { LM_MAX, LM_MEDIAN }
+      [ lm_alpha, lm_gamma, th_mcd, th_curve ] = ...
+	  leftmost_search_max(alpha, gamma, centroid_distance, opts);
+  endswitch
 
   %% Plot
   if isempty(lm_alpha)
@@ -429,7 +510,7 @@ function do_grid(data, k, opts)
     %% Plot
     if opts.plot
       plot_curve(th_curve, th_mcd, true(), opts);
-      plot_point(lm_alpha, lm_gamma, th_mcd, true(), opts);
+      plot_point(lm_alpha, lm_gamma, th_mcd, true(), opts)
     endif
 
     %% Result
@@ -967,6 +1048,103 @@ function do_search(data, k, opts);
 endfunction
 
 
+%%%%%%%%%%%%%%%%
+%% Event loop %%
+%%%%%%%%%%%%%%%%
+
+%% Do what an event should do
+function do_event(alpha, gamma, data, k, opts)
+  %% Debug
+  fprintf(2, "\nevent: alpha = %12g gamma = %12g\n", alpha, gamma);
+
+  %% Clusterer
+  %% (Yes, alpha is beta)
+  switch opts.clusterer
+    case BREGMAN
+      clusterer = BregmanEM(KernelDistance(RBFKernel(gamma)),           ...
+			    struct("beta",          alpha,              ...
+				   "em_threshold",  opts.em_threshold,  ...
+				   "em_iterations", opts.em_iterations, ...
+				   "plot",          opts.e_plot_cluster));
+
+    case SOFT_BBC
+      clusterer = SeqEM({ KMeans(KernelDistance(RBFKernel(gamma))),
+			  SoftBBCEM(KernelDistance(RBFKernel(gamma)), ...
+				    struct("beta", alpha,             ...
+					   "em_threshold",            ...
+					       opts.em_threshold,     ...
+					   "em_iterations",           ...
+					       opts.em_iterations,    ...
+					   "plot", opts.e_plot_cluster)) });
+  endswitch
+
+  %% Cluster
+  [ expec, model ] = cluster(clusterer, data, k);
+
+  %% Centroids
+  cs = centroids(model);
+
+  %% Distance
+  dists = apply(SqEuclideanDistance(), cs) + inf * eye(k);
+  mcd   = min(min(dists));
+
+  %% Correction for infinite distances
+  %% This means that only one centroid is left alive...
+  if ~isfinite(mcd)
+    mcd = 0;
+  endif
+
+  %% Complete the plot
+  if opts.e_plot_cluster
+    %% Hold
+    hold on;
+
+    %% Add title
+    title(sprintf("alpha = %g gamma = %g  ->  mcd = %g", ...
+		  alpha, gamma, mcd));
+
+    %% Plot centroids
+    plot(cs(1, :), cs(2, :), "*", "linewidth", 8);
+
+    %% Update
+    replot();
+  endif
+
+  %% Log
+  if opts.verbose
+    fprintf(2, "mcd(%12g, %12g) = %12g\n", alpha, gamma, mcd);
+  endif
+
+  %% Plot it
+  plot_point(alpha, gamma, mcd, true(), opts)
+
+  %% Result
+  result("Event", alpha, gamma, opts.e_run, opts)
+endfunction
+
+%% Event loop
+function event_loop(data, k, opts)
+  %% Loop
+  finish = false();
+  while ~finish
+    %% Ensure we are in the right figure
+    ensure_figure(opts);
+
+    %% Get an event
+    [ alpha, gamma, button ] = ginput(1);
+
+    %% Key
+    switch button
+      case 1
+	do_event(alpha, gamma, data, k, opts);
+
+      case -1
+	finish = true();
+    endswitch
+  endwhile
+endfunction
+
+
 %%%%%%%%%%
 %% Main %%
 %%%%%%%%%%
@@ -990,8 +1168,10 @@ def_opts.verbose       	  = false();
 %% Plot options
 def_opts.plot      = false();
 def_opts.p_contour = true();
+def_opts.p_c_grid  = false();
 
 %% Run options
+def_opts.run_mode     = "--basic";
 def_opts.run_clusters = 100;
 def_opts.run_repeats  = 100;
 
@@ -1002,7 +1182,7 @@ def_opts.man_run   = false();
 
 %% Grid options
 def_opts.grid           = false();
-def_opts.g_lm_criterion = LM_MAX;
+def_opts.g_lm_criterion = LM_EPSILON;
 def_opts.g_n_alpha      = 26;
 def_opts.g_n_gamma      = 26;
 def_opts.g_repeats      =  5;
@@ -1021,6 +1201,12 @@ def_opts.s_repeats      =  5;
 def_opts.s_subsample    = [];
 def_opts.s_run          = false();
 
+%% Event options
+def_opts.event_loop     = true();
+def_opts.e_plot_cluster = false();
+def_opts.e_repeats      = 5;
+def_opts.e_run          = false();
+
 %% Helper functions
 function [ opts ] = _sqrt_clusters(opts, value)
   opts.clusters = "sqrt";
@@ -1028,8 +1214,20 @@ endfunction
 function [ opts ] = _true_clusters(opts, value)
   opts.clusters = "true";
 endfunction
+function [ opts ] = _repeats(opts, value)
+  opts.g_repeats = opts.s_repeats = opts.e_repeats = value;
+endfunction
 function [ opts ] = _run(opts, value)
-  opts.man_run = opts.g_run = opts.s_run = value;
+  opts.man_run = opts.g_run = opts.s_run = opts.e_run = value;
+endfunction
+function [ opts ] = _run_basic(opts, value)
+  opts.run_mode = "--basic";
+endfunction
+function [ opts ] = _run_full(opts, value)
+  opts.run_mode = "--full";
+endfunction
+function [ opts ] = _run_extra(opts, value)
+  opts.run_mode = "--extra";
 endfunction
 function [ opts ] = _s_no_subsample(opts, value)
   opts.s_subsample = [];
@@ -1053,12 +1251,17 @@ endfunction
 		"max-alpha=f",        "max_alpha",        ...
 		"min-gamma=f",        "min_gamma",        ...
 		"max-gamma=f",        "max_gamma",        ...
+		"repeats=i",          @_repeats,          ...
 		"verbose!",           "verbose",          ...
 		...
 		"plot!",              "plot",             ...
 		"p-contour!",         "p_contour",        ...
+		"p-c-grid!",          "p_c_grid",         ...
 		...
-		"run!",               @_run,               ...
+		"run!",               @_run,              ...
+		"run-basic",          @_run_basic,        ...
+		"run-full",           @_run_full,         ...
+		"run-extra",          @_run_extra,        ...
 		"run-clusters=i",     "run_clusters",     ...
 		"run-repeats=i",      "run_repeats",      ...
 		...
@@ -1067,8 +1270,9 @@ endfunction
 		"man-run!",           "man_run",          ...
 		...
 		"grid!",              "grid",             ...
-		"g-lm-max=r0",        "g_lm_criterion",   ...
-		"g-lm-median=r1",     "g_lm_criterion",   ...
+		"g-lm-epsilon=r0",    "g_lm_criterion",   ...
+		"g-lm-max=r1",        "g_lm_criterion",   ...
+		"g-lm-median=r2",     "g_lm_criterion",   ...
 		"g-n-alpha=i",        "g_n_alpha",        ...
 		"g-n-gamma=i",        "g_n_gamma",        ...
 		"g-repeats=i",        "g_repeats",        ...
@@ -1082,8 +1286,13 @@ endfunction
 		"s-mouse-stay=i",     "s_mouse_stay",     ...
 		"s-precision=f",      "s_precision",      ...
 		"s-subsample=i",      "s_subsample",      ...
-		"s-no-subsample",     @_s_no_subsample,    ...
-		"s-run!",             "s_run");
+		"s-no-subsample",     @_s_no_subsample,   ...
+		"s-run!",             "s_run",            ...
+		...
+		"event-loop!",        "event_loop",       ...
+		"e-plot-cluster!",    "e_plot_cluster",   ...
+		"e-repeats=i",        "e_repeats",        ...
+		"e-run!",             "e_run");
 
 %% Arguments
 if length(args) ~= 2
@@ -1112,7 +1321,7 @@ fprintf(2, "k = %d\n", k);
 
 %% Plot
 if opts.plot
-  create_figure(opts);
+  ensure_figure(opts);
 endif
 
 %% Manual
@@ -1133,7 +1342,11 @@ if opts.search
   do_search(data, k, opts);
 endif
 
-%% Pause
+%% Event loop
 if opts.plot
-  pause();
+  if opts.event_loop
+    event_loop(data, k, opts);
+  else
+    pause();
+  endif
 endif

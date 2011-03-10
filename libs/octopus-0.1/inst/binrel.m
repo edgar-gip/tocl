@@ -14,6 +14,8 @@ function [ absolute ] = binrel(relative)
   %% Convert to absolute
   if nargin() > 0
     absolute = fullfile(bin_dir, relative);
+  elseif isempty(bin_dir)
+    absolute = ".";
   else
     absolute = bin_dir;
   endif
