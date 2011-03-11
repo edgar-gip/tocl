@@ -224,6 +224,15 @@ function [ dist_min ] = ...
       dist_mins(r) = 0;
     endif
 
+    %% Noise correction?
+    if opts.mcd_correction
+      %% Average noise expectation
+      nexpec = 1.0 - mean(sum(expec, 1));
+
+      %% Correct
+      dist_mins(r) * nexpec;
+    endif
+
     %% Log
     if opts.verbose
       fprintf(2, " %12g", dist_mins(r));
@@ -1163,6 +1172,7 @@ def_opts.min_alpha     	  =    0.01;
 def_opts.max_alpha     	  = 1000.0;
 def_opts.min_gamma     	  =    0.01;
 def_opts.max_gamma     	  = 1000.0;
+def_opts.mcd_correction   = false();
 def_opts.verbose       	  = false();
 
 %% Plot options
@@ -1251,6 +1261,7 @@ endfunction
 		"max-alpha=f",        "max_alpha",        ...
 		"min-gamma=f",        "min_gamma",        ...
 		"max-gamma=f",        "max_gamma",        ...
+		"mcd-correction!",    "mcd_correction",   ...
 		"repeats=i",          @_repeats,          ...
 		"verbose!",           "verbose",          ...
 		...

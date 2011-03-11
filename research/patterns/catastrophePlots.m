@@ -37,9 +37,9 @@ endfunction
 %%%%%%%%%%
 
 %% Plot a grid
-function plot_grid(title, alpha, gamma, values)
+function [ fh ] = plot_grid(title, alpha, gamma, values)
   %% Figure
-  figure("name", title);
+  fh = figure("name", title);
 
   %% Log-plots
   set(gca(), "xscale", "log");
@@ -81,7 +81,7 @@ function plot_grid(title, alpha, gamma, values)
     %% Any?
     if ~isempty(idx)
       %% Add them
-      plots = cell_push(plots, aa(idx), gg(idx), "*", "linewidth", 8);
+      plots = cell_push(plots, aa(idx), gg(idx), "*", "linewidth", 2);
 
       %% Already assigned
       assigned(idx) = true();
@@ -128,6 +128,102 @@ function [ cshift ] = centroid_shift(src_model, tgt_model)
 endfunction
 
 
+%% Noise expectation
+function [ nexpec ] = noise_expec(expec)
+  %% Noise expectation
+  nexpec = 1.0 - mean(sum(expec, 1));
+endfunction
+
+
+%%%%%%%%%%%
+%% Event %%
+%%%%%%%%%%%
+
+%% Do the event
+function do_event(alpha, gamma, data, k, fhs, opts)
+  %% Within range?
+  if opts.min_alpha <= alpha && alpha <= opts.max_alpha && ...
+     opts.min_gamma <= gamma && gamma <= opts.max_gamma
+    %% For each figure
+    for fh = fhs
+      %% Plot it
+      figure(fh);
+      plot(alpha, gamma, "g*", "linewidth", 8);
+      replot();
+    endfor
+  endif
+
+  %% Log
+  printf("gamma = %12g\n", gamma);
+
+  %% K-Means clusterer
+  kmeans = KMeans(KernelDistance(RBFKernel(gamma)));
+
+  %% Cluster
+  [ km_expec, km_model ] = cluster(kmeans, data, k);
+
+  %% Log
+  printf("* alpha = %12g", alpha);
+
+  %% SoftBregman clusterer
+  sbreg = SoftBBCEM(KernelDistance(RBFKernel(gamma)),           ...
+		    struct("beta",          alpha,              ...
+			   "em_threshold",  opts.em_threshold,  ...
+			   "em_iterations", opts.em_iterations, ...
+			   "plot",          opts.em_plot));
+
+  %% Cluster
+  [ sb_expec, sb_model ] = cluster(sbreg, data, k, km_expec);
+
+  %% Extra plot
+  if opts.em_plot
+    %% Hold
+    hold on;
+
+    %% Add title
+    title(sprintf("alpha = %g gamma = %g", alpha, gamma));
+
+    %% Plot centroids
+    cs = centroids(sb_model);
+    plot(cs(1, :), cs(2, :), "*", "linewidth", 8);
+
+    %% Update
+    replot();
+  endif
+
+  %% Now, find each function
+  [ min_cd, max_cd ] = centroid_distance(sb_model);
+  %% [ cshift         ] = centroid_shift(km_model, sb_model);
+  [ nexpec         ] = noise_expec(sb_expec);
+
+  %% Derived
+  nx_mcd = min_cd * nexpec;
+
+  %% Log
+  printf("\tmin_cd = %12g",   min_cd);
+  printf("\tmax_cd = %12g",   max_cd);
+  %% printf("\tcshift = %12g",   cshift);
+  printf("\tnexpec = %12g",   nexpec);
+  printf("\tnx_mcd = %12g\n", nx_mcd);
+
+  %% Run
+  if opts.run
+    %% Command string
+    cmd = sprintf(cstrcat("octave -p %s -q %s %s %s rbf %g",          ...
+			  " ewocs_voro %g,%d,%d 1 %d"),               ...
+		  binrel(), binrel("scoreAndoData.m"), opts.run_mode, ...
+		  opts.input, gamma, alpha, opts.run_repeats,         ...
+		  opts.run_clusters, opts.seed);
+
+    %% Display it
+    printf("*** %s\n", cmd);
+
+    %% Run it
+    system(cmd);
+  endif
+endfunction
+
+
 %%%%%%%%%%
 %% Main %%
 %%%%%%%%%%
@@ -135,8 +231,9 @@ endfunction
 %% General options
 def_opts               	  = struct();
 def_opts.clusters      	  = "sqrt";
-def_opts.em_threshold  	  = 1e-6;
 def_opts.em_iterations 	  =   20;
+def_opts.em_plot          = true();
+def_opts.em_threshold  	  = 1e-6;
 def_opts.min_alpha     	  =    0.01;
 def_opts.max_alpha     	  = 1000.0;
 def_opts.n_alpha          =   26;
@@ -175,6 +272,7 @@ endfunction
 		"true-clusters",   @_true_clusters, ...
 		"clusters=i",      "clusters",      ...
 		"em-iterations=i", "em_iterations", ...
+		"em-plot!",        "em_plot",       ...
 		"em-threshold=f",  "em_threshold",  ...
 		"min-alpha=f",     "min_alpha",     ...
 		"max-alpha=f",     "max_alpha",     ...
@@ -214,7 +312,7 @@ set_all_seeds(opts.seed);
 k = determine_clusters(data, truth, opts);
 
 %% Debug
-fprintf(2, "k = %d\n", k);
+printf("k = %d\n", k);
 
 %% Alpha/gamma values
 alpha = log_series(opts.min_alpha, opts.max_alpha, opts.n_alpha);
@@ -223,12 +321,14 @@ gamma = log_series(opts.min_gamma, opts.max_gamma, opts.n_gamma);
 %% Output
 min_cd = zeros(opts.n_gamma, opts.n_alpha);
 max_cd = zeros(opts.n_gamma, opts.n_alpha);
-cshift = zeros(opts.n_gamma, opts.n_alpha);
+%% cshift = zeros(opts.n_gamma, opts.n_alpha);
+nexpec = zeros(opts.n_gamma, opts.n_alpha);
+nx_mcd = zeros(opts.n_gamma, opts.n_alpha);
 
 %% For each gamma
 for j = 1 : opts.n_gamma
   %% Log
-  fprintf(2, "gamma = %12g\n", gamma(j));
+  printf("gamma = %12g\n", gamma(j));
 
   %% K-Means clusterer
   kmeans = KMeans(KernelDistance(RBFKernel(gamma(j))));
@@ -239,7 +339,7 @@ for j = 1 : opts.n_gamma
   %% For each alpha
   for i = 1 : opts.n_alpha
     %% Log
-    fprintf(2, "* alpha = %12g", alpha(i));
+    printf("* alpha = %12g", alpha(i));
 
     %% SoftBregman clusterer
     sbreg = SoftBBCEM(KernelDistance(RBFKernel(gamma(j))),       ...
@@ -252,36 +352,39 @@ for j = 1 : opts.n_gamma
 
     %% Now, find each function
     [ min_cd(j, i), max_cd(j, i) ] = centroid_distance(sb_model);
-    [ cshift(j, i)               ] = centroid_shift(km_model, sb_model);
+    %% [ cshift(j, i)               ] = centroid_shift(km_model, sb_model);
+    [ nexpec(j, i)               ] = noise_expec(sb_expec);
+
+    %% Derived
+    nx_mcd(j, i) = min_cd(j, i) * nexpec(j, i);
 
     %% Log
-    fprintf(2, "\tmin_cd = %12g",   min_cd(j, i));
-    fprintf(2, "\tmax_cd = %12g",   max_cd(j, i));
-    fprintf(2, "\tcshift = %12g\n", cshift(j, i));
+    printf("\tmin_cd = %12g",   min_cd(j, i));
+    printf("\tmax_cd = %12g",   max_cd(j, i));
+    %% printf("\tcshift = %12g",   cshift(j, i));
+    printf("\tnexpec = %12g",   nexpec(j, i));
+    printf("\tnx_mcd = %12g\n", nx_mcd(j, i));
   endfor
 endfor
 
 %% Plot
-plot_grid("Min Centroid Distance", alpha, gamma, min_cd);
-plot_grid("Max Centroid Distance", alpha, gamma, max_cd);
-plot_grid("Mean Centroid Shift",   alpha, gamma, cshift);
-
-%% Pause
-pause();
-
-%% Bye
-exit();
+fhs = [ plot_grid("Min Centroid Distance", alpha, gamma, min_cd), ...
+        plot_grid("Max Centroid Distance", alpha, gamma, max_cd), ...
+        ... %% plot_grid("Mean Centroid Shift",   alpha, gamma, cshift),
+        plot_grid("Noise Expectation",     alpha, gamma, nexpec), ...
+        plot_grid("N. Exp * Min C.D.",     alpha, gamma, nx_mcd) ];
 
 %% Event loop
 finish = false();
 while ~finish
   %% Get an event
+  figure(fhs(1));
   [ alpha, gamma, button ] = ginput(1);
 
   %% Key
   switch button
     case 1
-      %% do_event(alpha, gamma, data, k, opts);
+      do_event(alpha, gamma, data, k, fhs, opts);
 
     case -1
       finish = true();
