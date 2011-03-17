@@ -25,7 +25,7 @@
 function [ value ] = parse_double(string, label = "value")
   [ value, status ] = str2double(string);
   if status ~= 0
-    error("Wrong %s '%s'", label, string)
+    error("Wrong %s '%s'", label, string);
   endif
 endfunction
 

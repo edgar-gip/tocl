@@ -10,6 +10,9 @@
 %% Author: Edgar Gonzàlez i Pellicer
 
 
+%% Warnings
+%% warning on Octave:missing-semicolon;
+
 %% Octopus
 pkg load octopus;
 
@@ -24,6 +27,20 @@ enum C_NO C_FIXED C_ADAPTIVE;
 
 %% Left-most version
 enum LM_EPSILON LM_HEIGHT LM_MAX LM_MEDIAN;
+
+
+%%%%%%%%%%%%%
+%% Helpers %%
+%%%%%%%%%%%%%
+
+%% Conditional
+function [ out ] = iff(cond, then_out, else_out)
+  if cond
+    out = then_out;
+  else
+    out = else_out;
+  endif
+endfunction
 
 
 %%%%%%%%%%%%%%
@@ -157,7 +174,7 @@ function plot_curve(curve, mcd, big, color, opts)
 endfunction
 
 %% Plot a point
-function plot_point(alpha0, gamma0, mcd0, big, opts)
+function [ h ] = plot_point(alpha0, gamma0, mcd0, big, opts)
   %% Big or inside the range?
   if big || ...
 	(opts.min_alpha <= alpha0 && alpha0 <= opts.max_alpha && ...
@@ -180,20 +197,24 @@ function plot_point(alpha0, gamma0, mcd0, big, opts)
     %% Plot
     if opts.p_contour
       if big
-	plot(alpha0, gamma0, colour, "linewidth", 8);
+	h = plot(alpha0, gamma0, colour, "linewidth", 8);
       else
-	plot(alpha0, gamma0, colour, "linewidth", 2);
+	h = plot(alpha0, gamma0, colour, "linewidth", 2);
       endif
     else
       if big
-	plot3(alpha0, gamma0, mcd0, colour, "linewidth", 8);
+	h = plot3(alpha0, gamma0, mcd0, colour, "linewidth", 8);
       else
-	plot3(alpha0, gamma0, mcd0, colour, "linewidth", 2);
+	h = plot3(alpha0, gamma0, mcd0, colour, "linewidth", 2);
       endif
     endif
 
     %% Update
     replot();
+
+  else
+    %% Empty
+    h = [];
   endif
 endfunction
 
@@ -411,7 +432,7 @@ function [ lm_alpha, lm_gamma, th_mcd, th_curve ] = ...
       leftmost_search_epsilon(alpha, gamma, mcd, opts)
 
   %% Log
-  fprintf(2, "\ncontour: epsilon\n");
+  fprintf(2, "\ncontour: epsilon = %g\n", opts.epsilon_up);
 
   %% Find the curve
   switch opts.g_lm_criterion
@@ -524,61 +545,87 @@ endfunction
 
 %% Do the grid
 function do_grid(data, k, opts)
-  %% Log
-  fprintf(2, "\ngrid: alpha in [ %8g .. %8g ], gamma in [ %8g .. %8g ]\n", ...
-	  opts.min_alpha, opts.max_alpha, opts.min_gamma, ...
-	  opts.max_gamma);
+  %% Initial range
+  min_alpha = opts.min_alpha; max_alpha = opts.max_alpha;
+  min_gamma = opts.min_gamma; max_gamma = opts.max_gamma;
+  alpha_range = log(max_alpha) - log(min_alpha);
+  gamma_range = log(max_gamma) - log(min_gamma);
 
-  %% Alpha values
-  alpha = log_series(opts.min_alpha, opts.max_alpha, opts.g_n_alpha);
-  gamma = log_series(opts.min_gamma, opts.max_gamma, opts.g_n_gamma);
+  %% Recurse
+  for r = 1 : opts.g_n_recurse
+    %% Number of repeats
+    n_repeats = iff(r == opts.g_n_recurse, opts.g_last_repeats, opts.g_repeats);
 
-  %% Output
-  centroid_distance = zeros(opts.g_n_gamma, opts.g_n_alpha);
+    %% Log
+    fprintf(2, "\ngrid: alpha in [ %8g .. %8g ], gamma in [ %8g .. %8g ]\n", ...
+	    min_alpha, max_alpha, min_gamma, opts.max_gamma);
 
-  %% For each one
-  for i = 1 : opts.g_n_alpha
-    for j = 1 : opts.g_n_gamma
-      %% Value
-      mcd = ...
-	  minimum_centroid_distance(alpha(i), gamma(j), data, k, ...
-				    opts.g_repeats, false(), opts);
+    %% Alpha values
+    alpha = log_series(min_alpha, max_alpha, opts.g_n_alpha);
+    gamma = log_series(min_gamma, max_gamma, opts.g_n_gamma);
 
-      %% Store it
-      centroid_distance(j, i) = mcd;
+    %% Output
+    centroid_distance = zeros(opts.g_n_gamma, opts.g_n_alpha);
+
+    %% For each one
+    for i = 1 : opts.g_n_alpha
+      for j = 1 : opts.g_n_gamma
+	%% Value
+	mcd = ...
+	    minimum_centroid_distance(alpha(i), gamma(j), data, k, ...
+				      n_repeats, false(), opts);
+
+	%% Store it
+	centroid_distance(j, i) = mcd;
+      endfor
     endfor
-  endfor
 
-  %% Plot
-  if opts.plot
-    %% Plot the grid
-    plot_grid(alpha, gamma, centroid_distance, opts);
-  endif
+    %% Plot
+    if opts.plot
+      %% Plot the grid
+      plot_grid(alpha, gamma, centroid_distance, opts);
+    endif
 
-  %% Detect
-  switch opts.g_lm_criterion
-    case { LM_EPSILON, LM_HEIGHT }
-      [ lm_alpha, lm_gamma, th_mcd, th_curve ] = ...
-	  leftmost_search_epsilon(alpha, gamma, centroid_distance, opts);
+    %% Detect
+    switch opts.g_lm_criterion
+      case { LM_EPSILON, LM_HEIGHT }
+	[ lm_alpha, lm_gamma, th_mcd, th_curve ] = ...
+	    leftmost_search_epsilon(alpha, gamma, centroid_distance, opts);
 
-    case { LM_MAX, LM_MEDIAN }
-      [ lm_alpha, lm_gamma, th_mcd, th_curve ] = ...
-	  leftmost_search_max(alpha, gamma, centroid_distance, opts);
-  endswitch
+      case { LM_MAX, LM_MEDIAN }
+	[ lm_alpha, lm_gamma, th_mcd, th_curve ] = ...
+	    leftmost_search_max(alpha, gamma, centroid_distance, opts);
+    endswitch
 
-  %% Plot
-  if isempty(lm_alpha)
-    %% Empty result
-    result("Grid", nan, nan, false(), opts);
+    %% Empty?
+    if isempty(lm_alpha)
+      break;
+    endif
 
-  else
     %% Plot
     if opts.plot
       plot_curve(th_curve, th_mcd, true(), "k-", opts);
-      plot_point(lm_alpha, lm_gamma, th_mcd, true(), opts)
+      plot_point(lm_alpha, lm_gamma, th_mcd, true(), opts);
     endif
 
-    %% Result
+    %% Not last one
+    if r ~= opts.g_n_recurse
+      %% Update alpha bounds
+      alpha_range *= opts.g_recurse_scale;
+      min_alpha   = exp(log(lm_alpha) - alpha_range / 2);
+      max_alpha   = exp(log(lm_alpha) + alpha_range / 2);
+
+      %% Update gamma bounds
+      gamma_range *= opts.g_recurse_scale;
+      min_gamma   = exp(log(lm_gamma) - gamma_range / 2);
+      max_gamma   = exp(log(lm_gamma) + gamma_range / 2);
+    endif
+  endfor
+
+  %% Final
+  if isempty(lm_alpha)
+    result("Grid", nan, nan, false(), opts);
+  else
     result("Grid", lm_alpha, lm_gamma, opts.g_run, opts);
   endif
 endfunction
@@ -1113,6 +1160,111 @@ function do_search(data, k, opts);
 endfunction
 
 
+%%%%%%%%%%%%%
+%% Simplex %%
+%%%%%%%%%%%%%
+
+%% Simplex plot callback
+function simplex_plot_cb(p, mcd, moment, opts)
+  %% Point handle
+  persistent ph = [];
+
+  %% Delete former
+  if ~isempty(ph)
+    delete(ph);
+  endif
+
+  %% When?
+  switch moment
+    case { 0, 1 }
+      %% First one/Iteration
+      ph = plot_point(exp(p(1, :)), exp(p(2, :)), mcd, true(), opts);
+
+    case 2
+      %% Final
+      plot_point(exp(p(1, :)), exp(p(2, :)), mcd, true(), opts);
+      ph = [];
+  endswitch
+endfunction
+
+
+%% Simplex minimization function
+function [ y ] = simplex_f(p, x_beta, data, k, opts)
+  %% Number of points
+  n_p = size(p, 2);
+
+  %% Output
+  y = zeros(1, n_p);
+
+  %% For each one
+  for i = 1 : n_p
+    %% Extract
+    alpha = exp(p(1, i));
+    gamma = exp(p(2, i));
+
+    %% Value
+    mcd = ...
+	minimum_centroid_distance(alpha, gamma, data, k, ...
+				  opts.sx_repeats, false(), opts);
+
+    %% Convert to function
+    y(i) = log(1 + (mcd - opts.epsilon_up) .^ 2) + ...
+               opts.sx_beta * atan(p(1, i) - x_beta) / pi;
+  endfor
+endfunction
+
+
+%% Do it
+function do_simplex(data, k, opts)
+  %% Create simplex object
+  persistent simplex = ...
+      NelderMead(struct("delta",     opts.sx_delta,       ...
+			"max_eval",  opts.sx_max_eval,    ...
+			"tolerance", opts.sx_f_tolerance, ...
+			"callback",  iff(opts.plot, ...
+					 @(p, y, m) ...
+					     simplex_plot_cb(p, y, m, opts), ...
+					 [])));
+
+  %% Set point
+  p = log([ opts.sx_alpha_0 ; opts.sx_gamma_0 ]);
+
+  %% Log
+  fprintf(2, "\nsimplex: alpha = %8g, gamma = %8g\n", ...
+	  opts.sx_alpha_0, opts.sx_gamma_0);
+
+  %% Loop
+  finish = false();
+  while ~finish
+    %% Set x_beta
+    x_beta = p(1);
+
+    %% Solve
+    [ p, y ] = ...
+	minimize(simplex, ...
+		 @(px) simplex_f(px, x_beta, data, k, opts), p);
+
+    %% Debug
+    fprintf(2, "simplex: beta = %8g -> alpha = %8g, gamma = %8g -> %g\n", ...
+	    x_beta, exp(p), y);
+
+    %% New x_beta?
+    diff = abs(p(1) - x_beta) / (abs(p(1)) + abs(x_beta) + eps);
+    if diff < opts.sx_x_tolerance
+      %% Converged
+      finish = true;
+    endif
+  endwhile
+
+  %% Output
+  opt_alpha = exp(p(1));
+  opt_gamma = exp(p(2));
+
+  %% Result
+  result("Simplex", opt_alpha, opt_gamma, opts.sx_run, opts);
+endfunction
+
+
 %%%%%%%%%%%%%%%%
 %% Event loop %%
 %%%%%%%%%%%%%%%%
@@ -1266,12 +1418,15 @@ def_opts.man_gamma = [];
 def_opts.man_run   = false();
 
 %% Grid options
-def_opts.grid           = false();
-def_opts.g_lm_criterion = LM_HEIGHT;
-def_opts.g_n_alpha      = 26;
-def_opts.g_n_gamma      = 26;
-def_opts.g_repeats      =  5;
-def_opts.g_run          = false();
+def_opts.grid            = false();
+def_opts.g_lm_criterion  = LM_HEIGHT;
+def_opts.g_n_alpha       = 26;
+def_opts.g_n_gamma       = 26;
+def_opts.g_repeats       =  1;
+def_opts.g_last_repeats  =  5;
+def_opts.g_run           = false();
+def_opts.g_n_recurse     =  1;
+def_opts.g_recurse_scale =  0.5;
 
 %% Search options
 def_opts.search         = false();
@@ -1285,6 +1440,18 @@ def_opts.s_precision    =  0.1;
 def_opts.s_repeats      =  5;
 def_opts.s_subsample    = [];
 def_opts.s_run          = false();
+
+%% Simplex options
+def_opts.simplex        = false();
+def_opts.sx_alpha_0     = 100.0;
+def_opts.sx_gamma_0     = 1.0;
+def_opts.sx_beta        = 0.01;
+def_opts.sx_delta       = 2.0;
+def_opts.sx_max_eval    = 1000;
+def_opts.sx_f_tolerance = 1e-3;
+def_opts.sx_x_tolerance = 1e-3;
+def_opts.sx_repeats     = 3;
+def_opts.sx_run         = false();
 
 %% Event options
 def_opts.event_loop     = true();
@@ -1300,10 +1467,11 @@ function [ opts ] = _true_clusters(opts, value)
   opts.clusters = "true";
 endfunction
 function [ opts ] = _repeats(opts, value)
-  opts.g_repeats = opts.s_repeats = opts.e_repeats = value;
+  opts.g_repeats = opts.g_last_repeats = opts.s_repeats = opts.sx_repeats = ...
+      opts.e_repeats = value;
 endfunction
 function [ opts ] = _run(opts, value)
-  opts.man_run = opts.g_run = opts.s_run = opts.e_run = value;
+  opts.man_run = opts.g_run = opts.s_run = opts.sx_run = opts.e_run = value;
 endfunction
 function [ opts ] = _run_basic(opts, value)
   opts.run_mode = "--basic";
@@ -1375,7 +1543,10 @@ endfunction
 		"g-n-alpha=i",        	"g_n_alpha",        ...
 		"g-n-gamma=i",        	"g_n_gamma",        ...
 		"g-repeats=i",        	"g_repeats",        ...
+		"g-last-repeats=i",   	"g_last_repeats",   ...
 		"g-run!",             	"g_run",            ...
+		"g-n-recurse=i",        "g_n_recurse",      ...
+		"g-recurse-scale=f",    "g_recurse_scale",  ...
 		...
 		"search!",            	"search",           ...
 		"s-epsilon-dist=f",   	"s_epsilon_dist",   ...
@@ -1387,6 +1558,17 @@ endfunction
 		"s-subsample=i",      	"s_subsample",      ...
 		"s-no-subsample",     	@_s_no_subsample,   ...
 		"s-run!",             	"s_run",            ...
+		...
+		"simplex!",             "simplex",          ...
+		"sx-alpha-0=f",         "sx_alpha_0",       ...
+		"sx-gamma-0=f",         "sx_gamma_0",       ...
+		"sx-beta=f",            "sx_beta",          ...
+		"sx-delta=f",           "sx_delta",         ...
+		"sx-max-eval=i",        "sx_max_eval",      ...
+		"sx-f-tolerance=f",     "sx_f_tolerance",   ...
+		"sx-x-tolerance=f",     "sx_x_tolerance",   ...
+		"sx-repeats=i",         "sx_repeats",       ...
+		"sx-run!",              "sx_run",           ...
 		...
 		"event-loop!",        	"event_loop",       ...
 		"e-plot-cluster!",    	"e_plot_cluster",   ...
@@ -1442,6 +1624,12 @@ endif
 if opts.search
   %% Do it
   do_search(data, k, opts);
+endif
+
+%% Simplex
+if opts.simplex
+  %% Do it
+  do_simplex(data, k, opts);
 endif
 
 %% Plot?
