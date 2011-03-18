@@ -243,6 +243,13 @@ endfunction
 function [ dist_min ] = ...
       minimum_centroid_distance(alpha, gamma, data, k, repeats, do_plot, opts)
 
+  %% Correction exponent
+  if opts.mcd_correction == C_ADAPTIVE
+    corr_exp = 1 / (opts.mcd_adaptive_q * (opts.dimensions - 1));
+  else
+    corr_exp = 1;
+  endif
+
   %% Clusterer
   %% (Yes, alpha is beta)
   switch opts.clusterer
@@ -290,13 +297,8 @@ function [ dist_min ] = ...
 
     %% Noise correction?
     if opts.mcd_correction ~= C_NO
-      %% Average noise expectation
-      nexpec = 1.0 - mean(sum(expec, 1));
-
-      %% Adaptive?
-      if opts.mcd_correction == C_ADAPTIVE
-	nexpec **= (opts.dimensions - 1);
-      endif
+      %% Average noise expectation, with adaptive correction
+      nexpec = (1.0 - mean(sum(expec, 1))) ** corr_exp;
 
       %% Correct
       dist_mins(r) *= nexpec;
@@ -1390,6 +1392,7 @@ def_opts.max_alpha     	  = 1000.0;
 def_opts.min_gamma     	  =    0.01;
 def_opts.max_gamma     	  = 1000.0;
 def_opts.mcd_correction   = C_NO;
+def_opts.mcd_adaptive_q   =    1.0;
 def_opts.verbose       	  = false();
 
 %% Plot options
@@ -1507,6 +1510,7 @@ endfunction
 		"no-mcd-correction=r0", "mcd_correction",   ...
 		"mcd-correction=r1",  	"mcd_correction",   ...
 		"mcd-corr-adaptive=r2", "mcd_correction",   ...
+		"mcd-adaptive-q=f",     "mcd_adaptive_q",   ...
 		"repeats=i",          	@_repeats,          ...
 		"verbose!",           	"verbose",          ...
 		...
