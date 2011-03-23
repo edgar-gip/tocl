@@ -94,8 +94,14 @@ function ensure_figure(opts)
     set(gca(), "yscale", "log");
 
     %% Labels
-    xlabel("alpha");
-    ylabel("gamma");
+    if opts.p_symbols
+      xlabel("{/Symbol a}");
+      ylabel("{/Symbol g}");
+
+    else
+      xlabel("alpha");
+      ylabel("gamma");
+    endif
 
     %% Hold
     hold("on");
@@ -1409,6 +1415,7 @@ def_opts.p_save_font_size = 9;
 def_opts.p_save_pwidth    = 17.5 / 2.54;
 def_opts.p_save_pheight   = 10.5 / 2.54;
 def_opts.p_save_pmargin   = 0.1;
+def_opts.p_symbols        = false;
 
 %% Run options
 def_opts.run_mode     = "--basic";
@@ -1527,6 +1534,7 @@ endfunction
 		"p-save-pwidth=f",      "p_save_pwidth",    ...
 		"p-save-pheight=f",     "p_save_pheight",   ...
 		"p-save-pmargin=f",     "p_save_pmargin",   ...
+		"p-symbols!",           "p_symbols",        ...
 		...
 		"run!",               	@_run,              ...
 		"run-basic",          	@_run_basic,        ...
