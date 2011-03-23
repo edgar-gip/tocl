@@ -636,6 +636,17 @@ function do_grid(data, k, opts)
   else
     result("Grid", lm_alpha, lm_gamma, opts.g_run, opts);
   endif
+
+  %% Save grid
+  if ~isempty(opts.g_save_grid)
+    try
+      save("-binary", "-zip", opts.g_save_grid, ...
+	   "alpha", "gamma", "centroid_distance", ...
+	   "th_curve", "th_mcd", "lm_alpha", "lm_gamma");
+    catch
+      error("Cannot save data to '%s': %s", opts.g_save_grid, lasterr());
+    end_try_catch
+  endif
 endfunction
 
 
@@ -1437,6 +1448,7 @@ def_opts.g_last_repeats  =  5;
 def_opts.g_run           = false();
 def_opts.g_n_recurse     =  1;
 def_opts.g_recurse_scale =  0.5;
+def_opts.g_save_grid     = [];
 
 %% Search options
 def_opts.search         = false();
@@ -1559,6 +1571,7 @@ endfunction
 		"g-run!",             	"g_run",            ...
 		"g-n-recurse=i",        "g_n_recurse",      ...
 		"g-recurse-scale=f",    "g_recurse_scale",  ...
+		"g-save-grid=s",        "g_save_grid",      ...
 		...
 		"search!",            	"search",           ...
 		"s-epsilon-dist=f",   	"s_epsilon_dist",   ...
