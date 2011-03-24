@@ -381,8 +381,8 @@ else
 
   %% Display
   printf("*** %8g %5.3f ***\n", cluster_time, auc);
-  fprintf(fout, "%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
-	  "All", n_data, all_prc, 1.0, 1.0, all_f1);
+  printf("%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
+	 "All", n_data, all_prc, 1.0, 1.0, all_f1);
   printf("%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
 	 "Model", n_pos_cl, prc, rec, nrec, f1);
 
