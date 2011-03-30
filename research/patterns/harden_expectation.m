@@ -11,7 +11,7 @@ function [ hard, best_cl ] = harden_expectation(soft, add_bg = false())
   %% Add a background component?
   if add_bg
     %% Find the background cluster probability
-    bg_cl = 1.0 - sum(soft);
+    bg_cl = 1.0 - sum(soft, 1);
 
     %% Add it
     soft = [ bg_cl ; soft ];

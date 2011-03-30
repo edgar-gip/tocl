@@ -57,15 +57,17 @@ def_opts.freq_th   = [];
 def_opts.mi_feats  = [];
 def_opts.normalize = false();
 def_opts.sparse    = false();
+def_opts.tf_idf    = false();
 def_opts.words     = [];
 
 %% Parse options
 [ cmd_args, cmd_opts ] = ...
     get_options(def_opts, ...
-		"freq-th=i",  "freq_th", ...
-		"mi-feats=i", "mi_feats", ...
+		"freq-th=i",  "freq_th",   ...
+		"mi-feats=i", "mi_feats",  ...
 		"normalize!", "normalize", ...
-		"sparse!",    "sparse", ...
+		"sparse!",    "sparse",    ...
+		"tf-idf!",    "tf_idf",    ...
 		"words=s",    "words");
 
 %% Input and output
@@ -151,19 +153,20 @@ if ~isempty(cmd_opts.mi_feats) && n_feats > cmd_opts.mi_feats
   %% Kept feats
   rekept_feats = max_feats(1 : cmd_opts.mi_feats);
   kept_feats   = kept_feats(rekept_feats);
+  n_feats      = cmd_opts.mi_feats;
 
   %% New data
   data = data(rekept_feats, :);
 
   %% Words
   if ~isempty(words)
-    %% Display
-    for f = rekept_feats
-      fprintf(2, "%d(%s) -> %.3f", kept_feats(f), words(f), mi(f));
-    endfor
-
     %% Update
     words = words{rekept_feats};
+
+    %% Display
+    for f = 1 : n_feats
+      fprintf(2, "%d(%s) -> %.3f", kept_feats(f), words(f), mi(f));
+    endfor
   endif
 endif
 
@@ -171,6 +174,16 @@ endif
 if cmd_opts.normalize
   %% Do it
   data ./= ones(n_feats, 1) * sum(data);
+endif
+
+%% Find tf-idf
+if cmd_opts.tf_idf
+  %% Document frequency
+  df  = sum(data > 0, 2);
+  idf = log(n_data ./ df);
+
+  %% Scale
+  data .*= idf * ones(1, n_data);
 endif
 
 %% Save
