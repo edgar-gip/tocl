@@ -27,7 +27,7 @@ function enum(varargin)
   last = -1;
 
   %% For each argument
-  for i = 1:length(varargin)
+  for i = 1 : length(varargin)
 
     %% Check it is a valid string
     if ~ischar(varargin{i})

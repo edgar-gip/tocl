@@ -1,5 +1,5 @@
 # Modules
-MODULES = gaussian_expectation
+MODULES = factorial_normalization
 
 # Include
 include ../../make/ModuleMakefile.inc

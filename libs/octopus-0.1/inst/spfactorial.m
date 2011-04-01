@@ -17,17 +17,29 @@
 %% <http://www.gnu.org/licenses/>.
 
 %% -*- texinfo -*-
-%% @deftypefn {Function File} {[ @var{value} ] =} parse_double(@var{string}, @var{label})
-%% Convenience function to parse a double value and notify errors
+%% @deftypefn {Function File} {[ @var{F} ] =} spfactorial(@var{N})
+%% Sparse version of factorial(N) (0! = 0)
 %% @end deftypefn
 
-%% Parse a double
-function [ value ] = parse_double(string, label = "value")
+function [ F ] = spfactorial(N)
 
-  %% Parse
-  [ value, status ] = str2double(string);
-  if status ~= 0
-    error("Wrong %s '%s'", label, string);
+  %% Args
+  if nargin() ~= 1
+    usage("[ F ] = spfactorial(N)");
+  endif
+
+  %% Sparse?
+  if issparse(N)
+    %% Get size and nonzero entries
+    [ r,  c      ] = size(N);
+    [ ri, ci, nz ] = find(N);
+
+    %% Construct a matrix with the factorial
+    F = sparse(ri, ci, factorial(nz), r, c);
+
+  else
+    %% Regular one
+    F = factorial(N);
   endif
 endfunction
 

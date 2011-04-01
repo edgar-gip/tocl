@@ -5,6 +5,7 @@
 %% Author: Edgar Gonzàlez i Pellicer
 
 function [ absolute ] = binrel(relative)
+
   %% Binary path
   bin_path = program_invocation_name();
 

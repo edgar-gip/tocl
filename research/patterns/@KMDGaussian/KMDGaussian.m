@@ -64,12 +64,19 @@ function [ this ] = KMDGaussian(first, sum0, sum1, sum2)
     sigma =  sum0 / (sum0 - 1) * ...
             (sum2 /  sum0 - this.mu * this.mu');
 
-    %% Inverse
-    this.isigma = inv(sigma);
+    try
+      %% Inverse
+      this.isigma = inv(sigma);
 
-    %% Normalization factor
-    %% \log \frac{1}{\sqrt{(2 \pi)^k \cdot | \Sigma |}}
-    this.norm = -0.5 * (n_dims * log(2 * pi) + log(det(sigma)));
+      %% Normalization factor
+      %% \log \frac{1}{\sqrt{(2 \pi)^k \cdot | \Sigma |}}
+      this.norm = -0.5 * (n_dims * log(2 * pi) + log(det(sigma)));
+
+    catch
+      %% Singularity condition
+      this.isigma = eye(n_dims);
+      this.norm   = -0.5 * n_dims * log(2 * pi);
+    end_try_catch
   endif
 
   %% Bless

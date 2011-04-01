@@ -117,8 +117,9 @@ if ~isempty(cmd_opts.freq_th)
 
   %% Words
   if ~isempty(words)
-    words = words{kept_feats};
+    words = { words{kept_feats} };
   endif
+
 else
   %% Keep all
   kept_feats = 1 : n_feats;
@@ -127,28 +128,46 @@ endif
 %% Apply mutual information
 if ~isempty(cmd_opts.mi_feats) && n_feats > cmd_opts.mi_feats
 
-  %% Convert to probabilities
-  n_words  = sum(data, 1);
-  p_w_by_x = data ./ (ones(n_feats, 1) * n_words); % p(w | x)
+  %% Document length
+  %% l(x) -> 1 * X
+  l_x = sum(data, 1);
 
   %% Probability of a document
-  p_x = 1.0 ./ n_data;
+  %% p(x) -> (Implicitly, 1 * X)
+  p_x = 1.0 / n_data;
+
+  %% Probability of a word given a document
+  %% p(w | x) -> W * X
+  p_w_by_x = data ./ (ones(n_feats, 1) * l_x);
 
   %% Probability of a word
-  p_w = sum(p_w_by_x, 2) .* p_x; % p(w)
+  %% p(w) = \sum_x p(w | x) * p(x) -> W * 1
+  p_w = sum(p_w_by_x .* p_x, 2);
 
   %% Probability of a document given a word
-  p_x_by_w = (p_w_by_x * p_x) ./ (p_w * ones(1, n_data));
+  %% p(x | w) = \frac{p(w | x) * p(x)}{p(w)} -> W * X
+  p_x_by_w = (p_w_by_x .* p_x) ./ (p_w * ones(1, n_data));
+
+  %% Probability quotient
+  %% p(x | w) / p(x) -> W * X
+  p_x_by_w__p_x = p_x_by_w ./ p_x;
 
   %% Product matrix
+  %% p(x | w) * log(p(x | w) / p(x)) -> W * X
   prod_matrix                  = p_x_by_w;
-  prod_matrix(p_x_by_w ~= 0) .*= log(p_x_by_w(p_x_by_w ~= 0) ./ p_x);
+  prod_matrix(p_x_by_w ~= 0) .*= log(p_x_by_w__p_x(p_x_by_w ~= 0));
+
+  %% Kullback Leibler
+  %% kl(w) = \sum_x p(x | w) * log(p(x | w) / p(x))
+  kl_w = sum(prod_matrix, 2);
 
   %% Mutual information
-  mi = p_w .* sum(prod_matrix, 2);
+  %% mi(w) = p(w) * \sum_x  p(x | w) * log(p(x | w) / p(x))
+  %%       = p(w) * kl(w)
+  mi_w = p_w .* kl_w;
 
   %% Sort them
-  [ max_mi, max_feats ] = sort(mi, "descend");
+  [ max_mi, max_feats ] = sort(mi_w, "descend");
 
   %% Kept feats
   rekept_feats = max_feats(1 : cmd_opts.mi_feats);
@@ -161,11 +180,13 @@ if ~isempty(cmd_opts.mi_feats) && n_feats > cmd_opts.mi_feats
   %% Words
   if ~isempty(words)
     %% Update
-    words = words{rekept_feats};
+    words = { words{rekept_feats} };
 
     %% Display
     for f = 1 : n_feats
-      fprintf(2, "%d(%s) -> %.3f", kept_feats(f), words(f), mi(f));
+      rkf = rekept_feats(f);
+      fprintf(2, "%5d  %-20s  p: %.6f  kl: %.6f  mi: %.6f\n",
+	      kept_feats(f), words{f}, p_w(rkf), kl_w(rkf), mi_w(rkf));
     endfor
   endif
 endif
@@ -173,7 +194,7 @@ endif
 %% Normalize (as a distribution)
 if cmd_opts.normalize
   %% Do it
-  data ./= ones(n_feats, 1) * sum(data);
+  data ./= ones(n_feats, 1) * sum(data, 1);
 endif
 
 %% Find tf-idf

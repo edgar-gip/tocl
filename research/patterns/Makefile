@@ -1,6 +1,6 @@
 # SUBDIRS
-SUBDIRS = @Dirichlet/private @GaussianEMModel/private \
-	  @KLDivergence/private @MahalanobisDistance/private \
+SUBDIRS = @Dirichlet/private @KLDivergence/private \
+	  @KMDMultinomial/private @MahalanobisDistance/private \
 	  @SmoothKLDivergence/private
 
 # Modules

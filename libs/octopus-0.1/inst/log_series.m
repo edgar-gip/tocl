@@ -23,6 +23,7 @@
 
 %% Log-series
 function [ values ] = log_series(from, to, steps)
+
   %% Bounds
   log_from = log(from);
   log_to   = log(to);

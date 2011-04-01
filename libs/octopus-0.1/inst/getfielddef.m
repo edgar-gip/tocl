@@ -21,10 +21,10 @@
 %% Extract a field from a structure, giving a default value if it does not exist
 %% @end deftypefn
 
-function value = getfielddef(s, key, defvalue)
+function [ value ] = getfielddef(s, key, defvalue)
 
   %% Args
-  if nargin() != 3
+  if nargin() ~= 3
     usage("[ value ] = getfielddef(s, key, defvalue)");
   endif
 

@@ -13,8 +13,9 @@ function [ log_like ] = log_likelihood(this, data)
     usage("[ log_like ] = @KMDMultinomial/log_likelihood(this, data)");
   endif
 
+  %% Find the factorial normalization
+  fnorm = factorial_normalization(data);
+
   %% Find it
-  %% The factorial terms are ignored, given that they are the same
-  %% across all components, and can be factored out
-  log_like = this.log_theta * data;
+  log_like = fnorm .* (this.log_theta * data);
 endfunction
