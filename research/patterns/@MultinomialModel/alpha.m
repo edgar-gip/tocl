@@ -1,21 +1,21 @@
 %% -*- mode: octave; -*-
 
 %% Multinomial distribution clustering
-%% Theta values
+%% Alpha values
 
 %% Author: Edgar Gonzalez
 
-function [ th ] = theta(this, log_form = false())
+function [ th ] = alpha(this, log_form = false())
 
   %% Check arguments
   if ~any(nargin() == [ 1, 2 ])
-    usage("[ th ] = @MultinomialModel/theta(this [, log_form])");
+    usage("[ th ] = @MultinomialModel/alpha(this [, log_form])");
   endif
 
-  %% Return theta
+  %% Return alpha
   if log_form
-    th = this.theta;
+    th = this.alpha;
   else
-    th = exp(this.theta);
+    th = exp(this.alpha);
   endif
 endfunction

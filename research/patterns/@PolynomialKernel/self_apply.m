@@ -15,7 +15,7 @@ function [ result ] = apply(this, source)
   %% Find dot product
   result = sum(source .* source);
 
-  %% Now, add homogeneousness and elevate
-  result += this.homogeneous;
+  %% Now, add heterogeneousness and elevate
+  result += this.heterogeneous;
   result .^ this.degree;
 endfunction

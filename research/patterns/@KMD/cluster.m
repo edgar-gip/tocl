@@ -60,9 +60,12 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Background log-likelihood
   bg_ll = log_likelihood(bg_c, data);
 
-  %% Foreground components
-  fg_cs = [];
-  fg_k  = 0;
+  %% Components and alphas
+  log_alpha  = [ nan  ]; %% This one will be updated
+  components = { bg_c };
+
+  %% Number of foreground components
+  fg_k = 0;
 
   %% For each iteration
   for i = 1 : this.max_iterations
@@ -112,6 +115,10 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
 
     %% Is the size more than the threshold?
     if length(fg_idxs) >= eff_min_size
+      %% Store
+      log_alpha  = [ log_alpha, fg_lp ];
+      components = cell_push(components, fg_c);
+
       %% One more cluster
       fg_k += 1;
 
@@ -129,6 +136,9 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
     endif
   endfor
 
+  %% Fix background alpha
+  log_alpha(1) = bg_lp;
+
   %% Expectation
   expec_on = find(hard_expec);
   expec    = ...
@@ -136,7 +146,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
 	     fg_k, n_data);
 
   %% Model
-  model = [];
+  model = KMDModel(log_alpha, components);
 
   %% Info
   info = struct();

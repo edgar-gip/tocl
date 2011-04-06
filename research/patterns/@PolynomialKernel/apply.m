@@ -19,7 +19,7 @@ function [ result ] = apply(this, source, target)
     result = source' * target;
   endif
 
-  %% Now, add homogeneousness and elevate
-  result += this.homogeneous;
+  %% Now, add heterogeneousness and elevate
+  result += this.heterogeneous;
   result .^ this.degree;
 endfunction

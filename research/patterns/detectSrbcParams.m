@@ -22,6 +22,9 @@ addpath(binrel("private"));
 %% Clusterer types
 enum BREGMAN SOFT_BBC;
 
+%% MCD Distance
+enum D_SQ_EUCLIDEAN D_RBF_KERNEL
+
 %% MCD Correction
 enum C_NO C_FIXED C_ADAPTIVE;
 
@@ -256,22 +259,25 @@ function [ dist_min ] = ...
     corr_exp = 1;
   endif
 
+  %% Distance
+  kdist = KernelDistance(RBFKernel(gamma));
+
   %% Clusterer
   %% (Yes, alpha is beta)
   switch opts.clusterer
     case BREGMAN
-      clusterer = BregmanEM(KernelDistance(RBFKernel(gamma)),          ...
+      clusterer = BregmanEM(kdist,                                     ...
 			    struct("beta",          alpha,             ...
 				   "em_threshold",  opts.em_threshold, ...
 				   "em_iterations", opts.em_iterations));
 
     case SOFT_BBC
-      clusterer = SeqEM({ KMeans(KernelDistance(RBFKernel(gamma))),
-			  SoftBBCEM(KernelDistance(RBFKernel(gamma)), ...
-				    struct("beta", alpha,             ...
-					   "em_threshold",            ...
-					       opts.em_threshold,     ...
-					   "em_iterations",           ...
+      clusterer = SeqEM({ KMeans(kdist), ...
+			  SoftBBCEM(kdist,                        ...
+				    struct("beta", alpha,         ...
+					   "em_threshold",        ...
+					       opts.em_threshold, ...
+					   "em_iterations",       ...
 					       opts.em_iterations)) });
   endswitch
 
@@ -292,7 +298,16 @@ function [ dist_min ] = ...
     cs = centroids(model);
 
     %% Distance
-    dists        = apply(SqEuclideanDistance(), cs) + inf * eye(k);
+    switch opts.mcd_distance
+      case D_SQ_EUCLIDEAN
+	dists = apply(SqEuclideanDistance(), cs);
+
+      case D_RBF_KERNEL
+	dists = apply(kdist, cs);
+    endswitch
+
+    %% Minimum distance
+    dists       += inf * eye(k);
     dist_mins(r) = min(min(dists));
 
     %% Correction for infinite distances
@@ -436,7 +451,7 @@ endfunction
 
 
 %% Left-most search (epsilon)
-function [ lm_alpha, lm_gamma, th_mcd, th_curve ] = ...
+function [ lm_alpha, lm_gamma, th_mcd, th_curve, all_curves ] = ...
       leftmost_search_epsilon(alpha, gamma, mcd, opts)
 
   %% Log
@@ -484,7 +499,7 @@ endfunction
 
 
 %% Left-most search (max)
-function [ lm_alpha, lm_gamma, th_mcd, th_curve ] = ...
+function [ lm_alpha, lm_gamma, th_mcd, th_curve, all_curves ] = ...
       leftmost_search_max(alpha, gamma, mcd, opts)
 
   %% Reference
@@ -597,11 +612,11 @@ function do_grid(data, k, opts)
     %% Detect
     switch opts.g_lm_criterion
       case { LM_EPSILON, LM_HEIGHT }
-	[ lm_alpha, lm_gamma, th_mcd, th_curve ] = ...
+	[ lm_alpha, lm_gamma, th_mcd, th_curve, all_curves ] = ...
 	    leftmost_search_epsilon(alpha, gamma, centroid_distance, opts);
 
       case { LM_MAX, LM_MEDIAN }
-	[ lm_alpha, lm_gamma, th_mcd, th_curve ] = ...
+	[ lm_alpha, lm_gamma, th_mcd, th_curve, all_curves ] = ...
 	    leftmost_search_max(alpha, gamma, centroid_distance, opts);
     endswitch
 
@@ -612,6 +627,9 @@ function do_grid(data, k, opts)
 
     %% Plot
     if opts.plot
+      for i = 1 : length(all_curves)
+	plot_curve(all_curves{i}, th_mcd, false(), "k-", opts);
+      endfor
       plot_curve(th_curve, th_mcd, true(), "k-", opts);
       plot_point(lm_alpha, lm_gamma, th_mcd, true(), opts);
     endif
@@ -1408,6 +1426,7 @@ def_opts.min_alpha     	  =    0.01;
 def_opts.max_alpha     	  = 1000.0;
 def_opts.min_gamma     	  =    0.01;
 def_opts.max_gamma     	  = 1000.0;
+def_opts.mcd_distance     = D_SQ_EUCLIDEAN;
 def_opts.mcd_correction   = C_NO;
 def_opts.mcd_adaptive_q   =    1.0;
 def_opts.verbose       	  = false();
@@ -1526,6 +1545,8 @@ endfunction
 		"max-alpha=f",        	"max_alpha",        ...
 		"min-gamma=f",        	"min_gamma",        ...
 		"max-gamma=f",        	"max_gamma",        ...
+		"mcd-sq-euclidean=r0",  "mcd_distance",     ...
+		"mcd-rbf-kernel=r1",    "mcd_distance",     ...
 		"no-mcd-correction=r0", "mcd_correction",   ...
 		"mcd-correction=r1",  	"mcd_correction",   ...
 		"mcd-corr-adaptive=r2", "mcd_correction",   ...

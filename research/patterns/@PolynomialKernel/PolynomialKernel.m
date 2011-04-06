@@ -5,19 +5,19 @@
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = PolynomialKernel(degree, homogeneous)
+function [ this ] = PolynomialKernel(degree, heterogeneous = 0)
 
   %% Check arguments
-  if nargin() ~= 2
-    usage("[ this ] = PolynomialKernel(degree, homogeneous)");
+  if ~any(nargin() == [ 1, 2 ])
+    usage("[ this ] = PolynomialKernel(degree [, heterogeneous])");
   endif
 
   %% This object
   this = struct();
 
   %% Set fields
-  this.degree      = degree;
-  this.homogeneous = homogeneous;
+  this.degree        = degree;
+  this.heterogeneous = heterogeneous;
 
   %% Bless
   %% And add inheritance

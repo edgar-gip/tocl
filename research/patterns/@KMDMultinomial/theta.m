@@ -1,6 +1,7 @@
 %% -*- mode: octave; -*-
 
-%% Multinomial distribution clustering
+%% k-Minority Detection
+%% Multinomial Component
 %% Theta values
 
 %% Author: Edgar Gonzalez
@@ -9,13 +10,13 @@ function [ th ] = theta(this, log_form = false())
 
   %% Check arguments
   if ~any(nargin() == [ 1, 2 ])
-    usage("[ th ] = @MultinomialModel/theta(this [, log_form])");
+    usage("[ th ] = @KMDMultinomial/theta(this [, log_form])");
   endif
 
   %% Return theta
   if log_form
-    th = this.theta;
+    th = this.log_theta;
   else
-    th = exp(this.theta);
+    th = exp(this.log_theta);
   endif
 endfunction

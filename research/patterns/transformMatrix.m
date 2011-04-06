@@ -54,57 +54,64 @@ endfunction
 %% Default options
 def_opts           = struct();
 def_opts.freq_th   = [];
+def_opts.mi_cheat  = false();
 def_opts.mi_feats  = [];
 def_opts.normalize = false();
 def_opts.sparse    = false();
 def_opts.tf_idf    = false();
-def_opts.words     = [];
+def_opts.verbose   = false();
 
 %% Parse options
 [ cmd_args, cmd_opts ] = ...
     get_options(def_opts, ...
 		"freq-th=i",  "freq_th",   ...
+		"mi-cheat!",  "mi_cheat",  ...
 		"mi-feats=i", "mi_feats",  ...
 		"normalize!", "normalize", ...
 		"sparse!",    "sparse",    ...
 		"tf-idf!",    "tf_idf",    ...
-		"words=s",    "words");
+		"verbose!",   "verbose");
+
+%% Usage
+usage = cstrcat("Usage: transformMatrix.m [options] <input> <output>\n", ...
+		"       transformMatrix.m [options] --sparse <matrix>",  ...
+		" <features> <output>");
 
 %% Input and output
-if length(cmd_args) ~= 2
-  error("Usage: transformMatrix.m [options] <input> <output>");
-endif
-input  = cmd_args{1};
-output = cmd_args{2};
-
-%% Load
 try
   if cmd_opts.sparse
-    [ data, truth ] = read_sparse(input, true());
-  else
-    load(input, "data", "truth");
-  endif
-catch
-  error("Cannot load data from '%s': %s", input, lasterr());
-end_try_catch
+    if length(cmd_args) ~= 3
+      error(usage);
+    endif
 
-%% Word list
-if ~isempty(cmd_opts.words)
-  %% Read it
-  try
-    [ words ] = read_lines(cmd_opts.words);
-  catch
-    error("Cannot load word list from '%s': %s", cmd_opts.words, lasterr());
-  end_try_catch
-else
-  words = {};
-endif
+    input_f  = cmd_args{1};
+    feats_f  = cmd_args{2};
+    output_f = cmd_args{3};
+
+    [ data, truth ] = read_sparse(input_f, true());
+    feats           = read_lines(feats_f);
+
+  else
+    if length(cmd_args) ~= 2
+      error(usage);
+    endif
+
+    input_f  = cmd_args{1};
+    output_f = cmd_args{2};
+
+    load(input_f, "data", "feats", "truth");
+  endif
+
+catch
+  error("Cannot load data: %s", lasterr());
+end_try_catch
 
 %% Size
 [ n_feats, n_data ] = size(data);
 
 %% Apply frequency threshold
 if ~isempty(cmd_opts.freq_th)
+
   %% Feature frequency
   feat_freq = full(sum(data > 0, 2));
 
@@ -115,42 +122,55 @@ if ~isempty(cmd_opts.freq_th)
   %% Keep only those above it
   data = data(kept_feats, :);
 
-  %% Words
-  if ~isempty(words)
-    words = { words{kept_feats} };
-  endif
-
-else
-  %% Keep all
-  kept_feats = 1 : n_feats;
+  %% Feats
+  feats = { feats{kept_feats} };
 endif
 
 %% Apply mutual information
 if ~isempty(cmd_opts.mi_feats) && n_feats > cmd_opts.mi_feats
 
+  %% Cheat?
+  if cmd_opts.mi_cheat
+    %% Expectation -> C * D
+    expec = sparse(truth, 1 : n_data, ones(1, n_data));
+
+    %% Source data is the sum by classes
+    src_data   = data * expec';
+    n_src_data = size(src_data, 1);
+
+    %% Probability of a class
+    %% p(x) -> 1 * C
+    p_x = sum(expec, 2)' / n_data;
+
+  else
+    %% Source data is raw data
+    src_data   = data;
+    n_src_data = n_data;
+
+    %% Probability of a document
+    %% p(x) -> 1 * D
+    p_x = 1.0 / n_src_data * ones(1, n_data);
+  endif
+
   %% Document length
   %% l(x) -> 1 * X
-  l_x = sum(data, 1);
-
-  %% Probability of a document
-  %% p(x) -> (Implicitly, 1 * X)
-  p_x = 1.0 / n_data;
+  l_x = sum(src_data, 1);
 
   %% Probability of a word given a document
   %% p(w | x) -> W * X
-  p_w_by_x = data ./ (ones(n_feats, 1) * l_x);
+  p_w_by_x = src_data * diag(1 ./ l_x);
 
   %% Probability of a word
   %% p(w) = \sum_x p(w | x) * p(x) -> W * 1
-  p_w = sum(p_w_by_x .* p_x, 2);
+  p_w = sum(p_w_by_x * diag(p_x), 2);
 
   %% Probability of a document given a word
   %% p(x | w) = \frac{p(w | x) * p(x)}{p(w)} -> W * X
-  p_x_by_w = (p_w_by_x .* p_x) ./ (p_w * ones(1, n_data));
+  p_x_by_w = diag(1 ./ p_w) * p_w_by_x * diag(p_x);
 
   %% Probability quotient
   %% p(x | w) / p(x) -> W * X
-  p_x_by_w__p_x = p_x_by_w ./ p_x;
+  p_x_by_w__p_x = p_x_by_w * diag(1 ./ p_x);
 
   %% Product matrix
   %% p(x | w) * log(p(x | w) / p(x)) -> W * X
@@ -170,31 +190,33 @@ if ~isempty(cmd_opts.mi_feats) && n_feats > cmd_opts.mi_feats
   [ max_mi, max_feats ] = sort(mi_w, "descend");
 
   %% Kept feats
-  rekept_feats = max_feats(1 : cmd_opts.mi_feats);
-  kept_feats   = kept_feats(rekept_feats);
-  n_feats      = cmd_opts.mi_feats;
+  kept_feats = max_feats(1 : cmd_opts.mi_feats);
+  n_feats    = cmd_opts.mi_feats;
 
   %% New data
-  data = data(rekept_feats, :);
+  data = data(kept_feats, :);
 
-  %% Words
-  if ~isempty(words)
-    %% Update
-    words = { words{rekept_feats} };
+  %% Feats
+  feats = { feats{kept_feats} };
 
-    %% Display
+  %% Display
+  if cmd_opts.verbose
     for f = 1 : n_feats
-      rkf = rekept_feats(f);
+      kf = kept_feats(f);
       fprintf(2, "%5d  %-20s  p: %.6f  kl: %.6f  mi: %.6f\n",
-	      kept_feats(f), words{f}, p_w(rkf), kl_w(rkf), mi_w(rkf));
+	      f, words{f}, p_w(kf), kl_w(kf), mi_w(kf));
     endfor
   endif
 endif
 
 %% Normalize (as a distribution)
 if cmd_opts.normalize
-  %% Do it
-  data ./= ones(n_feats, 1) * sum(data, 1);
+  %% Find the norm
+  norm = sum(data, 1);
+
+  %% Normalize non-zeros
+  nz = (norm ~= 0);
+  data(:, nz) ./= ones(n_feats, 1) * norm(nz);
 endif
 
 %% Find tf-idf
@@ -209,7 +231,7 @@ endif
 
 %% Save
 try
-  save("-binary", "-zip", output, "data", "truth", "kept_feats");
+  save("-binary", "-zip", output_f, "data", "truth", "feats");
 catch
-  error("Cannot save data to '%s': %s", output, lasterr());
+  error("Cannot save data to '%s': %s", output_f, lasterr());
 end_try_catch
