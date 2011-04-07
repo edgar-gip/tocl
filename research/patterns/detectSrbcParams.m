@@ -171,10 +171,13 @@ function plot_curve(curve, mcd, big, color, opts)
       plot(curve(1, :), curve(2, :), color);
     endif
   else
+    n_points = size(curve, 2);
+
     if big
-      plot3(curve(1, :), curve(2, :), mcd, color, "linewidth", 2);
+      plot3(curve(1, :), curve(2, :), mcd * ones(1, n_points), ...
+	    color, "linewidth", 2);
     else
-      plot3(curve(1, :), curve(2, :), mcd, color);
+      plot3(curve(1, :), curve(2, :), mcd * ones(1, n_points), color);
     endif
   endif
 
@@ -312,7 +315,7 @@ function [ dist_min ] = ...
 
     %% Correction for infinite distances
     %% This means that only one centroid is left alive...
-    if ~isfinite(dist_mins(r))
+    if ~isfinite(dist_mins(r)) || dist_mins(r) < 0
       dist_mins(r) = 0;
     endif
 
