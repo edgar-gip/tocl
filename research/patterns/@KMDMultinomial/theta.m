@@ -1,8 +1,8 @@
 %% -*- mode: octave; -*-
 
 %% k-Minority Detection
-%% Multinomial Component
-%% Theta values
+
+%% Multinomial Component Theta Values
 
 %% Author: Edgar Gonzalez
 
