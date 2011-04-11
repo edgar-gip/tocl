@@ -17,14 +17,18 @@ function [ model ] = maximization(this, data, expec)
   [ k     , n_data ] = size(expec);
 
   %% Uniform background probability
-  bg_p = -sum(log(max(data') - min(data')));
+  ranges =  max(data') - min(data');
+  bg_p   = -full(sum(log(ranges(ranges > 0))));
 
   %% Cluster sizes
-  cl_sizes = sum(expec, 2)'; % 1 * k
-  cl_size  = sum(cl_sizes);
+  cl_sizes    = sum(expec, 2)'; % 1 * k
+  cl_size     = sum(cl_sizes);
+  cl_nonempty = (cl_sizes > 0);
 
   %% Mean
-  cl_mu = full(data * expec') ./ (ones(n_dims, 1) * cl_sizes); % n_dims * k
+  cl_mu = full(data * expec');
+  cl_mu(:, cl_nonempty) ./= ...
+      ones(n_dims, 1) * cl_sizes(cl_nonempty); % n_dims * k_ne
 
   %% Smoothen cl_sizes
   cl_sizes .+= this.alpha_prior;

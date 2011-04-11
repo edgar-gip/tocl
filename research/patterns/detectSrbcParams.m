@@ -20,10 +20,10 @@ pkg load octopus;
 addpath(binrel("private"));
 
 %% Clusterer types
-enum BREGMAN SOFT_BBC;
+enum CT_BREGMAN CT_SOFT_BBC;
 
 %% MCD Distance
-enum D_SQ_EUCLIDEAN D_RBF_KERNEL
+enum D_SQ_EUCLIDEAN D_RBF_KERNEL D_FULL_KERNEL;
 
 %% MCD Correction
 enum C_NO C_FIXED C_ADAPTIVE;
@@ -268,13 +268,13 @@ function [ dist_min ] = ...
   %% Clusterer
   %% (Yes, alpha is beta)
   switch opts.clusterer
-    case BREGMAN
+    case CT_BREGMAN
       clusterer = BregmanEM(kdist,                                     ...
 			    struct("beta",          alpha,             ...
 				   "em_threshold",  opts.em_threshold, ...
 				   "em_iterations", opts.em_iterations));
 
-    case SOFT_BBC
+    case CT_SOFT_BBC
       clusterer = SeqEM({ KMeans(kdist), ...
 			  SoftBBCEM(kdist,                        ...
 				    struct("beta", alpha,         ...
@@ -307,6 +307,9 @@ function [ dist_min ] = ...
 
       case D_RBF_KERNEL
 	dists = apply(kdist, cs);
+
+      case D_FULL_KERNEL
+	dists = alpha * apply(kdist, cs);
     endswitch
 
     %% Minimum distance
@@ -453,6 +456,18 @@ function [ curve ] = largest_curve(curves)
 endfunction
 
 
+%% Left-most search (Mid point)
+function [ lm_alpha, lm_gamma, th_curve ] = ...
+      leftmost_midpoint(alpha, gamma, th_mcd)
+  %% Alpha and gamma midpoint
+  lm_alpha = exp((log(alpha(1)) + log(alpha(length(alpha)))) / 2);
+  lm_gamma = exp((log(gamma(1)) + log(gamma(length(gamma)))) / 2);
+
+  %% Curve
+  th_curve = [ lm_alpha ; lm_gamma ];
+endfunction
+
+
 %% Left-most search (epsilon)
 function [ lm_alpha, lm_gamma, th_mcd, th_curve, all_curves ] = ...
       leftmost_search_epsilon(alpha, gamma, mcd, opts)
@@ -476,11 +491,12 @@ function [ lm_alpha, lm_gamma, th_mcd, th_curve, all_curves ] = ...
 
   %% Empty?
   if isempty(all_curves)
-    %% Nothing
-    lm_alpha = lm_gamma = lm_mcd = th_curve = [];
+    %% Failback -> Take the range midpoint
+    th_mcd = opts.epsilon_up;
+    [ lm_alpha, lm_gamma, th_curve ] = leftmost_midpoint(alpha, gamma, th_mcd);
 
     %% Log
-    fprintf(2, "none\n");
+    fprintf(2, "alpha = %12g, gamma = %12g [Midpoint]\n", lm_alpha, lm_gamma);
 
   else
     %% Take the largest
@@ -499,7 +515,6 @@ function [ lm_alpha, lm_gamma, th_mcd, th_curve, all_curves ] = ...
     fprintf(2, "alpha = %12g, gamma = %12g\n", lm_alpha, lm_gamma);
   endif
 endfunction
-
 
 %% Left-most search (max)
 function [ lm_alpha, lm_gamma, th_mcd, th_curve, all_curves ] = ...
@@ -564,7 +579,12 @@ function [ lm_alpha, lm_gamma, th_mcd, th_curve, all_curves ] = ...
 
   %% Not found?
   if ~found
-    lm_alpha = lm_gamma = lm_mcd = th_curve = [];
+    %% Failback -> Take the range midpoint
+    th_mcd = ref_mcd * opts.min_max_fraction;
+    [ lm_alpha, lm_gamma, th_curve ] = leftmost_midpoint(alpha, gamma, th_mcd);
+
+    %% Log
+    fprintf(2, "alpha = %12g, gamma = %12g [Midpoint]\n", lm_alpha, lm_gamma);
   endif
 endfunction
 
@@ -1317,14 +1337,14 @@ function do_event(alpha, gamma, data, k, opts)
   %% Clusterer
   %% (Yes, alpha is beta)
   switch opts.clusterer
-    case BREGMAN
+    case CT_BREGMAN
       clusterer = BregmanEM(KernelDistance(RBFKernel(gamma)),           ...
 			    struct("beta",          alpha,              ...
 				   "em_threshold",  opts.em_threshold,  ...
 				   "em_iterations", opts.em_iterations, ...
 				   "plot",          opts.e_plot_cluster));
 
-    case SOFT_BBC
+    case CT_SOFT_BBC
       clusterer = SeqEM({ KMeans(KernelDistance(RBFKernel(gamma))),
 			  SoftBBCEM(KernelDistance(RBFKernel(gamma)), ...
 				    struct("beta", alpha,             ...
@@ -1417,7 +1437,7 @@ endfunction
 
 %% General options
 def_opts               	  = struct();
-def_opts.clusterer     	  = SOFT_BBC;
+def_opts.clusterer     	  = CT_SOFT_BBC;
 def_opts.clusters      	  = "sqrt";
 def_opts.em_threshold  	  = 1e-6;
 def_opts.em_iterations 	  =   20;
@@ -1550,6 +1570,7 @@ endfunction
 		"max-gamma=f",        	"max_gamma",        ...
 		"mcd-sq-euclidean=r0",  "mcd_distance",     ...
 		"mcd-rbf-kernel=r1",    "mcd_distance",     ...
+		"mcd-full-kernel=r2",   "mcd_distance",     ...
 		"no-mcd-correction=r0", "mcd_correction",   ...
 		"mcd-correction=r1",  	"mcd_correction",   ...
 		"mcd-corr-adaptive=r2", "mcd_correction",   ...
