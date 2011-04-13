@@ -14,8 +14,8 @@ function [ dists ] = apply(this, source, target)
 
   %% Call helper functions
   if nargin() == 2
-    dists = skl_divergence1(this.term, source);
+    dists = skl_divergence1(this.src_term, this.tgt_term, source);
   else %% nargin() == 3
-    dists = skl_divergence2(this.term, source, target);
+    dists = skl_divergence2(this.src_term, this.tgt_term, source, target);
   endif
 endfunction

@@ -5,18 +5,19 @@
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = SmoothKLDivergence(term)
+function [ this ] = SmoothKLDivergence(src_term, tgt_term = src_term)
 
   %% Check arguments
-  if nargin() ~= 1
-    usage("[ this ] = SmoothKLDivergence(term)");
+  if ~any(nargin() == [ 1, 2 ])
+    usage("[ this ] = SmoothKLDivergence(src_term [, tgt_term])");
   endif
 
   %% This
   this = struct();
 
   %% Smoothing term
-  this.term = term;
+  this.src_term = src_term;
+  this.tgt_term = tgt_term;
 
   %% Bless
   %% And add inheritance

@@ -25,12 +25,17 @@ static void kl_divergence(Matrix& _distances,
   for (octave_idx_type src = 0; src < n_src; ++src) {
     for (octave_idx_type tgt = 0; tgt < n_tgt; ++tgt) {
       // Accumulate
-      double sum = 0.0;
-      for (octave_idx_type i = 0; i < n_dims; ++i)
-	sum += _target(i, tgt) * std::log(_target(i, tgt) / _source(i, src));
+      double sum_s  = 0.0;
+      double sum_t  = 0.0;
+      double sum_st = 0.0;
+      for (octave_idx_type i = 0; i < n_dims; ++i) {
+	sum_s  += _source(i, src);
+	sum_t  += _target(i, tgt);
+	sum_st += _target(i, tgt) * std::log(_target(i, tgt) / _source(i, src));
+      }
 
-      // Set
-      _distances(src, tgt) = sum;
+      // Normalize and set
+      _distances(src, tgt) = sum_st / sum_t - log(sum_t / sum_s);
     }
   }
 }
@@ -66,7 +71,9 @@ static void kl_divergence(Matrix& _distances,
     for (octave_idx_type tgt = 0; tgt < n_tgt; ++tgt) {
 
       // Accumulate
-      double sum = 0.0;
+      double sum_s  = 0.0;
+      double sum_t  = 0.0;
+      double sum_st = 0.0;
 
       // Merge-sortish
       octave_idx_type src_i = src_cidx[src];
@@ -76,16 +83,16 @@ static void kl_divergence(Matrix& _distances,
 	// What?
 	if (src_ridx[src_i] < tgt_ridx[tgt_i]) {
 	  // Advance source
-	  ++src_i;
+	  sum_s += src_data[src_i++];
 	}
 	else if (src_ridx[src_i] > tgt_ridx[tgt_i]) {
 	  // Advance target
-	  ++tgt_i;
+	  sum_t += tgt_data[tgt_i++];
 	}
 	else { // src_ridx[src_i] == tgt_ridx[tgt_i]
 	  // Update
-	  sum += tgt_data[tgt_i]
-	       * std::log(tgt_data[tgt_i] / src_data[src_i]);
+	  sum_st += tgt_data[tgt_i]
+	          * std::log(tgt_data[tgt_i] / src_data[src_i]);
 
 	  // Advance both
 	  ++src_i;
@@ -93,8 +100,8 @@ static void kl_divergence(Matrix& _distances,
 	}
       }
 
-      // Set
-      _distances(src, tgt) = sum;
+      // Normalize and set
+      _distances(src, tgt) = sum_st / sum_t - log(sum_t / sum_s);
     }
   }
 }
