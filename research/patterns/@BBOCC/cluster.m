@@ -25,14 +25,19 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% expec_0 given?
   if nargin() == 4
     %% Harden the cluster
-    cluster  = find(expec_0 > 0.5);
-    centroid = mean(data(:, cluster), 2);
+    cluster = find(expec_0 > 0.5);
+    size    = length(cluster);
+    expec   = sparse(ones(1, size), cluster, ones(1, size), ...
+		     1, n_samples);
 
   else %% nargin() < 4
     %% Select a starting centroid at random
-    cluster  = floor(1 + n_samples * rand(1));
-    centroid = data(:, cluster);
+    cluster = floor(1 + n_samples * rand(1));
+    expec   = sparse(1, cluster, 1, 1, n_samples);
   endif
+
+  %% Centroid
+  centroid = apply(this.centroid_finder, data, expec);
 
   %% Starting radius -> Infinity
   radius = inf;
@@ -57,7 +62,14 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
     %% New cluster and centroid
     radius   = sort_divs(target_size);
     cluster  = find(divs <= radius);
-    centroid = mean(data(:, cluster), 2);
+
+    %% Expectation
+    size  = length(cluster);
+    expec = sparse(ones(1, size), cluster, ones(1, size), ...
+		   1, n_samples);
+
+    %% Centroid
+    centroid = apply(this.centroid_finder, data, expec);
 
     %% Changes
     n_changes = length(setxor(cluster, p_cluster));
@@ -70,10 +82,6 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Model
   model = BregmanBallModel(this.divergence, centroid, radius);
 
-  %% Expectation
-  size  = length(cluster);
-  expec = sparse(ones(1, size), cluster, ones(1, size), ...
-		 1, n_samples);
 
   %% Info
   info            = struct();

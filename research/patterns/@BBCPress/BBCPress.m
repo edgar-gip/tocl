@@ -40,6 +40,26 @@ function [ this ] = BBCPress(divergence, opts = struct())
   %% Default -> 1
   this.change_threshold = getfielddef(opts, "change_threshold", 1);
 
+  %% Centroid finder
+  %% Default -> Raw
+  if ~isfield(opts, "centroid_finder")
+    this.centroid_finder = RawCentroids();
+
+  elseif ~isobject(opts.centroid_finder)
+    opts.centroid_finder = tolower(opts.centroid_finder);
+    switch opts.centroid_finder
+      case "raw"
+	this.centroid_finder = RawCentroids();
+      case "smooth"
+	this.centroid_finder = SmoothCentroids();
+      default
+	error("Bad centroid finder '%s'", opts.centroid_finder);
+    endswitch
+
+  else
+    this.centroid_finder = opts.centroid_finder;
+  endif
+
   %% Verbose
   %% Default -> false
   this.verbose = getfielddef(opts, "verbose", false());

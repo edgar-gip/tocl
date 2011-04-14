@@ -37,11 +37,8 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
     expec = sparse(1 : k, seeds, ones(1, k), k, n_samples);
   endif
 
-  %% Cluster sizes
-  sizes = full(sum(expec, 2))'; % 1 * k
-
-  %% Cluster centroids
-  centroids = (data * expec') ./ (ones(n_dims, 1) * sizes); % n_dims * k
+  %% Find centroids
+  centroids = apply(this.centroid_finder, data, expec);
 
   %% Starting radius -> Infinity
   radius = inf;
@@ -90,11 +87,8 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
       %% Make the expectation
       expec = sparse(min_indices(on), on, ones(1, n_on), k, n_samples);
 
-      %% Cluster sizes
-      sizes = full(sum(expec, 2))'; % 1 * k
-
-      %% Cluster centroids
-      centroids = (data * expec') ./ (ones(n_dims, 1) * sizes); % n_dims * k
+      %% Find centroids
+      centroids = apply(this.centroid_finder, data, expec);
 
       %% Changes
       n_changes   = full(sum(sum(xor(expec, p_expec))));

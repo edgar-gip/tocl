@@ -29,13 +29,15 @@ static void kl_divergence(Matrix& _distances,
       double sum_t  = 0.0;
       double sum_st = 0.0;
       for (octave_idx_type i = 0; i < n_dims; ++i) {
-	sum_s  += _source(i, src);
-	sum_t  += _target(i, tgt);
-	sum_st += _target(i, tgt) * std::log(_target(i, tgt) / _source(i, src));
+	sum_s += _source(i, src);
+	sum_t += _target(i, tgt);
+	if (_target(i, tgt))
+	  sum_st += _target(i, tgt) * std::log(_target(i, tgt) /
+					       _source(i, src));
       }
 
       // Normalize and set
-      _distances(src, tgt) = sum_st / sum_t - log(sum_t / sum_s);
+      _distances(src, tgt) = sum_st / sum_t - std::log(sum_t / sum_s);
     }
   }
 }
@@ -83,14 +85,17 @@ static void kl_divergence(Matrix& _distances,
 	// What?
 	if (src_ridx[src_i] < tgt_ridx[tgt_i]) {
 	  // Advance source
-	  sum_s += src_data[src_i++];
+	  sum_s  += src_data[src_i++];
 	}
 	else if (src_ridx[src_i] > tgt_ridx[tgt_i]) {
 	  // Advance target
-	  sum_t += tgt_data[tgt_i++];
+	  sum_t  += tgt_data[tgt_i++];
+	  sum_st += INFINITY;
 	}
 	else { // src_ridx[src_i] == tgt_ridx[tgt_i]
 	  // Update
+	  sum_s  += src_data[src_i];
+	  sum_t  += tgt_data[tgt_i];
 	  sum_st += tgt_data[tgt_i]
 	          * std::log(tgt_data[tgt_i] / src_data[src_i]);
 
@@ -100,8 +105,21 @@ static void kl_divergence(Matrix& _distances,
 	}
       }
 
+      // While source remains
+      while (src_i < src_cidx[src + 1]) {
+	// Advance source
+	sum_s += src_data[src_i++];
+      }
+
+      // While target remains
+      while (tgt_i < tgt_cidx[tgt + 1]) {
+	// Advance target
+	sum_t  += tgt_data[tgt_i++];
+	sum_st += INFINITY;
+      }
+
       // Normalize and set
-      _distances(src, tgt) = sum_st / sum_t - log(sum_t / sum_s);
+      _distances(src, tgt) = sum_st / sum_t - std::log(sum_t / sum_s);
     }
   }
 }
@@ -173,7 +191,8 @@ DEFUN_DLD(kl_divergence2, args, nargout,
 @deftypefn {Loadable Function}\
  {[ @var{dist} ] =} kl_divergence2(@var{source}, @var{target})\n\
 \n\
-Find the kullback-leibler divergence between elements of @var{source} and @var{target}\n\
+Find the kullback-leibler divergence between elements of @var{source} and\
+ @var{target}\n\
 @end deftypefn") {
   // Result
   octave_value_list result;

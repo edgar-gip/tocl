@@ -15,7 +15,7 @@ function [ this ] = SmoothKLDivergence(src_term, tgt_term = src_term)
   %% This
   this = struct();
 
-  %% Smoothing term
+  %% Smoothing terms
   this.src_term = src_term;
   this.tgt_term = tgt_term;
 
