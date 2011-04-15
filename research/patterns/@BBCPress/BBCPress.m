@@ -52,7 +52,7 @@ function [ this ] = BBCPress(divergence, opts = struct())
 	this.centroid_finder = RawCentroids();
       case "smooth"
 	this.centroid_finder = SmoothCentroids();
-      default
+      otherwise
 	error("Bad centroid finder '%s'", opts.centroid_finder);
     endswitch
 

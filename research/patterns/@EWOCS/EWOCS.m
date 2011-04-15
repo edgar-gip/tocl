@@ -52,7 +52,7 @@ function [ this ] = EWOCS(clusterer, opts = struct())
 	this.score_function = RadiusCSF();
       case "size"
 	this.score_function = SizeCSF();
-      else
+      otherwise
 	error("Bad score function '%s'", opts.score_function)
     endswitch
 
@@ -83,6 +83,8 @@ function [ this ] = EWOCS(clusterer, opts = struct())
 	this.interpolator = LogInterpolator();
       case "null"
 	this.interpolator = NullInterpolator();
+      otherwise
+	error("Bad interpolator '%s'", opts.interpolator)
     endswitch
 
   else
