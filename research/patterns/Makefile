@@ -1,7 +1,8 @@
 # SUBDIRS
-SUBDIRS = @Dirichlet/private @KLDivergence/private \
-	  @KMDMultinomial/private @LogisticLoss/private \
-	  @MahalanobisDistance/private @SmoothKLDivergence/private
+SUBDIRS = @Dirichlet/private    @JSDivergence/private \
+	  @KLDivergence/private @KMDMultinomial/private \
+	  @LogisticLoss/private @MahalanobisDistance/private \
+	  @SmoothKLDivergence/private
 
 # Modules
 MODULES = CPM3C multi_assignment read_redo read_seeds read_sparse
