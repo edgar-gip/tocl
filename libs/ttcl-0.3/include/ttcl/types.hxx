@@ -11,15 +11,12 @@
 /// TTCL Namespace
 namespace ttcl {
 
-  /// Real
-  typedef double real;
-  
   /// Unsigned integer
   typedef unsigned int uint;
-  
+
   /// Long integer
   typedef long long lint;
-  
+
   /// Unsigned long integer
   typedef unsigned long long ulint;
 }
