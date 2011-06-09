@@ -42,7 +42,8 @@ namespace ttcl {
       int mode_;
 
       /// Flush buffer
-      int flush_buffer() {
+      int
+      flush_buffer() {
 	// Separate the writing of the buffer from overflow() and
 	// sync() operation.
 	int w = pptr() - pbase();
@@ -59,7 +60,7 @@ namespace ttcl {
         setp(buffer_, buffer_ + (bufferSize-1));
         setg(buffer_ + 4,     // Beginning of putback area
              buffer_ + 4,     // Read position
-             buffer_ + 4);    // End position      
+             buffer_ + 4);    // End position
       }
 
       /// Destructor
@@ -68,12 +69,14 @@ namespace ttcl {
       }
 
       /// Is it open?
-      int is_open() const {
+      int
+      is_open() const {
 	return opened_;
       }
 
       /// Open
-      gzstreambuf* open(const char* _name, int _open_mode) {
+      gzstreambuf*
+      open(const char* _name, int _open_mode) {
 	// Not open before
 	if (is_open())
 	  return 0;
@@ -103,7 +106,8 @@ namespace ttcl {
       }
 
       /// Close
-      gzstreambuf* close() {
+      gzstreambuf*
+      close() {
 	// Sync and close
 	if (is_open()) {
 	  sync();
@@ -119,7 +123,8 @@ namespace ttcl {
       /// Overflow
       /** Used for output buffer only
        */
-      virtual int overflow(int c = EOF) {
+      virtual int
+      overflow(int c = EOF) {
 	if (not (mode_ & std::ios::out) or not opened_)
 	  return EOF;
 
@@ -137,7 +142,8 @@ namespace ttcl {
       /// Underflow
       /** Used for input buffer only
        */
-      virtual int underflow() {
+      virtual int
+      underflow() {
 	// Something in the buffer
 	if (gptr() and gptr() < egptr())
 	  return *reinterpret_cast<unsigned char*>(gptr());
@@ -163,11 +169,12 @@ namespace ttcl {
 	     buffer_ + 4 + num);          // End of buffer
 
 	// Return next character
-	return *reinterpret_cast<unsigned char*>(gptr());    
+	return *reinterpret_cast<unsigned char*>(gptr());
       }
 
       /// Sync
-      virtual int sync() {
+      virtual int
+      sync() {
 	// Changed to use flush_buffer() instead of overflow(EOF)
 	// which caused improper behavior with std::endl and flush(),
 	// bug reported by Vincent Ricard.
@@ -178,7 +185,7 @@ namespace ttcl {
 	return 0;
       }
     };
-    
+
 
     /// Zlib Stream Base
     class gzstreambase :
@@ -206,25 +213,29 @@ namespace ttcl {
       }
 
       /// Is it open?
-      int is_open() const {
+      int
+      is_open() const {
 	return buf_.is_open();
       }
 
       /// Open
-      void open(const char* _name, int _open_mode) {
+      void
+      open(const char* _name, int _open_mode) {
 	if (not buf_.open(_name, _open_mode))
 	  clear(rdstate() | std::ios::badbit);
       }
 
       /// Close
-      void close() {
+      void
+      close() {
 	if (buf_.is_open())
 	  if (not buf_.close())
             clear(rdstate() | std::ios::badbit);
       }
 
       /// Buffer
-      gzstreambuf* rdbuf() {
+      gzstreambuf*
+      rdbuf() {
 	return &buf_;
       }
     };
@@ -245,12 +256,14 @@ namespace ttcl {
       }
 
       /// Buffer
-      gzstreambuf* rdbuf() {
+      gzstreambuf*
+      rdbuf() {
 	return gzstreambase::rdbuf();
       }
 
       /// Open
-      void open(const char* _name, int _open_mode = std::ios::in) {
+      void
+      open(const char* _name, int _open_mode = std::ios::in) {
         gzstreambase::open(_name, _open_mode);
       }
     };
@@ -271,12 +284,14 @@ namespace ttcl {
       }
 
       /// Buffer
-      gzstreambuf* rdbuf() {
+      gzstreambuf*
+      rdbuf() {
 	return gzstreambase::rdbuf();
       }
 
       /// Open
-      void open(const char* _name, int _open_mode = std::ios::out) {
+      void
+      open(const char* _name, int _open_mode = std::ios::out) {
         gzstreambase::open(_name, _open_mode);
       }
     };

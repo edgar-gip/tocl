@@ -14,7 +14,7 @@
 namespace ttcl {
 
   /// Utility Namespace
-  namespace ut { 
+  namespace ut {
 
     /// Range iterator
     /** A model of STL Random Access Iterator (Non-mutable)
@@ -33,7 +33,7 @@ namespace ttcl {
 
       /// Pointer type
       typedef T* pointer;
-      
+
       /// Reference type
       typedef T& reference;
 
@@ -57,63 +57,73 @@ namespace ttcl {
       }
 
       /// Dereference
-      const_reference operator*() const {
+      const_reference
+      operator*() const {
 	return value_;
       }
 
       /// Preincrement
-      range_iterator& operator++() {
+      range_iterator&
+      operator++() {
 	++value_;
 	return *this;
       }
 
       /// Postincrement
-      range_iterator operator++(int) {
+      range_iterator
+      operator++(int) {
 	range_iterator copy = *this;
 	++value_;
 	return copy;
       }
 
       /// Increment
-      range_iterator& operator+=(const difference_type& _incr) {
+      range_iterator&
+      operator+=(const difference_type& _incr) {
 	value_ += _incr;
 	return *this;
       }
 
       /// Predecrement
-      range_iterator& operator--() {
+      range_iterator&
+      operator--() {
 	--value_;
 	return *this;
       }
 
       /// Postdecrement
-      range_iterator operator--(int) {
+      range_iterator
+      operator--(int) {
 	range_iterator copy = *this;
 	--value_;
 	return copy;
       }
 
       /// Decrement
-      range_iterator& operator-=(const difference_type& _decr) {
+      range_iterator&
+      operator-=(const difference_type& _decr) {
 	value_ -= _decr;
 	return *this;
       }
 
       /// Element operator
-      value_type operator[](const difference_type& _index) const {
+      value_type
+      operator[](const difference_type& _index) const {
 	return value_ + _index;
       }
     };
 
     /// Equality Comparison
     template <typename T>
-    bool operator==(const range_iterator<T>& _a, const range_iterator<T>& _b) {
+    bool
+    operator==(const range_iterator<T>& _a, const range_iterator<T>& _b) {
       return *_a == *_b;
     }
 
     /// Inequality comparison
     template <typename T>
-    bool operator!=(const range_iterator<T>& _a, const range_iterator<T>& _b) {
+    bool
+    operator!=(const range_iterator<T>& _a, const range_iterator<T>& _b) {
       return !(_a == _b);
     }
 
@@ -126,7 +136,8 @@ namespace ttcl {
 
     /// Convenience function
     template <typename T>
-    range_iterator<T> range(const T& _value) {
+    range_iterator<T>
+    range(const T& _value) {
       return range_iterator<T>(_value);
     }
 
@@ -154,7 +165,8 @@ namespace ttcl {
       }
 
       /// Invocation
-      result_type operator()() {
+      result_type
+      operator()() {
 	result_type result = value_;
 	value_ += incr_;
 	return result;
