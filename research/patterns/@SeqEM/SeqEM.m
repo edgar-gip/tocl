@@ -27,6 +27,6 @@ function [ this ] = SeqEM(clusterers, opts = struct())
   this.verbose = getfielddef(opts, "verbose", false());
 
   %% Bless
-  this = class(this, "SeqEM",
+  this = class(this, "SeqEM", ...
 	       Simple());
 endfunction

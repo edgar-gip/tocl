@@ -37,6 +37,6 @@ function [ this ] = CriterionClusterer(clusterer, criterion, opts = struct())
 
   %% Bless
   %% And add inheritance
-  this = class(this, "CriterionClusterer",
+  this = class(this, "CriterionClusterer", ...
 	       Simple());
 endfunction

@@ -9,7 +9,10 @@
 */
 
 #ifdef __linux__
-#include <execinfo.h>
+# include <execinfo.h>
+# ifdef __GNUC__
+#  include <cxxabi.h>
+# endif
 #endif
 
 #include <cstdarg>
@@ -23,7 +26,7 @@
 #include <boost/format.hpp>
 
 #ifndef TTCL_WHAT_SIZE
-#define TTCL_WHAT_SIZE 1024
+# define TTCL_WHAT_SIZE 1024
 #endif
 
 #include <ttcl/global.hxx>
@@ -33,7 +36,8 @@
 namespace ttcl {
 
   /// Exception
-  class exception : public std::exception {
+  class exception :
+    public std::exception {
   protected:
     /// Description message
     std::string message_;
@@ -45,8 +49,11 @@ namespace ttcl {
     uint line_no_;
 
 #ifdef _EXECINFO_H
-    /// Backtrace
-    char** trace_;
+    /// Backtrace addresses
+    void** addresses_;
+
+    /// Backtrace function names
+    char** functions_;
 
     /// Number of positions of trace filled
     int n_filled_;
@@ -60,10 +67,13 @@ namespace ttcl {
     */
     exception(const std::string& _file, uint _line_no,
 	      const std::string& _message) :
-      message_(_message), file_(_file), line_no_(_line_no) {
 #ifdef _EXECINFO_H
+      message_(_message), file_(_file), line_no_(_line_no),
+      addresses_(0), functions_(0) {
       // Get the backtrace
       get_backtrace();
+#else
+      message_(_message), file_(_file), line_no_(_line_no) {
 #endif
     }
 
@@ -74,22 +84,29 @@ namespace ttcl {
     */
     exception(const std::string& _file, uint _line_no,
 	      const boost::format& _message) :
-      message_(_message.str()), file_(_file), line_no_(_line_no) {
 #ifdef _EXECINFO_H
+      message_(_message.str()), file_(_file), line_no_(_line_no),
+      addresses_(0), functions_(0) {
       // Get the backtrace
       get_backtrace();
-#endif
     }
+#else
+      message_(_message.str()), file_(_file), line_no_(_line_no) {
+    }
+#endif
 
     /// Constructor from a char* and a variable argument list
     /** printf-style interpolation
      */
     exception(const std::string& _file, uint _line_no,
 	      const char* _format, ...) ttcl_printf_check(4, 5) :
-      message_(), file_(_file), line_no_(_line_no) {
 #ifdef _EXECINFO_H
+      message_(), file_(_file), line_no_(_line_no),
+      addresses_(0), functions_(0) {
       // Get the backtrace
       get_backtrace();
+#else
+      message_(), file_(_file), line_no_(_line_no) {
 #endif
 
       // Create the list
@@ -106,10 +123,13 @@ namespace ttcl {
   protected:
     /// Non-message specifying constructor
     exception(const std::string& _file, uint _line_no) :
-      message_(), file_(_file), line_no_(_line_no) {
 #ifdef _EXECINFO_H
+      message_(), file_(_file), line_no_(_line_no),
+      addresses_(0), functions_(0) {
       // Get the backtrace
       get_backtrace();
+#else
+      message_(), file_(_file), line_no_(_line_no) {
 #endif
     }
 
@@ -123,12 +143,62 @@ namespace ttcl {
       // Split the first 2
       n_filled_ -= 2;
 
+      // Allocate space for addresses
+      addresses_ =
+	reinterpret_cast<void**>(std::malloc(n_filled_ * sizeof(void*)));
+      if (not addresses_)
+	throw std::bad_alloc();
+
+      // Copy them
+      std::memcpy(addresses_, buffer + 2, n_filled_ * sizeof(void*));
+
       // Convert to symbols
-      trace_ = backtrace_symbols(buffer + 2, n_filled_);
+      functions_ = backtrace_symbols(addresses_, n_filled_);
 
       // Check for out of memory
-      if (not trace_)
+      if (not functions_) {
+	std::free(addresses_);
 	throw std::bad_alloc();
+      }
+
+# ifdef _CXXABI_H
+      // Demangle each
+      for (int i = 0; i < n_filled_; ++i) {
+	// Demangled name
+	char* demangled = 0;
+
+	// Find the '('
+	char* start = strchr(functions_[i], '(');
+	if (start) {
+	  // Find the '+'
+	  char* end = strchr(start, '+');
+	  if (end) {
+	    // Copy to a buffer
+	    char buffer[1024];
+	    std::strncpy(buffer, start + 1, end - start - 1);
+	    buffer[end - start - 1] = '\0';
+
+	    // Demangle
+	    int status;
+	    demangled = abi::__cxa_demangle(buffer, NULL, 0, &status);
+
+	    // Error?
+	    if (status)
+	      demangled = strdup(buffer);
+	  }
+	}
+
+	// Demangled found?
+	if (demangled) {
+	  // Replace
+	  functions_[i] = demangled;
+	}
+	else {
+	  // Just duplicate
+	  functions_[i] = strdup(functions_[i]);
+	}
+      }
+# endif
     }
 #endif
 
@@ -152,24 +222,49 @@ namespace ttcl {
       std::exception(_other), message_(_other.message_),
       file_(_other.file_), line_no_(_other.line_no_) {
 #ifdef _EXECINFO_H
-      // Reserve memory for the trace
+      // How many filled?
       n_filled_ = _other.n_filled_;
-      trace_    =
-	reinterpret_cast<char**>(std::malloc(n_filled_ * sizeof(char*)));
 
-      // Check for out of memory
-      if (not trace_)
+      // Reserve memory for the addresses
+      addresses_ =
+	reinterpret_cast<void**>(std::malloc(n_filled_ * sizeof(void*)));
+      if (not addresses_)
 	throw std::bad_alloc();
 
-      // Copy the trace
-      std::memcpy(trace_, _other.trace_, n_filled_ * sizeof(char*));
+      // Copy the addresses
+      std::memcpy(addresses_, _other.addresses_, n_filled_ * sizeof(void*));
+
+      // Reserve memory for the function names
+      functions_    =
+	reinterpret_cast<char**>(std::malloc(n_filled_ * sizeof(char*)));
+      if (not functions_) {
+	std::free(addresses_);
+	throw std::bad_alloc();
+      }
+
+# ifdef _CXXABI_H
+      // Duplicate each function name
+      for (int i = 0; i < n_filled_; ++i)
+	functions_[i] = strdup(_other.functions_[i]);
+# else
+      // Copy the function names
+      std::memcpy(functions_, _other.functions_, n_filled_ * sizeof(char*));
+# endif
 #endif
     }
 
     /// Destructor
     virtual ~exception() throw () {
 #ifdef _EXECINFO_H
-      std::free(trace_);
+# ifdef _CXXABI_H
+      // Free each demangled name
+      for (uint i = 0; i < n_filled_; ++i)
+	std::free(functions_[i]);
+# endif
+
+      // Free the trace arrays
+      std::free(addresses_);
+      std::free(functions_);
 #endif
     }
 
@@ -209,12 +304,13 @@ namespace ttcl {
     /// Write to an ostream
     /** @param _os Target ostream
      */
-    virtual void display(std::ostream& _os) const {
+    virtual void display(std::ostream& _os = std::cerr) const {
       _os << message_ << " in " << file_
 	  << ":" << line_no_ << std::endl;
 #ifdef _EXECINFO_H
       for (int i = 0; i < n_filled_; ++i)
-	_os << " from " << trace_[i] << std::endl;
+	_os << " from " << functions_[i] << " ["
+	    << addresses_[i] << ']' << std::endl;
 #endif
     }
 
@@ -229,7 +325,7 @@ namespace ttcl {
       while (printed < TTCL_WHAT_SIZE - 1 and
 	     i < n_filled_) {
 	printed += snprintf(buffer + printed, TTCL_WHAT_SIZE - printed,
-			    " from %s", trace_[i]);
+			    " from %s [%p]", functions_[i], addresses_[i]);
 	++i;
       }
 #endif

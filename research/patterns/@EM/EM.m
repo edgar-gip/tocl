@@ -36,6 +36,6 @@ function [ this ] = EM(opts = struct())
   this.verbose = getfielddef(opts, "verbose", false());
 
   %% Bless
-  this = class(this, "EM",
+  this = class(this, "EM", ...
 	       Simple());
 endfunction
