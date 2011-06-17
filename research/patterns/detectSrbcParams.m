@@ -604,7 +604,7 @@ function do_grid(data, k, opts)
 
     %% Log
     fprintf(2, "\ngrid: alpha in [ %8g .. %8g ], gamma in [ %8g .. %8g ]\n", ...
-	    min_alpha, max_alpha, min_gamma, opts.max_gamma);
+	    min_alpha, max_alpha, min_gamma, max_gamma);
 
     %% Alpha values
     alpha = log_series(min_alpha, max_alpha, opts.g_n_alpha);
