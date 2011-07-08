@@ -27,9 +27,4 @@
 #define import_r_type(class, type, newtype)	\
   typedef typename class::type newtype
 
-/// C++ 0x default functions
-#if __GNUC__ == 4 && __GNUC_MINOR__ >= 4 && defined(__GXX_EXPERIMENTAL_CXX0X__)
-#define TTCL_CXX0X_DEFAULTS
-#endif
-
 #endif
