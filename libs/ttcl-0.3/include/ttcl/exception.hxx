@@ -137,8 +137,8 @@ namespace ttcl {
     /// Get the backtrace
     void get_backtrace() {
       // Get the backtrace
-      void* buffer[20];
-      n_filled_ = backtrace(buffer, 20);
+      void* bt_buffer[20];
+      n_filled_ = backtrace(bt_buffer, 20);
 
       // Split the first 2
       n_filled_ -= 2;
@@ -150,7 +150,7 @@ namespace ttcl {
 	throw std::bad_alloc();
 
       // Copy them
-      std::memcpy(addresses_, buffer + 2, n_filled_ * sizeof(void*));
+      std::memcpy(addresses_, bt_buffer + 2, n_filled_ * sizeof(void*));
 
       // Convert to symbols
       functions_ = backtrace_symbols(addresses_, n_filled_);
@@ -173,18 +173,18 @@ namespace ttcl {
 	  // Find the '+'
 	  char* end = strchr(start, '+');
 	  if (end) {
-	    // Copy to a buffer
-	    char buffer[1024];
-	    std::strncpy(buffer, start + 1, end - start - 1);
-	    buffer[end - start - 1] = '\0';
+	    // Copy to a dmg_buffer
+	    char dmg_buffer[1024];
+	    std::strncpy(dmg_buffer, start + 1, end - start - 1);
+	    dmg_buffer[end - start - 1] = '\0';
 
 	    // Demangle
 	    int status;
-	    demangled = abi::__cxa_demangle(buffer, NULL, 0, &status);
+	    demangled = abi::__cxa_demangle(dmg_buffer, NULL, 0, &status);
 
 	    // Error?
 	    if (status)
-	      demangled = strdup(buffer);
+	      demangled = strdup(dmg_buffer);
 	  }
 	}
 
@@ -205,13 +205,13 @@ namespace ttcl {
     /// Fill printf-style
     void fill_printf(const char* _format, std::va_list _args) {
       // Buffer
-      char buffer[TTCL_WHAT_SIZE];
+      char pf_buffer[TTCL_WHAT_SIZE];
 
       // Print to the buffer
-      std::vsnprintf(buffer, TTCL_WHAT_SIZE, _format, _args);
+      std::vsnprintf(pf_buffer, TTCL_WHAT_SIZE, _format, _args);
 
       // Save the message
-      message_ = buffer;
+      message_ = pf_buffer;
     }
 
   public:
