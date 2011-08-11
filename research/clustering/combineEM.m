@@ -1,10 +1,8 @@
-%% Add something to the load path
-LOADPATH = [ LOADPATH ":/home/usuaris/egonzalez/devel/research/clusteringSys/octave/combination" ];
-LOADPATH = [ LOADPATH ":/home/usuaris/egonzalez/devel/research/clusteringSys/octave/io" ];
-LOADPATH = [ LOADPATH ":/home/usuaris/egonzalez/devel/research/clusteringSys/octave/measures" ];
+%% -*- mode: octave; -*-
 
 %% Check arguments
-[ length dummy ] = size(argv);
+args = argv();
+[ length dummy ] = size(args);
 if mod(length, 2) ~= 0
   error('The number of arguments should be pair');
 end
@@ -15,10 +13,10 @@ output = {};
 %% For every element
 for i = 1:2:length
   %% Weight
-  output{i}   = str2num(argv{i});
+  output{i}   = str2num(args{i});
 
   %% Name
-  output{i+1} = argv{i+1};
+  output{i+1} = args{i+1};
 end
 
 %% Call the combination

@@ -1,5 +1,6 @@
 #include <octave/oct.h>
 #include <octave/ov-struct.h>
+#include <octave/version.h>
 
 
 /****************/
@@ -16,12 +17,12 @@ void eStep(Matrix& expectation,
   // DEBUG
   printf("E Step\n");
 #endif
-  
+
   // Find useful sizes
   int nData  = data.rows();
   int nFeats = data.cols();
   int nClust = alpha.rows();
-    
+
   // For every point
   for (int i = 0; i < nData; ++i) {
     // Total (for normalization)
@@ -62,12 +63,12 @@ void eStepW(Matrix& expectation,
   // DEBUG
   printf("E Step W\n");
 #endif
-  
+
   // Find useful sizes
   int nData  = data.rows();
   int nFeats = data.cols();
   int nClust = alpha.rows();
-  
+
   // For every point
   for (int i = 0; i < nData; ++i) {
     // Total (for normalization)
@@ -111,7 +112,7 @@ void mStep(Matrix& alpha,
   int nData  = data.rows();
   int nFeats = data.cols();
   int nClust = alpha.rows();
-    
+
   // Totals
   double alphaTotal = 0.0;
 
@@ -152,7 +153,7 @@ void mStep(Matrix& alpha,
       double valTotal = 0.0;
       for (int v = 0; v < nValues; ++v)
 	valTotal += coefs[f](c, v);
-      
+
       if (valTotal != 0.0)
 	for (int v = 0; v < nValues; ++v)
 	  coefs[f](c, v) /= valTotal;
@@ -165,7 +166,7 @@ void mStep(Matrix& alpha,
 double logLike(Matrix& alpha,
 	       Matrix* coefs,
 	       Matrix& data) {
-  
+
 #ifdef DEBUG
   // DEBUG
   printf("Log-Likelihood\n");
@@ -175,7 +176,7 @@ double logLike(Matrix& alpha,
   int nData  = data.rows();
   int nFeats = data.cols();
   int nClust = alpha.rows();
-    
+
   // Total
   double llike = 0.0;
 
@@ -224,7 +225,7 @@ double logLikeW(Matrix& alpha,
 		Matrix* coefs,
 		Matrix& data,
 		Matrix& weights) {
-  
+
 #ifdef DEBUG
   // DEBUG
   printf("Log-Likelihood W\n");
@@ -234,7 +235,7 @@ double logLikeW(Matrix& alpha,
   int nData  = data.rows();
   int nFeats = data.cols();
   int nClust = alpha.rows();
-    
+
   // Total
   double llike = 0.0;
 
@@ -304,7 +305,7 @@ Perform an expectation step.\n\
     error("DATA should be a matrix");
     return octave_value_list();
   }
-  
+
   // Find the kind element of the struct
   Octave_map model         = args(0).map_value();
   Octave_map::iterator iki = model.seek("kind");
@@ -325,7 +326,7 @@ Perform an expectation step.\n\
     error("MODEL.kind unsupported");
     return octave_value_list();
   }
-  
+
   // Find the alpha element of the struct
   Octave_map::iterator ial = model.seek("alpha");
   if (ial == model.end()) {
@@ -391,7 +392,7 @@ Perform an expectation step.\n\
       delete[] coefs;
       return octave_value_list();
     }
-    
+
     // Find the weights matrix
     if (!model.contents(iwe)(0).is_real_matrix()) {
       error("MODEL.weights should be a matrix");
@@ -399,11 +400,11 @@ Perform an expectation step.\n\
       return octave_value_list();
     }
     Matrix weights = model.contents(iwe)(0).matrix_value();
-    
+
     // Call the function
     eStepW(expectation, data, alpha, coefs, weights);
   }
-    
+
   // Free the coefs array
   delete[] coefs;
 
@@ -443,7 +444,7 @@ Perform an expectation step.\n\
     error("EXPECTATION should be a matrix");
     return octave_value_list();
   }
-  
+
   // Get the matrices
   Matrix data         = args(0).matrix_value();
   Matrix featureSizes = args(1).matrix_value();
@@ -475,7 +476,7 @@ Perform an expectation step.\n\
   // Output coefs
   Matrix* coefs = new Matrix[nFeats];
   for (int f = 0; f < nFeats; ++f) {
-    coefs[f].resize_and_fill(nClust, int(featureSizes(f)), 0.0);
+    coefs[f].resize_fill(nClust, int(featureSizes(f)), 0.0);
   }
 
   // Call
@@ -547,7 +548,7 @@ Find the log-likelihood of data according to the model.\n\
     error("MODEL.kind unsupported");
     return octave_value_list();
   }
-  
+
   // Find the alpha element of the struct
   Octave_map::iterator ial = model.seek("alpha");
   if (ial == model.end()) {
@@ -606,7 +607,7 @@ Find the log-likelihood of data according to the model.\n\
       delete[] coefs;
       return octave_value_list();
     }
-    
+
     // Find the weights matrix
     if (!model.contents(iwe)(0).is_real_matrix()) {
       error("MODEL.weights should be a matrix");
@@ -614,7 +615,7 @@ Find the log-likelihood of data according to the model.\n\
       return octave_value_list();
     }
     Matrix weights = model.contents(iwe)(0).matrix_value();
-    
+
     // Call the function
     llike = logLikeW(alpha, coefs, data, weights);
   }
