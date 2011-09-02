@@ -1,6 +1,8 @@
+%% -*- mode: octave; -*-
+
 %% Add something to the LOADPATH
-LOADPATH = [ LOADPATH ":/home2/edgar/devel/research/matlabClustering/io" ];
-LOADPATH = [ LOADPATH ":/home2/edgar/devel/research/matlabClustering/measures" ];
+addpath("/home2/edgar/devel/research/matlabClustering/io", ...
+	"/home2/edgar/devel/research/matlabClustering/measures");
 
 %% Get arguments
 doc2cat = argv{1};
@@ -20,7 +22,7 @@ for i = 3:length
 
   %% Number of clusters (real)
   nr = sum(sum(Occ') ~= 0);
-  
+
   %% Output
   printf("%s %g %d/%d/%d\n", argv{i}, nmi, nr, nc, n);
 end

@@ -1,8 +1,10 @@
-%% Add something to the load path
-LOADPATH = [ LOADPATH ":/home/usuaris/egonzalez/devel/research/matlabClustering/combination" ];
-LOADPATH = [ LOADPATH ":/home/usuaris/egonzalez/devel/research/matlabClustering/io" ];
-LOADPATH = [ LOADPATH ":/home/usuaris/egonzalez/devel/research/matlabClustering/measures" ];
-LOADPATH = [ LOADPATH ":/home/usuaris/egonzalez/devel/research/matlabClustering/weak" ];
+%% -*- mode: octave; -*-
+
+%% Add something to the LOADPATH
+addpath("/home/usuaris/egonzalez/devel/research/matlabClustering/combination", ...
+	"/home/usuaris/egonzalez/devel/research/matlabClustering/io", ...
+	"/home/usuaris/egonzalez/devel/research/matlabClustering/measures", ...
+	"/home/usuaris/egonzalez/devel/research/matlabClustering/weak");
 
 %% Check arguments
 [ length dummy ] = size(argv);

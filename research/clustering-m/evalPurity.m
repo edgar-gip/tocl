@@ -1,26 +1,29 @@
+%% -*- mode: octave; -*-
+
 %% Add something to the LOADPATH
-LOADPATH = [ LOADPATH ":/home/egonzalez/devel/research/matlabClustering/io" ];
-LOADPATH = [ LOADPATH ":/home/egonzalez/devel/research/matlabClustering/measures" ];
+addpath("/home/egonzalez/devel/research/matlabClustering/io", ...
+	"/home/egonzalez/devel/research/matlabClustering/measures");
 
 %% Get arguments
-doc2cat = argv{1};
-rlabel  = argv{2};
+args = argv();
+doc2cat = args{1};
+rlabel  = args{2};
 
 %% Load labels
 [ L n ] = read_labels_num(rlabel, doc2cat);
 
 %% Read every cluster
-[ length dummy ] = size(argv);
-for i = 3:length
+[ length dummy ] = size(args);
+for i = 3 : length
   %% Read
-  [ C nc ] = read_clustering(argv{i});
+  [ C nc ] = read_clustering(args{i});
 
   %% Find purity
   [ pur ipur f1 Occ ] = meas_purity(C, L);
 
   %% Number of clusters (real)
   nr = sum(sum(Occ') ~= 0);
-  
+
   %% Output
-  printf("%s %g %g %g %d/%d/%d\n", argv{i}, pur, ipur, f1, nr, nc, n);
+  printf("%s %g %g %g %d/%d/%d\n", args{i}, pur, ipur, f1, nr, nc, n);
 end

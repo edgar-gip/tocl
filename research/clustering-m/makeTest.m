@@ -1,8 +1,10 @@
-%% Add something to the load path
-LOADPATH = [ LOADPATH ":/home/usuaris/egonzalez/devel/research/matlabClustering/combination" ];
-LOADPATH = [ LOADPATH ":/home/usuaris/egonzalez/devel/research/matlabClustering/io" ];
-LOADPATH = [ LOADPATH ":/home/usuaris/egonzalez/devel/research/matlabClustering/measures" ];
-LOADPATH = [ LOADPATH ":/home/usuaris/egonzalez/devel/research/matlabClustering/weak" ];
+%% -*- mode: octave; -*-
+
+%% Add something to the LOADPATH
+addpath("/home/usuaris/egonzalez/devel/research/matlabClustering/combination",...
+	"/home/usuaris/egonzalez/devel/research/matlabClustering/io",       ...
+	"/home/usuaris/egonzalez/devel/research/matlabClustering/measures", ...
+	"/home/usuaris/egonzalez/devel/research/matlabClustering/weak");
 
 %% Data
 
@@ -18,12 +20,12 @@ dLA.it  = { 'it.W.90', 'it.WN.10', 'it.WN.80' };
 dReu.dir = '/home/usuaris/egonzalez/devel/research/hybridTI/data/Remake-Combi/ReutersModApte/words/';
 dReu.all = { 'geo.GWB.75', 'it.GW.10', 'it.WN.35', 'it.WN.75' };
 dReu.it  = { 'it.GW.10', 'it.WN.35', 'it.WN.75' };
- 
-dReu10.dir = '/home/usuaris/egonzalez/devel/research/hybridTI/data/Remake-Combi/ReutersModApteTop10/words/'; 
+
+dReu10.dir = '/home/usuaris/egonzalez/devel/research/hybridTI/data/Remake-Combi/ReutersModApteTop10/words/';
 dReu10.all = { 'geo.GW.90', 'it.W.40', 'it.WB.10', 'it.WN.85' };
 dReu10.it  = { 'it.W.40', 'it.WB.10', 'it.WN.85' };
 
-dSmart.dir = '/home/usuaris/egonzalez/devel/research/hybridTI/data/Remake-Combi/SMART/words/'; 
+dSmart.dir = '/home/usuaris/egonzalez/devel/research/hybridTI/data/Remake-Combi/SMART/words/';
 dSmart.all = { 'geo.GWN.90', 'it.GW.10', 'it.WN.35', 'it.WN.90' };
 dSmart.it  = { 'it.GW.10', 'it.WN.35', 'it.WN.90' };
 
@@ -37,7 +39,7 @@ for i = 1:4
 
   %% Say we are in
   disp(tests{i}.dir);
-  
+
   %% Cluster all
   %%%%%%%%%%%%%%%
   disp('All');
@@ -47,7 +49,7 @@ for i = 1:4
   file = fopen("mem.gi.plot", "w");
   fprintf(file, "%d %g\n", [ Sizes Lls ]');
   fclose(file);
-  
+
   %% Max
   [ val idx ] = max(Lls);
   file = fopen("mem.gi.gmax", "w");
@@ -70,7 +72,7 @@ for i = 1:4
   file = fopen("mem.i.plot", "w");
   fprintf(file, "%d %g\n", [ Sizes Lls ]');
   fclose(file);
-  
+
   %% Max
   [ val idx ] = max(Lls);
   file = fopen("mem.i.gmax", "w");
