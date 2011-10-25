@@ -340,11 +340,11 @@ namespace ttcl {
 
 /// TODO
 #define ttcl_todo\
-  ttcl_fire("%s not implemented", __PRETTY_FUNCTION__);
+  ttcl_fire("%s not implemented", __PRETTY_FUNCTION__)
 
 /// Virtual
 #define ttcl_pseudovirtual\
-  ttcl_fire("%s pseudovirtual version called", __PRETTY_FUNCTION__);
+  ttcl_fire("%s pseudovirtual version called", __PRETTY_FUNCTION__)
 
 #endif
 
