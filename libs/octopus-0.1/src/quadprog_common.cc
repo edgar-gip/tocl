@@ -11,7 +11,7 @@
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 // FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 // for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with octopus; see the file COPYING.  If not, see
 // <http://www.gnu.org/licenses/>.
@@ -34,7 +34,7 @@ void parse_quadprog_args(const octave_value_list& args,
   // Check the number of parameters
   if (args.length() < 4 or args.length() > 10)
     throw (const char*)0;
-  
+
   // Get H
   if (args(0).is_real_scalar()) {
     H.RESIZE_AND_FILL(1, 1, args(0).scalar_value());
@@ -54,7 +54,11 @@ void parse_quadprog_args(const octave_value_list& args,
   if (args(1).is_real_scalar()) {
     if (n_vars != 1)
       throw "f should be a column vector with the same rows as H";
+#ifdef RESIZE_VECTOR_ONE_ARG
+    f.RESIZE_AND_FILL(1, args(1).scalar_value());
+#else
     f.RESIZE_AND_FILL(1, 1, args(1).scalar_value());
+#endif
   }
   else if (args(1).is_real_matrix()) {
     if (args(1).columns() != 1 or args(1).rows() != n_vars)
@@ -93,7 +97,11 @@ void parse_quadprog_args(const octave_value_list& args,
   else if (args(3).is_real_scalar()) {
     if (n_ineq != 1)
       throw "bineq should be a column vector with the same rows as Aineq";
+#ifdef RESIZE_VECTOR_ONE_ARG
+    bineq.RESIZE_AND_FILL(1, args(3).scalar_value());
+#else
     bineq.RESIZE_AND_FILL(1, 1, args(3).scalar_value());
+#endif
   }
   else if (args(3).is_real_matrix()) {
     if (args(3).columns() != 1 or args(3).rows() != n_ineq)
@@ -105,7 +113,7 @@ void parse_quadprog_args(const octave_value_list& args,
   }
 
   // Equality
-  
+
   // Get Aeq
   if (args.length() <= 4 or args(4).is_zero_by_zero()) {
     n_eq = 0;
@@ -125,7 +133,7 @@ void parse_quadprog_args(const octave_value_list& args,
   else {
     throw "Aeq should be a matrix with the same columns as H";
   }
-    
+
   // Get beq
   if (args.length() <= 5 or args(5).is_zero_by_zero()) {
     if (n_eq != 0)
@@ -134,7 +142,11 @@ void parse_quadprog_args(const octave_value_list& args,
   else if (args(5).is_real_scalar()) {
     if (n_eq != 1)
       throw "beq should be a column vector with the same rows as Aeq";
+#ifdef RESIZE_VECTOR_ONE_ARG
+    beq.RESIZE_AND_FILL(1, args(5).scalar_value());
+#else
     beq.RESIZE_AND_FILL(1, 1, args(5).scalar_value());
+#endif
   }
   else if (args(5).is_real_matrix()) {
     if (args(5).columns() != 1 or args(5).rows() != n_eq)
@@ -149,12 +161,20 @@ void parse_quadprog_args(const octave_value_list& args,
 
   // Get lb
   if (args.length() <= 6 or args(6).is_zero_by_zero()) {
+#ifdef RESIZE_VECTOR_ONE_ARG
+    lb.RESIZE_AND_FILL(n_vars, -INFINITY);
+#else
     lb.RESIZE_AND_FILL(n_vars, 1, -INFINITY);
+#endif
   }
   else if (args(6).is_real_scalar()) {
     if (n_vars != 1)
       throw "lb should be a column vector with the same rows as H";
+#ifdef RESIZE_VECTOR_ONE_ARG
+    lb.RESIZE_AND_FILL(n_vars, args(6).scalar_value());
+#else
     lb.RESIZE_AND_FILL(n_vars, 1, args(6).scalar_value());
+#endif
   }
   else if (args(6).is_real_matrix()) {
     if (args(6).columns() != 1 or args(6).rows() != n_vars)
@@ -167,12 +187,20 @@ void parse_quadprog_args(const octave_value_list& args,
 
   // Get ub
   if (args.length() <= 7 or args(7).is_zero_by_zero()) {
+#ifdef RESIZE_VECTOR_ONE_ARG
+    ub.RESIZE_AND_FILL(n_vars, INFINITY);
+#else
     ub.RESIZE_AND_FILL(n_vars, 1, INFINITY);
+#endif
   }
   else if (args(7).is_real_scalar()) {
     if (n_vars != 1)
       throw "ub should be a column vector with the same rows as H";
+#ifdef RESIZE_VECTOR_ONE_ARG
+    ub.RESIZE_AND_FILL(n_vars, args(7).scalar_value());
+#else
     ub.RESIZE_AND_FILL(n_vars, 1, args(7).scalar_value());
+#endif
   }
   else if (args(7).is_real_matrix()) {
     if (args(7).columns() != 1 or args(7).rows() != n_vars)
@@ -187,12 +215,20 @@ void parse_quadprog_args(const octave_value_list& args,
 
   // Get x0
   if (args.length() <= 8 or args(8).is_zero_by_zero()) {
+#ifdef RESIZE_VECTOR_ONE_ARG
+    x.RESIZE_AND_FILL(n_vars, 0.0);
+#else
     x.RESIZE_AND_FILL(n_vars, 1, 0.0);
+#endif
   }
   else if (args(8).is_real_scalar()) {
     if (n_vars != 1)
       throw "x0 should be a column vector with the same rows as H";
+#ifdef RESIZE_VECTOR_ONE_ARG
+    x.RESIZE_AND_FILL(n_vars, args(8).scalar_value());
+#else
     x.RESIZE_AND_FILL(n_vars, 1, args(8).scalar_value());
+#endif
   }
   else if (args(8).is_real_matrix()) {
     if (args(8).columns() != 1 or args(8).rows() != n_vars)

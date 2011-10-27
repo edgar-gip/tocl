@@ -30,19 +30,30 @@ $2
 # Determine the Octave function for resize and fill
 AC_DEFUN([OCTAVE_RESIZE_AND_FILL],
 [AC_LANG_PUSH(Octfile)
+
  AC_MSG_CHECKING([[if Octave Matrix supports method resize_and_fill]])
  AC_COMPILE_IFELSE(
 	[AC_LANG_PROGRAM([[@%:@include <octave/oct.h>]],
 		         [[Matrix m; m.resize_and_fill(1, 1, 0);]])],
 	[AC_MSG_RESULT([[yes]])
 	 AC_DEFINE([RESIZE_AND_FILL],[resize_and_fill],[Octave Matrix resizing method])],
-	[AC_MSG_RESULT([[no]])
-	 AC_MSG_CHECKING([[if Octave Matrix supports method resize_fill]])
-	 AC_COMPILE_IFELSE(
-		[AC_LANG_PROGRAM([[@%:@include <octave/oct.h>]],
-			         [[Matrix m; m.resize_fill(1, 1, 0);]])],
-		[AC_MSG_RESULT([[yes]])
-		 AC_DEFINE([RESIZE_AND_FILL],[resize_fill],[Octave Matrix resizing method])])],
-		[AC_MSG_RESULT([[no]])
-		 AC_ERROR([[Octave Matrix does not support resize_and_fill nor resize_fill]])])
+	[AC_MSG_RESULT([[no]])])
+
+ AC_MSG_CHECKING([[if Octave Matrix supports method resize_fill]])
+ AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM([[@%:@include <octave/oct.h>]],
+		         [[Matrix m; m.resize_fill(1, 1, 0);]])],
+	[AC_MSG_RESULT([[yes]])
+	 AC_DEFINE([RESIZE_AND_FILL],[resize_fill],[Octave Matrix resizing method])],
+	[AC_MSG_RESULT([[no]])])
+
+ AC_MSG_CHECKING([[if Octave Matrix supports method resize]])
+ AC_COMPILE_IFELSE(
+	[AC_LANG_PROGRAM([[@%:@include <octave/oct.h>]],
+		         [[Matrix m; m.resize(1, 1, 0);]])],
+	[AC_MSG_RESULT([[yes]])
+	 AC_DEFINE([RESIZE_AND_FILL],[resize],[Octave Matrix resizing method])
+	 AC_DEFINE([RESIZE_VECTOR_ONE_ARG],[],[Octave Matrix resize(...) takes one argument for *Vector types])],
+	[AC_MSG_RESULT([[no]])])
+
  AC_LANG_POP(Octfile)])

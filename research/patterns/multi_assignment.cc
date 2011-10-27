@@ -173,8 +173,8 @@ static void multi_assignment(const Matrix& _costs,
   }
 
   // Initialize mapping
-  _row_map.resize_fill(n_rows, -1);
-  _col_map.resize_fill(n_cols, -1);
+  _row_map.resize(n_rows, -1);
+  _col_map.resize(n_cols, -1);
 
   // Groups
   for (unsigned int i = 0; i < groups.size(); ++i) {

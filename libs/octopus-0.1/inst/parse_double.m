@@ -25,7 +25,16 @@
 function [ value ] = parse_double(string, label = "value")
 
   %% Parse
-  [ value, status ] = str2double(string);
+  if strncmp(version, "3.4", 3)
+    %% 3.4 API
+    value  = str2double(string);
+    status = isnan(value) && ~strcmpi(string, "nan");
+  else
+    %% Legacy API
+    [ seed, status ] = str2double(string);
+  endif
+
+  %% Status
   if status ~= 0
     error("Wrong %s '%s'", label, string);
   endif
