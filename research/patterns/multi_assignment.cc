@@ -173,8 +173,13 @@ static void multi_assignment(const Matrix& _costs,
   }
 
   // Initialize mapping
+#ifdef OCTAVE_3_4
   _row_map.resize(n_rows, -1);
   _col_map.resize(n_cols, -1);
+#else
+  _row_map.resize_fill(n_rows, -1);
+  _col_map.resize_fill(n_cols, -1);
+#endif
 
   // Groups
   for (unsigned int i = 0; i < groups.size(); ++i) {

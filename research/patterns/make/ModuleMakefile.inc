@@ -9,8 +9,15 @@
 # Paths
 MKOCTFILE = mkoctfile
 
+# Octave version
+OCTAVE_VERSION = \
+  $(shell octave --version | head -n 1 | \
+    sed 's/^.\+\([[:digit:]]\.[[:digit:]]\)\.[[:digit:]]$/\1/')
+OCTAVE_IS_3_4  = $(shell test "$(OCTAVE_VERSION)" == "3.4" && echo "true")
+OCTFLAGS_VER   = $(if $(OCTAVE_IS_3_4), -DOCTAVE_3_4)
+
 # Flags
-OCTFLAGS = -Wall -Wextra
+OCTFLAGS = -Wall -Wextra $(OCTFLAGS_VER)
 
 # Objects and targets
 OBJECTS = $(addsuffix .o,   $(MODULES))
@@ -36,7 +43,7 @@ all: $(TARGETS)
 
 # .oct file generation
 %.oct: %.cc
-	$(MKOCTFILE) $($*_OCTFLAGS) $^ $($*_LIBS)
+	$(MKOCTFILE) $(OCTFLAGS) $($*_OCTFLAGS) $^ $($*_LIBS)
 
 # Subdirs
 $(foreach s,$(SUBDIRS),$(eval $(call SUBDIR_TEMPLATE,$(s))))

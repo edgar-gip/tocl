@@ -5,7 +5,7 @@ SUBDIRS = @Dirichlet/private    @JSDivergence/private \
 	  @SmoothKLDivergence/private
 
 # Modules
-MODULES = CPM3C multi_assignment read_redo read_seeds read_sparse
+MODULES = affinity CPM3C multi_assignment read_redo read_seeds read_sparse
 
 # Module specific flags
 CPM3C_OCTFLAGS       = -I../../../libs/ttcl-0.3/include

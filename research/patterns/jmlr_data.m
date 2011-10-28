@@ -1,5 +1,9 @@
 %% -*- mode: octave; -*-
 
+%% Generate some nice data: the Toy dataset of our late JMLR article
+
+%% Author: Edgar Gonzàlez i Pellicer
+
 %% Generate the data
 function [ data, truth ] = jmlr_data(generator)
   %% Which generator?
@@ -19,7 +23,7 @@ function [ data, truth ] = jmlr_data(generator)
     case "3gauss-tri-hm"
       [ data, truth ] = gen_three_gauss_tri_hm();
     otherwise
-      error(sprintf("Wrong data generator '%s'", cmd_args{2}));
+      error(sprintf("Wrong data generator '%s'", generator));
   endswitch
 endfunction
 

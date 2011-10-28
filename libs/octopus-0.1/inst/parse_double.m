@@ -31,7 +31,7 @@ function [ value ] = parse_double(string, label = "value")
     status = isnan(value) && ~strcmpi(string, "nan");
   else
     %% Legacy API
-    [ seed, status ] = str2double(string);
+    [ value, status ] = str2double(string);
   endif
 
   %% Status

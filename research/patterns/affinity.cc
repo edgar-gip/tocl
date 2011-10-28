@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <octave/oct.h>
 
 
@@ -12,7 +14,14 @@ _affinity(Matrix& _aff, const Matrix& _co_occ, const RowVector& _truth) {
   octave_idx_type n_clusters = octave_idx_type(_truth.max());
 
   // Resize output
+#ifdef OCTAVE_3_4
   _aff.resize(n_clusters, n_clusters, 0.0);
+#else
+  _aff.resize_fill(n_clusters, n_clusters, 0.0);
+#endif
+
+  // Denominator
+  Matrix dens(n_clusters, n_clusters, 0.0);
 
   // Cluster sizes
   RowVector sizes(n_clusters, 0.0);
@@ -25,15 +34,21 @@ _affinity(Matrix& _aff, const Matrix& _co_occ, const RowVector& _truth) {
     // Count for size
     ++sizes(cl_i);
 
+    // Add self-affinity
+    _aff(cl_i, cl_i) += _co_occ(i, i);
+    dens(cl_i, cl_i) += 1.0;
+
     // For each other sample
-    for (octave_idx_type j = 0; j <= i; ++j) {
+    for (octave_idx_type j = 0; j < i; ++j) {
       // Cluster
       octave_idx_type cl_j = octave_idx_type(_truth(j)) - 1;
 
       // Add
       _aff(cl_i, cl_j) += _co_occ(i, j);
-      if (i != j)
-	_aff(cl_j, cl_i) += _co_occ(i, j);
+      _aff(cl_j, cl_i) += _co_occ(j, i);
+
+      dens(cl_i, cl_j) += 1.0;
+      dens(cl_j, cl_i) += 1.0;
     }
   }
 
@@ -42,6 +57,11 @@ _affinity(Matrix& _aff, const Matrix& _co_occ, const RowVector& _truth) {
     for (octave_idx_type cl_j = 0; cl_j < n_clusters; ++cl_j) {
       // Denominator
       double den = sizes(cl_i) * sizes(cl_j);
+
+      // Check
+      if (den != dens(cl_i, cl_j))
+	std::cerr << cl_i << ',' << cl_j << " = " << den << " != "
+		  << dens(cl_i, cl_j) << std::endl;
 
       // Divide
       if (den != 0.0)
