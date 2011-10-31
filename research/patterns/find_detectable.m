@@ -6,8 +6,25 @@ function [ detectable ] = find_detectable(alpha, met_aff, method = "exact")
     case "exact"
       [ detectable ] = find_detectable_exact(alpha, met_aff);
 
-    case "delta_lambda"
-      [ detectable ] = find_detectable_dl(alpha, met_aff);
+    case "dl1"
+      [ detectable ] = find_detectable_dl1(alpha, met_aff);
+
+    case "dl2"
+      [ detectable ] = find_detectable_dl2(alpha, met_aff);
+
+    case "dl3"
+      [ detectable ] = find_detectable_dl3(alpha, met_aff);
+
+    case "dl4"
+      [ detectable ] = find_detectable_dl4(alpha, met_aff);
+
+    case "all"
+      [ detectable ] = ...
+	  [ find_detectable_exact(alpha, met_aff), ...
+	    find_detectable_dl1(alpha, met_aff),   ...
+	    find_detectable_dl2(alpha, met_aff),   ...
+	    find_detectable_dl3(alpha, met_aff),   ...
+	    find_detectable_dl4(alpha, met_aff) ];
 
     otherwise
       error(sprintf("Wrong detection method '%s'", method));
@@ -23,7 +40,26 @@ function [ detectable ] = find_detectable_exact(alpha, met_aff)
   detectable = detectable(2 : length(detectable));
 endfunction
 
-function [ detectable ] = find_detectable_dl(alpha, met_aff)
+function [ detectable ] = find_detectable_dl1(alpha, met_aff)
+  %% Number of clusters
+  n_clusters = length(alpha);
+
+  %% Alphas
+  alpha_f = alpha(2 : n_clusters);
+
+  %% Find delta
+  delta = min((diag(met_aff) - met_aff(1, :)')(2 : n_clusters));
+
+  %% Find lambda
+  diffs  = met_aff - ones(n_clusters, 1) * met_aff(1, :) + ...
+           diag(inf(1, n_clusters));
+  lambda = -min(min(diffs(2 : n_clusters, :)));
+
+  %% Find detectable
+  detectable = delta > ((1 - alpha_f) ./ alpha_f) * lambda;
+endfunction
+
+function [ detectable ] = find_detectable_dl2(alpha, met_aff)
   %% Number of clusters
   n_clusters = length(alpha);
 
@@ -32,20 +68,62 @@ function [ detectable ] = find_detectable_dl(alpha, met_aff)
   alpha_f = alpha(2 : n_clusters);
 
   %% Find delta
-  fake_diag       = diag(met_aff) - met_aff(1, 1);
-  fake_diag(1, 1) = inf;
-  delta           = min(fake_diag)
+  delta = min((diag(met_aff) - met_aff(1, :)')(2 : n_clusters));
 
-  %% Find lambda_1
-  lambda_1 = -min(met_aff(1, 2 : n_clusters) - met_aff(1, 1))
+  %% Find differences
+  diffs = met_aff - ones(n_clusters, 1) * met_aff(1, :) + ...
+          diag(inf(1, n_clusters));
 
-  %% Find lambda_f
-  fake_aff = met_aff(2 : n_clusters, 2 : n_clusters) ...
-           + diag(inf(1, n_clusters - 1));
-  lambda_f = -min(min(fake_aff - ...
-		      ones(n_clusters - 1, 1) * met_aff(1, 2 : n_clusters)))
+  %% Find lambda's
+  lambda_1 = -min(diffs(2 : n_clusters, 1));
+  lambda_f = -min(min(diffs(2 : n_clusters, 2 : n_clusters)));
 
   %% Find detectable
   detectable = delta > (alpha_1 * lambda_1 + ...
-			(1 - alpha_1 - alpha_f) * lambda_f) ./ alpha_f
+			(1 - alpha_1 - alpha_f) * lambda_f) ./ alpha_f;
+endfunction
+
+function [ detectable ] = find_detectable_dl3(alpha, met_aff)
+  %% Number of clusters
+  n_clusters = length(alpha);
+
+  %% Alphas
+  alpha_f = alpha(2 : n_clusters);
+
+  %% Find delta
+  delta = min((diag(met_aff) - met_aff(1, :)')(2 : n_clusters));
+
+  %% Find differences
+  diffs   = met_aff - ones(n_clusters, 1) * met_aff(1, :) + ...
+            diag(inf(1, n_clusters));
+  diffs .*= ones(n_clusters, 1) * alpha';
+
+  %% Find lambda
+  lambda = -min(min(diffs(2 : n_clusters, :)));
+
+  %% Find detectable
+  detectable = delta > ((n_clusters - 1) * lambda) ./ alpha_f;
+endfunction
+
+function [ detectable ] = find_detectable_dl4(alpha, met_aff)
+  %% Number of clusters
+  n_clusters = length(alpha);
+
+  %% Alphas
+  alpha_f = alpha(2 : n_clusters);
+
+  %% Find delta
+  delta = min((diag(met_aff) - met_aff(1, :)')(2 : n_clusters));
+
+  %% Find differences
+  diffs   = met_aff - ones(n_clusters, 1) * met_aff(1, :) + ...
+            diag(inf(1, n_clusters));
+  diffs .*= ones(n_clusters, 1) * alpha';
+
+  %% Find lambda's
+  lambda_1 = -min(diffs(2 : n_clusters, 1));
+  lambda_f = -min(min(diffs(2 : n_clusters, 2 : n_clusters)));
+
+  %% Find detectable
+  detectable = delta > (lambda_1 + (n_clusters - 2) * lambda_f) ./ alpha_f;
 endfunction
