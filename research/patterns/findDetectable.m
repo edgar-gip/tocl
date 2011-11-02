@@ -50,8 +50,8 @@ for i = 1 : n
     detectablty = n_dets  / n_clust;
 
     %% Log
-    fprintf(2, "%15s %15s %d/%d = %6.2f%%\n", args{i}, met, ...
-	    n_dets, n_clust, 100 * consistency);
+    %% fprintf(2, "%15s %15s %d/%d = %6.2f%%\n", args{i}, met, ...
+    %%         n_dets, n_clust, 100 * consistency);
 
     %% Update stats
     if ~isfield(consistency_sum, met)
@@ -92,8 +92,6 @@ for j = 1 : length(methods)
       getfield(cluster_det, met) / getfield(cluster_total, met);
 
   %% Print them
-  printf("%15s %6.2f%% %6.2f%% %6.2f%%\n", met, 100 * consistency, ...
+  printf("%s %.2f %.2f %.2f\n", met, 100 * consistency, ...
 	 100 * macro_detectablty, 100 * micro_detectablty);
 endfor
-
-
