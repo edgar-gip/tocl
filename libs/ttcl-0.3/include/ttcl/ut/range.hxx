@@ -161,7 +161,7 @@ namespace ttcl {
       /// Constructor
       range_generator(const result_type& _value = result_type(),
 		      const result_type& _incr  = result_type(1)) :
-	value_(_value) {
+	value_(_value), incr_(_incr) {
       }
 
       /// Invocation
