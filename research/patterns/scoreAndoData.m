@@ -79,16 +79,10 @@ if length(mextra) ~= req_args
 endif
 
 %% k
-[ k, status ] = str2double(args{6});
-if status ~= 0
-  error("Wrong number of clusters '%s'", args{6})
-endif
+k = parse_double(args{6}, "number of clusters");
 
 %% Seed
-[ seed, status ] = str2double(args{7});
-if status ~= 0
-  error("Wrong seed '%s'", args{7});
-endif
+seed = parse_double(args{7}, "seed");
 
 %% Output
 if length(args) >= 8
