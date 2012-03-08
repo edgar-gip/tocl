@@ -99,7 +99,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
 
   %% Display final output
   if this.verbose
-    fprintf(2, " %6d %8g %8g %8g\n", i, log_like, change);
+    fprintf(2, " %6d %8g %8g\n", i, log_like, change);
   endif
 
   %% Plot

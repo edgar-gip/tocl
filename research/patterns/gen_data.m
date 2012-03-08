@@ -120,7 +120,7 @@ endfunction
 %%%%%%%%%%%%%%%%%%%%%%%
 
 %% Distributions
-enum P_BERNOULLI P_GAUSSIAN P_SPHERICAL P_UNIFORM
+%% enum P_BERNOULLI P_GAUSSIAN P_SPHERICAL P_UNIFORM
 
 %% Generate uniform
 function [ data ] = gen_uniform(dims, size, mean, var)

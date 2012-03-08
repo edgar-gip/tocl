@@ -1,6 +1,7 @@
 %% -*- mode: octave; -*-
 
 %% Gaussian distribution EM clustering
+%% Axis-aligned variance version
 %% Expectation
 
 %% Author: Edgar Gonzalez
@@ -9,7 +10,8 @@ function [ expec, log_like ] = expectation(this, data)
 
   %% Check arguments
   if nargin() ~= 2
-    usage("[ expec, log_like ] = @GaussianEMModel/expectation(this, data)");
+    usage(cstrcat("[ expec, log_like ] =", ...
+		  " @AlignedGaussianEMModel/expectation(this, data)"));
   endif
 
   %% Number of data
@@ -25,7 +27,7 @@ function [ expec, log_like ] = expectation(this, data)
     cdata = data - this.mu(:, c) * ones(1, n_data);
 
     %% Distance
-    dist = sum(cdata .* (this.isigma(:, :, c) * cdata), 1);
+    dist = sum(cdata .* (diag(this.isigma(:, c)) * cdata), 1);
 
     %% Find it
     expec(c, :) -= 0.5 * dist;

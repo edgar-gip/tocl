@@ -29,6 +29,9 @@ endfunction
 %% Private functions %%
 %%%%%%%%%%%%%%%%%%%%%%%
 
+%% Distributions
+%% enum P_BERNOULLI P_GAUSSIAN P_SPHERICAL P_UNIFORM
+
 %% Uniform background
 function [ data, truth, desc ] = data_unibg(dims, extra)
   %% Generate it
