@@ -47,6 +47,10 @@ function [ this ] = KMD(fg_component, bg_component, opts = struct())
   %% Default -> 1
   this.change_threshold = getfielddef(opts, "change_threshold", 1);
 
+  %% Include a priori correction
+  %% Default -> true
+  this.apriori_correction = getfielddef(opts, "apriori_correction", true());
+
   %% Verbose
   %% Default -> false
   this.verbose = getfielddef(opts, "verbose", false());

@@ -12,9 +12,12 @@ MKOCTFILE = mkoctfile
 # Octave version
 OCTAVE_VERSION = \
   $(shell octave --version | head -n 1 | \
-    sed 's/^.\+\([[:digit:]]\.[[:digit:]]\)\.[[:digit:]]$$/\1/')
-OCTAVE_IS_3_4  = $(shell test "x$(OCTAVE_VERSION)" = "x3.4" && echo "true")
-OCTFLAGS_VER   = $(if $(OCTAVE_IS_3_4), -DOCTAVE_3_4)
+    sed -e 's/^.\+\([[:digit:]]\+\.[[:digit:]]\+\)\.[[:digit:]]\+$$/\1/')
+OCTAVE_MAJOR = \
+  $(shell echo "$(OCTAVE_VERSION)" | sed -e 's/\.[[:digit:]]\+$$//')
+OCTAVE_MINOR = \
+  $(shell echo "$(OCTAVE_VERSION)" | sed -e 's/^[[:digit:]]\+\.//')
+OCTFLAGS_VER = -DOCTAVE_MAJOR=$(OCTAVE_MAJOR) -DOCTAVE_MINOR=$(OCTAVE_MINOR)
 
 # Flags
 OCTFLAGS = -Wall -Wextra $(OCTFLAGS_VER)

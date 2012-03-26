@@ -1,4 +1,4 @@
-%% Copyright (C) 2011 Edgar Gonzàlez i Pellicer <edgar.gip@gmail.com>
+%% Copyright (C) 2012 Edgar Gonzàlez i Pellicer <edgar.gip@gmail.com>
 %%
 %% This file is part of octopus-0.1.
 %%
@@ -17,28 +17,20 @@
 %% <http://www.gnu.org/licenses/>.
 
 %% -*- texinfo -*-
-%% @deftypefn {Function File} {[ @var{value} ] =} parse_double(@var{string}, @var{label})
-%% Convenience function to parse a double value and notify errors
+%% @deftypefn {Function File} {[ @var{major}, @var{minor}, @var{micro} ] =} octave_version()
+%% Wrapper around the version() function
 %% @end deftypefn
 
-%% Parse a double
-function [ value ] = parse_double(string, label = "value")
+%% Wrapper around the version() function
+function [ major, minor, micro ] = octave_version()
 
   %% Which version
-  [ major, minor ] = octave_version();
-  if major > 3 || (major == 3 && minor >= 4)
-    %% 3.4+ API
-    value  = str2double(string);
-    status = isnan(value) && ~strcmpi(string, "nan");
-  else
-    %% Legacy API
-    [ value, status ] = str2double(string);
-  endif
+  parts = strsplit(version(), ".");
 
-  %% Status
-  if status ~= 0
-    error("Wrong %s '%s'", label, string);
-  endif
+  %% Return the parts
+  major = str2double(parts{1});
+  minor = str2double(parts{2});
+  micro = str2double(parts{3});
 endfunction
 
 %% Local Variables:

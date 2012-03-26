@@ -93,7 +93,12 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
       fg_ll = log_likelihood(fg_c, data(:, fg_idxs));
 
       %% Which are below it?
-      out_idxs = fg_idxs(find(fg_lp + fg_ll < bg_lp + bg_ll(fg_idxs)));
+      if this.apriori_correction
+	out_idxs = fg_idxs(find(fg_lp + fg_ll < bg_lp + bg_ll(fg_idxs)));
+      else
+	%% Original (Ando, 2007) implementation
+	out_idxs = fg_idxs(find(fg_ll < bg_ll(fg_idxs)));
+      end
 
       %% Remove
       fg_idxs = setdiff(fg_idxs, out_idxs);

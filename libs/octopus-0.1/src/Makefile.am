@@ -33,6 +33,10 @@ endif
 if ISTREAM_MODULE
 noinst_DATA  += istream_open.oct
 istream_open_LDADD = -lbz2 -lz
+istream_open_CPPFLAGS = -DUSE_OCTAVE_ALLOCATOR
+
+istream_open.oct: istream_open.cc
+	$(MKOCTFILE) $(istream_open_CPPFLAGS) $(CPPFLAGS) $(istream_open_OCTFLAGS) $(DEFS) $^ $(LDFLAGS) $(istream_open_LDADD)
 endif
 
 

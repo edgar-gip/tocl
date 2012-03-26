@@ -14,7 +14,7 @@ _affinity(Matrix& _aff, const Matrix& _co_occ, const RowVector& _truth) {
   octave_idx_type n_clusters = octave_idx_type(_truth.max());
 
   // Resize output
-#ifdef OCTAVE_3_4
+#if OCTAVE_MAJOR > 3 || (OCTAVE_MAJOR == 3 && OCTAVE_MINOR >= 4)
   _aff.resize(n_clusters, n_clusters, 0.0);
 #else
   _aff.resize_fill(n_clusters, n_clusters, 0.0);
