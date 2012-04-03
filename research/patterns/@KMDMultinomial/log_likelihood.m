@@ -17,5 +17,5 @@ function [ log_like ] = log_likelihood(this, data)
   fnorm = factorial_normalization(data);
 
   %% Find it
-  log_like = fnorm .* (this.log_theta * data);
+  log_like = fnorm .+ (this.log_theta * data);
 endfunction
