@@ -8,23 +8,20 @@
     @author Edgar Gonzàlez i Pellicer
 */
 
-/// Null pointer
-#define ttcl_nullptr (void*)(0)
-
 /// printf()-like Format Check
 #ifdef __GNUC__
-#define ttcl_printf_check(str_idx, par_idx)		\
+#define TTCL_PRINTF_CHECK(str_idx, par_idx)		\
   __attribute__((format(printf, str_idx, par_idx)))
 #else
-#define ttcl_printf_check()
+#define TTCL_PRINTF_CHECK()
 #endif
 
 /// Import type
-#define import_type(class, type)		\
+#define TTCL_IMPORT_TYPE(class, type)		\
   typedef typename class::type type
 
 /// Import and rename type
-#define import_r_type(class, type, newtype)	\
+#define TTCL_IMPORT_R_TYPE(class, type, newtype)	\
   typedef typename class::type newtype
 
 #endif

@@ -99,7 +99,7 @@ namespace ttcl {
     /** printf-style interpolation
      */
     exception(const std::string& _file, uint _line_no,
-	      const char* _format, ...) ttcl_printf_check(4, 5) :
+	      const char* _format, ...) TTCL_PRINTF_CHECK(4, 5) :
 #ifdef _EXECINFO_H
       message_(), file_(_file), line_no_(_line_no),
       addresses_(0), functions_(0) {
@@ -335,16 +335,16 @@ namespace ttcl {
 }
 
 /// Throw an exception
-#define ttcl_fire(...)						\
+#define TTCL_FIRE(...)						\
   throw ttcl::exception(__FILE__, __LINE__, __VA_ARGS__)
 
 /// TODO
-#define ttcl_todo\
-  ttcl_fire("%s not implemented", __PRETTY_FUNCTION__)
+#define TTCL_TODO						\
+  TTCL_FIRE("%s not implemented", __PRETTY_FUNCTION__)
 
 /// Virtual
-#define ttcl_pseudovirtual\
-  ttcl_fire("%s pseudovirtual version called", __PRETTY_FUNCTION__)
+#define TTCL_PSEUDOVIRTUAL						\
+  TTCL_FIRE("%s pseudovirtual version called", __PRETTY_FUNCTION__)
 
 #endif
 
