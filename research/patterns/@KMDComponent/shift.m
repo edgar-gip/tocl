@@ -11,7 +11,7 @@ function [ new, idx ] = shift(this, data, tsize)
 
   %% Check arguments
   if ~any(nargin() ~= [ 2, 3 ])
-    usage("[ l_p ] = @KMDComponent/readd(this, data [, tsize])");
+    usage("[ l_p ] = @KMDComponent/shift(this, data [, tsize])");
   endif
 
   %% Size
