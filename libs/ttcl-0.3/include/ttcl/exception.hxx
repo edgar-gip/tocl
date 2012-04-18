@@ -8,9 +8,9 @@
     @author Edgar Gonzalez i Pellicer
 */
 
-#ifdef __linux__
+#ifdef TTCL_EXCEPTION_BACKTRACE
 # include <execinfo.h>
-# ifdef __GNUC__
+# ifdef TTCL_EXCEPTION_DEMANGLE
 #  include <cxxabi.h>
 # endif
 #endif
@@ -48,7 +48,7 @@ namespace ttcl {
     /// Exception source line number
     uint line_no_;
 
-#ifdef _EXECINFO_H
+#ifdef TTCL_EXCEPTION_BACKTRACE
     /// Backtrace addresses
     void** addresses_;
 
@@ -67,7 +67,7 @@ namespace ttcl {
     */
     exception(const std::string& _file, uint _line_no,
 	      const std::string& _message) :
-#ifdef _EXECINFO_H
+#ifdef TTCL_EXCEPTION_BACKTRACE
       message_(_message), file_(_file), line_no_(_line_no),
       addresses_(0), functions_(0) {
       // Get the backtrace
@@ -84,7 +84,7 @@ namespace ttcl {
     */
     exception(const std::string& _file, uint _line_no,
 	      const boost::format& _message) :
-#ifdef _EXECINFO_H
+#ifdef TTCL_EXCEPTION_BACKTRACE
       message_(_message.str()), file_(_file), line_no_(_line_no),
       addresses_(0), functions_(0) {
       // Get the backtrace
@@ -100,7 +100,7 @@ namespace ttcl {
      */
     exception(const std::string& _file, uint _line_no,
 	      const char* _format, ...) TTCL_PRINTF_CHECK(4, 5) :
-#ifdef _EXECINFO_H
+#ifdef TTCL_EXCEPTION_BACKTRACE
       message_(), file_(_file), line_no_(_line_no),
       addresses_(0), functions_(0) {
       // Get the backtrace
@@ -123,7 +123,7 @@ namespace ttcl {
   protected:
     /// Non-message specifying constructor
     exception(const std::string& _file, uint _line_no) :
-#ifdef _EXECINFO_H
+#ifdef TTCL_EXCEPTION_BACKTRACE
       message_(), file_(_file), line_no_(_line_no),
       addresses_(0), functions_(0) {
       // Get the backtrace
@@ -133,7 +133,7 @@ namespace ttcl {
 #endif
     }
 
-#ifdef _EXECINFO_H
+#ifdef TTCL_EXCEPTION_BACKTRACE
     /// Get the backtrace
     void get_backtrace() {
       // Get the backtrace
@@ -161,7 +161,7 @@ namespace ttcl {
 	throw std::bad_alloc();
       }
 
-# ifdef _CXXABI_H
+# ifdef TTCL_EXCEPTION_DEMANGLE
       // Demangle each
       for (int i = 0; i < n_filled_; ++i) {
 	// Demangled name
@@ -221,7 +221,7 @@ namespace ttcl {
     exception(const exception& _other) :
       std::exception(_other), message_(_other.message_),
       file_(_other.file_), line_no_(_other.line_no_) {
-#ifdef _EXECINFO_H
+#ifdef TTCL_EXCEPTION_BACKTRACE
       // How many filled?
       n_filled_ = _other.n_filled_;
 
@@ -242,7 +242,7 @@ namespace ttcl {
 	throw std::bad_alloc();
       }
 
-# ifdef _CXXABI_H
+# ifdef TTCL_EXCEPTION_DEMANGLE
       // Duplicate each function name
       for (int i = 0; i < n_filled_; ++i)
 	functions_[i] = strdup(_other.functions_[i]);
@@ -255,8 +255,8 @@ namespace ttcl {
 
     /// Destructor
     virtual ~exception() throw () {
-#ifdef _EXECINFO_H
-# ifdef _CXXABI_H
+#ifdef TTCL_EXCEPTION_BACKTRACE
+# ifdef TTCL_EXCEPTION_DEMANGLE
       // Free each demangled name
       for (uint i = 0; i < n_filled_; ++i)
 	std::free(functions_[i]);
@@ -307,7 +307,8 @@ namespace ttcl {
     virtual void display(std::ostream& _os = std::cerr) const {
       _os << message_ << " in " << file_
 	  << ":" << line_no_ << std::endl;
-#ifdef _EXECINFO_H
+
+#ifdef TTCL_EXCEPTION_BACKTRACE
       for (int i = 0; i < n_filled_; ++i)
 	_os << " from " << functions_[i] << " ["
 	    << addresses_[i] << ']' << std::endl;
@@ -318,9 +319,13 @@ namespace ttcl {
     virtual const char* what() const
       throw() {
       static char buffer[TTCL_WHAT_SIZE];
-      int printed = snprintf(buffer, TTCL_WHAT_SIZE - 1, "%s in %s:%d",
-			     message_.c_str(), file_.c_str(), line_no_);
-#ifdef _EXECINFO_H
+#ifdef TTCL_EXCEPTION_BACKTRACE
+      int printed =
+#endif
+	snprintf(buffer, TTCL_WHAT_SIZE - 1, "%s in %s:%d",
+		 message_.c_str(), file_.c_str(), line_no_);
+
+#ifdef TTCL_EXCEPTION_BACKTRACE
       int i = 0;
       while (printed < TTCL_WHAT_SIZE - 1 and
 	     i < n_filled_) {
@@ -329,6 +334,7 @@ namespace ttcl {
 	++i;
       }
 #endif
+
       return buffer;
     }
   };
