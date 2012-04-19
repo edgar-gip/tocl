@@ -10,10 +10,10 @@
 
 /// printf()-like Format Check
 #ifdef __GNUC__
-#define TTCL_PRINTF_CHECK(str_idx, par_idx)		\
+# define TTCL_PRINTF_CHECK(str_idx, par_idx)		\
   __attribute__((format(printf, str_idx, par_idx)))
 #else
-#define TTCL_PRINTF_CHECK()
+# define TTCL_PRINTF_CHECK()
 #endif
 
 /// Import type
