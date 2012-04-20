@@ -15,8 +15,6 @@
 #include <iostream>
 #include <string>
 
-#include <boost/format.hpp>
-
 #include <ttcl/global.hxx>
 #include <ttcl/types.hxx>
 
@@ -38,21 +36,6 @@ exception(const string& _file, ttcl::uint _line_no,
   message_(_message), file_(_file), line_no_(_line_no) {
 #endif
 }
-
-/// Constructor from a boost::format
-ttcl::exception::
-exception(const string& _file, ttcl::uint _line_no,
-	  const boost::format& _message) :
-#ifdef TTCL_EXCEPTION_BACKTRACE
-  message_(_message.str()), file_(_file), line_no_(_line_no),
-  addresses_(0), functions_(0) {
-  // Get the backtrace
-  get_backtrace();
-}
-#else
-  message_(_message.str()), file_(_file), line_no_(_line_no) {
-}
-#endif
 
 /// Constructor from a char* and a variable argument list
 ttcl::exception::

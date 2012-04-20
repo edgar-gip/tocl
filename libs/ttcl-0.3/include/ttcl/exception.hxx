@@ -13,8 +13,6 @@
 #include <iostream>
 #include <string>
 
-#include <boost/format.hpp>
-
 #include <ttcl/global.hxx>
 #include <ttcl/types.hxx>
 
@@ -57,14 +55,6 @@ namespace ttcl {
     */
     exception(const std::string& _file, uint _line_no,
 	      const std::string& _message);
-
-    /// Constructor from a boost::format
-    /** @param _file    Exception source file
-	@param _line_no Exception source line number
-	@param _message Description message
-    */
-    exception(const std::string& _file, uint _line_no,
-	      const boost::format& _message);
 
     /// Constructor from a char* and a variable argument list
     /** printf-style interpolation
