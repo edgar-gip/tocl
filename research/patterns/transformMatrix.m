@@ -56,7 +56,8 @@ def_opts           = struct();
 def_opts.freq_th   = [];
 def_opts.mi_cheat  = false();
 def_opts.mi_feats  = [];
-def_opts.normalize = false();
+def_opts.norm_norm = false();
+def_opts.norm_sum  = false();
 def_opts.sparse    = false();
 def_opts.tf_idf    = false();
 def_opts.verbose   = false();
@@ -67,7 +68,8 @@ def_opts.verbose   = false();
 		"freq-th=i",  "freq_th",   ...
 		"mi-cheat!",  "mi_cheat",  ...
 		"mi-feats=i", "mi_feats",  ...
-		"normalize!", "normalize", ...
+		"norm-norm!", "norm_norm", ...
+		"norm-sum!",  "norm_sum",  ...
 		"sparse!",    "sparse",    ...
 		"tf-idf!",    "tf_idf",    ...
 		"verbose!",   "verbose");
@@ -209,16 +211,6 @@ if ~isempty(cmd_opts.mi_feats) && n_feats > cmd_opts.mi_feats
   endif
 endif
 
-%% Normalize (as a distribution)
-if cmd_opts.normalize
-  %% Find the norm
-  norm = sum(data, 1);
-
-  %% Normalize non-zeros
-  nz = (norm ~= 0);
-  data(:, nz) ./= ones(n_feats, 1) * norm(nz);
-endif
-
 %% Find tf-idf
 if cmd_opts.tf_idf
   %% Document frequency
@@ -226,7 +218,31 @@ if cmd_opts.tf_idf
   idf = log(n_data ./ df);
 
   %% Scale
-  data .*= idf * ones(1, n_data);
+  data = sparse(diag(idf)) * data;
+endif
+
+%% Normalize
+if cmd_opts.norm_sum
+  %% Find the norm
+  norm = sum(data, 1);
+
+  %% Invert non-zeros
+  nz       = (norm ~= 0);
+  norm(nz) = 1 ./ norm(nz);
+
+  %% Scale
+  data *= sparse(diag(norm));
+
+elseif cmd_opts.norm_norm
+  %% Find the norm
+  norm = sqrt(sum(data .* data, 1));
+
+  %% Invert non-zeros
+  nz       = (norm ~= 0);
+  norm(nz) = 1 ./ norm(nz);
+
+  %% Scale
+  data *= sparse(diag(norm));
 endif
 
 %% Save
