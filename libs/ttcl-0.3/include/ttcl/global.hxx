@@ -20,8 +20,20 @@
 #define TTCL_IMPORT_TYPE(class, type)		\
   typedef typename class::type type
 
+/// Import type
+/** Outside a template
+ */
+#define TTCL_IMPORT_TYPE_OT(class, type)	\
+  typedef class::type type
+
 /// Import and rename type
 #define TTCL_IMPORT_R_TYPE(class, type, newtype)	\
   typedef typename class::type newtype
+
+/// Import and rename type
+/** Outside a template
+ */
+#define TTCL_IMPORT_R_TYPE_OT(class, type, newtype)	\
+  typedef class::type newtype
 
 #endif
