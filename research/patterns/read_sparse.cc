@@ -7,7 +7,7 @@
 #include <utility>
 #include <vector>
 
-#include <ttcl/io/anystream.hxx>
+#include <ttcl/io/ianystream.hxx>
 
 #include <octave/oct.h>
 

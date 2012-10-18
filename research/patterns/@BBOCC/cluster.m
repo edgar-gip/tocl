@@ -82,7 +82,6 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Model
   model = BregmanBallModel(this.divergence, centroid, radius);
 
-
   %% Info
   info            = struct();
   info.iterations = i;

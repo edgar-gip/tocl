@@ -11,7 +11,7 @@
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 // FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 // for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with octopus; see the file COPYING.  If not, see
 // <http://www.gnu.org/licenses/>.
@@ -23,7 +23,7 @@
 
 #include <octave/oct.h>
 
-#include <ttcl/io/anystream.hxx>
+#include <ttcl/io/ianystream.hxx>
 
 #include "octave_c_ptr_value.h"
 
@@ -83,7 +83,7 @@ Open a istream\n\
   // Return the result
   return result;
 }
-  
+
 
 /******************************/
 /* Read a line from a istream */
@@ -121,7 +121,7 @@ Read a line from a istream\n\
 
     // Result
     result.resize(nargout);
-    
+
     // OK?
     if (is->data().good())
       result(0) = line;

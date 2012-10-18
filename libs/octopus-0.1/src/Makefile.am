@@ -32,7 +32,7 @@ endif
 # istream
 if ISTREAM_MODULE
 noinst_DATA  += istream_open.oct
-istream_open_LDADD = -lbz2 -lz
+istream_open_LDADD = -lttcl -lbz2 -lz
 istream_open_CPPFLAGS = -DUSE_OCTAVE_ALLOCATOR
 
 istream_open.oct: istream_open.cc

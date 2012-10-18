@@ -10,7 +10,7 @@
 
 #include <boost/regex.hpp>
 
-#include <ttcl/io/anystream.hxx>
+#include <ttcl/io/ianystream.hxx>
 
 
 /*************************************/
@@ -33,7 +33,7 @@ Read the seeds from a result file\n\
       print_usage();
       return octave_value_list();
     }
-  
+
     // Get file
     if (not args(0).is_string())
       throw "file should be a string";
@@ -64,7 +64,7 @@ Read the seeds from a result file\n\
 	}
       }
     }
-	
+
     // Convert to matrix
     Matrix m(2, seeds.size() / 2);
     std::copy(seeds.begin(), seeds.end(), m.fortran_vec());

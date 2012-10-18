@@ -9,7 +9,7 @@
 
 #include <boost/regex.hpp>
 
-#include <ttcl/io/anystream.hxx>
+#include <ttcl/io/ianystream.hxx>
 
 #include <octave/oct.h>
 
@@ -118,7 +118,7 @@ Read a the contents of a redo file section from a file\n\
 	}
       }
     }
-	
+
     // Convert to an octave Matrix
     Matrix m(information.size(), redo_info::n_fields);
     for (int i = 0; i < information.size(); ++i)

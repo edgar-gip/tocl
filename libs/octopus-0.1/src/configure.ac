@@ -36,8 +36,8 @@ AC_CHECK_HEADERS([boost/regex.hpp],
 		 [has_boost_regex_hpp=true])
 AC_CHECK_HEADERS([CGAL/QP_models.h],
 	         [has_cgal_qp_models=true])
-AC_CHECK_HEADERS([ttcl/io/anystream.hxx],
-		 [has_ttcl_io_anystream=true])
+AC_CHECK_HEADERS([ttcl/io/ianystream.hxx],
+		 [has_ttcl_io_ianystream=true])
 AC_CHECK_HEADERS([Rmath.h],
                  [has_rmath_h=true],[],
 		 [#define MATHLIB_STANDALONE
@@ -54,7 +54,7 @@ OCTAVE_RESIZE_AND_FILL
 AM_CONDITIONAL([IN_CONVEX_HULL_MODULE],
 	       [test x$has_cgal_qp_models = xtrue])
 AM_CONDITIONAL([ISTREAM_MODULE],
-	       [test x$has_libbz2 = xtrue -a x$has_libz = xtrue -a x$has_ttcl_io_anystream = xtrue])
+	       [test x$has_libbz2 = xtrue -a x$has_libz = xtrue -a x$has_ttcl_io_ianystream = xtrue])
 AM_CONDITIONAL([QUADPROG_CGAL_MODULE],
 	       [test x$has_cgal_qp_models = xtrue])
 AM_CONDITIONAL([REGEX_MODULE],

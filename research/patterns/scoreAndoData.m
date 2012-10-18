@@ -15,6 +15,30 @@ pkg load octopus;
 source(binrel("andoElements.m"));
 
 
+%%%%%%%%%%%%%%%%
+%% Evaluation %%
+%%%%%%%%%%%%%%%%
+
+function [ n_pos_cl, prc, rec, nrec, f1 ] = eval_expec(expec, struth, n_data)
+  %% Positive cluster
+  pos_cl = find(sum(expec, 1)); n_pos_cl = length(pos_cl);
+
+  %% Truth
+  pos_tr = find(struth); n_pos_tr = length(pos_tr);
+  n_neg_tr = n_data - n_pos_tr;
+
+  %% The good (and the bad) ones
+  n_pos_pos = length(intersect(pos_cl, pos_tr));
+  n_neg_pos = n_pos_cl - n_pos_pos;
+
+  %% Prc/Rec/F1
+  prc  = n_pos_pos / n_pos_cl;
+  rec  = n_pos_pos / n_pos_tr;
+  nrec = n_neg_pos / n_neg_tr;
+  f1   = 2 * prc * rec / (prc + rec);
+endfunction
+
+
 %%%%%%%%%%
 %% Main %%
 %%%%%%%%%%
@@ -205,29 +229,29 @@ if getfield(methods, met, "scor")
     endif
   endfor
 
+  %% Evaluate the expectation?
+  if getfield(methods, met, "xpec")
+    %% Eval
+    [ n_pos_cl, prc, rec, nrec, f1 ] = eval_expec(expec, struth, n_data);
+
+    %% Display
+    fprintf(fout, "%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
+	    "Model", n_pos_cl, prc, rec, nrec, f1);
+  endif
+
 else
   %% Non-scored method
 
-  %% Positive cluster
-  pos_cl = find(sum(expec, 1)); n_pos_cl = length(pos_cl);
-
-  %% Truth
-  pos_tr = find(struth); n_pos_tr = length(pos_tr);
-  n_neg_tr = n_data - n_pos_tr;
-
-  %% The good (and the bad) ones
-  n_pos_pos = length(intersect(pos_cl, pos_tr));
-  n_neg_pos = n_pos_cl - n_pos_pos;
-
-  %% Prc/Rec/F1 curves
-  prc  = n_pos_pos / n_pos_cl;
-  rec  = n_pos_pos / n_pos_tr;
-  nrec = n_neg_pos / n_neg_tr;
-  f1  = 2 * prc * rec / (prc + rec);
+  %% Eval
+  [ n_pos_cl, prc, rec, nrec, f1 ] = eval_expec(expec, struth, n_data);
 
   %% ROC is a quadrilateral
   %% AUC = rec * nrec / 2 + rec * (1 - nrec) + (1 - rec) * (1 - nrec) / 2
   auc = (1 + rec - nrec) / 2;
+
+  %% Truth
+  pos_tr = find(struth); n_pos_tr = length(pos_tr);
+  n_neg_tr = n_data - n_pos_tr;
 
   %% All Prc/F1
   all_prc = n_pos_tr / n_data;
