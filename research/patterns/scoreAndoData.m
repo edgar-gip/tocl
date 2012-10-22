@@ -103,7 +103,11 @@ if length(mextra) ~= req_args
 endif
 
 %% k
-k = parse_double(args{6}, "number of clusters");
+if length(args{6}) == 0
+  k = [];
+else
+  k = parse_double(args{6}, "number of clusters");
+endif
 
 %% Seed
 seed = parse_double(args{7}, "seed");

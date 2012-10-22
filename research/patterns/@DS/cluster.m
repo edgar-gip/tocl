@@ -13,9 +13,9 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
 		  "@DS/cluster(this, data [, k [, expec_0]]])"));
   endif
 
-  %% The number of clusters must be 1
-  if nargin() >= 3 && k ~= 1
-    usage("k must be 1 if given");
+  %% Warn that k is ignored
+  if nargin() >= 3 && ~isempty(k)
+    usage("k is ignored");
   endif
 
   %% Warn that expec_0 is ignored

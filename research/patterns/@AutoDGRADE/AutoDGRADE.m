@@ -1,7 +1,7 @@
 %% -*- mode: octave; -*-
 
-%% Density Gradient Enumeration (DGRADE)
-%% From:
+%% Density Gradient Enumeration (DGRADE) with automatical s_one tuning.
+%% Section 9.3, scheme 3 from:
 %%   Joydeep Gosh, Gunjan Gupta
 %%   "Bregman Bubble Clustering: A Robust Framework for Mining Dense
 %%    Clusters" in
@@ -13,11 +13,11 @@
 
 %% Author: Edgar Gonzalez
 
-function [ this ] = DGRADE(divergence, opts = struct())
+function [ this ] = AutoDGRADE(divergence, opts = struct())
 
   %% Check arguments
   if ~any(nargin() == [ 1, 2 ])
-    usage("[ this ] = DGRADE(divergence [, opts])");
+    usage("[ this ] = AutoDGRADE(divergence [, opts])");
   endif
 
   %% This object
@@ -30,16 +30,12 @@ function [ this ] = DGRADE(divergence, opts = struct())
   %% Default -> 0.1
   this.size_ratio = getfielddef(opts, "size_ratio", 0.1);
 
-  %% Smoothing parameter
-  %% Default -> 5
-  this.s_one = getfielddef(opts, "s_one", 5);
-
   %% Verbose
   %% Default -> false
   this.verbose = getfielddef(opts, "verbose", false());
 
   %% Bless
   %% And add inheritance
-  this = class(this, "DGRADE", ...
+  this = class(this, "AutoDGRADE", ...
 	       Simple());
 endfunction

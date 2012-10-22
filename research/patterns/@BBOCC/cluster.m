@@ -60,8 +60,8 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
     [ sort_divs, sort_indices ] = sort(divs);
 
     %% New cluster and centroid
-    radius   = sort_divs(target_size);
-    cluster  = find(divs <= radius);
+    radius  = sort_divs(target_size);
+    cluster = find(divs <= radius);
 
     %% Expectation
     size  = length(cluster);
