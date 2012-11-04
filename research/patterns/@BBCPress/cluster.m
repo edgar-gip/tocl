@@ -112,3 +112,4 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Info
   info = struct();
 endfunction
+
