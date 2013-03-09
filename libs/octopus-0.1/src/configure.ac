@@ -5,15 +5,16 @@ AC_INIT([octopus], [0.1], [egonzalez@lsi.upc.edu])
 AC_CONFIG_AUX_DIR(config)
 AC_CONFIG_SRCDIR([cell_cat.cc])
 AC_CONFIG_HEADERS([config.h])
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([foreign])
 
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_F77
-AC_CHECK_PROGS([OCTAVE], [octave])
-AC_CHECK_PROGS([MKOCTFILE], [mkoctfile])
-
+AC_CHECK_PROGS([OCTAVE], [octave]
+	       [AC_MSG_ERROR([Cannot find octave])])
+AC_CHECK_PROGS([MKOCTFILE], [mkoctfile],
+	       [AC_MSG_ERROR([Cannot find mkoctfile])])
 
 # C
 AC_LANG(C)
