@@ -27,5 +27,5 @@ function [ this ] = Gaussian1DModel(k, alpha, mean, var)
   %% Bless
   %% And add inheritance
   this = class(this, "Gaussian1DModel", ...
-	       Simple());
+               Simple());
 endfunction

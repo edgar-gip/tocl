@@ -48,7 +48,7 @@ Possible normalization values: 'no', 'sum', 'euclid'\n\
       print_usage("cread_sparse");
     }
   }
-  
+
   // Open the file
   strcpy(filename, args(0).string_value().c_str());
   FILE* file = fopen(filename, "r");
@@ -63,14 +63,14 @@ Possible normalization values: 'no', 'sum', 'euclid'\n\
     fclose(file);
     return octave_value_list();
   }
-  
+
   // Parse
   int nrows, ncols, nnz;
   if (sscanf(buffer, "%d %d %d", &nrows, &ncols, &nnz) < 3) {
     error("cread_sparse: ill formed header '%s' at %s:1",
-	  buffer, filename);
+          buffer, filename);
     fclose(file);
-  }  
+  }
 
   // Now, reserve three vectors
   ColumnVector rows(nnz);
@@ -79,7 +79,7 @@ Possible normalization values: 'no', 'sum', 'euclid'\n\
 
   // Current filling position
   int i = 0;
-  
+
   // Current row
   int r = 1;
 
@@ -103,55 +103,55 @@ Possible normalization values: 'no', 'sum', 'euclid'\n\
       // Skip blank
       while (*p && isspace(*p)) ++p;
       if (!*p) break;
-      
+
       // Keep the pos
       q = p++;
       while(*p && !isspace(*p)) ++p;
 
       // Finished?
       if (!*p) {
-	error("cread_sparse: ill formed line (no value) at %s:%d",
-	      filename, r + 1);
-	fclose(file);
-	return octave_value_list();
+        error("cread_sparse: ill formed line (no value) at %s:%d",
+              filename, r + 1);
+        fclose(file);
+        return octave_value_list();
       }
 
       // Parse
       *p++ = '\0';
       col = strtoul(q, &perr, 10);
       if (*perr) {
-	error("cread_sparse: ill formed line (wrong column format '%s') at %s:%d",
-	      q, filename, r + 1);
-	fclose(file);
-	return octave_value_list();
+        error("cread_sparse: ill formed line (wrong column format '%s') at %s:%d",
+              q, filename, r + 1);
+        fclose(file);
+        return octave_value_list();
       }
 
       // Skip blank
       while (*p && isspace(*p)) ++p;
       if (!*p) {
-	error("cread_sparse: ill formed line (no value) at %s:%d",
-	      filename, r + 1);
-	fclose(file);
-	return octave_value_list();
+        error("cread_sparse: ill formed line (no value) at %s:%d",
+              filename, r + 1);
+        fclose(file);
+        return octave_value_list();
       }
-      
+
       // Keep the pos
       q = p++;
       while(*p && !isspace(*p)) ++p;
-      
+
       if (!*p) {
-	more = false;
+        more = false;
       } else {
-	*p++ = '\0';
+        *p++ = '\0';
       }
 
       // Parse
       val = strtod(q, &perr);
       if (*perr) {
-	error("cread_sparse: ill formed line (wrong value format '%s') at %s:%d",
-	      q, filename, r + 1);
-	fclose(file);
-	return octave_value_list();
+        error("cread_sparse: ill formed line (wrong value format '%s') at %s:%d",
+              q, filename, r + 1);
+        fclose(file);
+        return octave_value_list();
       }
 
       // Debug
@@ -174,27 +174,27 @@ Possible normalization values: 'no', 'sum', 'euclid'\n\
     // Normalization
     if (normMode != nmode_no) {
       if (normMode == nmode_euclid)
-	total = sqrt(total);
+        total = sqrt(total);
 
       for (int ti = startI; ti < i; ++ti)
-	vals(ti) /= total;
+        vals(ti) /= total;
     }
 
     // Next row
     ++r;
   }
- 
+
   // Error or EOF?
   if (ferror(file)) {
     error("cread_sparse: input error at %s:%d",
-	  filename, r + 1);
+          filename, r + 1);
     fclose(file);
     return octave_value_list();
   }
 
   // Free
   fclose(file);
-  
+
   // Enough data read?
   if (i < nnz) {
     error("cread_sparse: not enough data at %s:%d", filename, r + 1);
@@ -245,24 +245,24 @@ Internal function to help in loading sparse matrices.\n\
     fclose(file);
     return octave_value_list();
   }
-  
+
   // Parse
   int nrows, ncols, nnz;
   if (sscanf(buffer, "%d %d %d", &nrows, &ncols, &nnz) < 3) {
     error("cread_sparse_idf: ill formed header '%s' at %s:1",
-	  buffer, filename);
+          buffer, filename);
     fclose(file);
-  }  
+  }
 
   // Now, reserve four vectors
   vector<int>  rows(nnz, 0);
   vector<int>  cols(nnz, 0);
   ColumnVector vals(nnz);
   vector<int>  df  (ncols, 0);
-  
+
   // Current filling position
   int i = 0;
-  
+
   // Current row
   int r = 1;
 
@@ -282,17 +282,17 @@ Internal function to help in loading sparse matrices.\n\
       // Skip blank
       while (*p && isspace(*p)) ++p;
       if (!*p) break;
-      
+
       // Keep the pos
       q = p++;
       while(*p && !isspace(*p)) ++p;
 
       // Finished?
       if (!*p) {
-	error("cread_sparse_idf: ill formed line (no value) at %s:%d",
-	      filename, r + 1);
-	fclose(file);
-	return octave_value_list();
+        error("cread_sparse_idf: ill formed line (no value) at %s:%d",
+              filename, r + 1);
+        fclose(file);
+        return octave_value_list();
       }
 
       // Parse
@@ -313,11 +313,11 @@ Internal function to help in loading sparse matrices.\n\
         fclose(file);
         return octave_value_list();
       }
-      
+
       // Keep the pos
       q = p++;
       while(*p && !isspace(*p)) ++p;
-      
+
       if (!*p) {
         more = false;
       } else {
@@ -341,43 +341,43 @@ Internal function to help in loading sparse matrices.\n\
       cols[i] = col;
       vals(i) = val;
       ++i;
-      
+
       // Update df
       ++df[col];
     }
-    
+
     // Next row
     ++r;
   }
-  
+
   // Error or EOF?
   if (ferror(file)) {
     error("cread_sparse_idf: input error at %s:%d",
-	  filename, r + 1);
+          filename, r + 1);
     fclose(file);
     return octave_value_list();
   }
-  
+
   // Free
   fclose(file);
-  
+
   // Enough data read?
   if (i < nnz) {
     error("cread_sparse_idf: not enough data at %s:%d", filename, r + 1);
     return octave_value_list();
   }
-  
+
   // TfIdf normalization
   // First, convert idf to what should be
   vector<double> idf;
   idf.reserve(ncols);
-  
+
   double lrows = log(double(nrows));
   for (vector<int>::iterator it = df.begin();
        it != df.end(); ++it) {
     idf.push_back(lrows - log(double(*it)));
   }
-  
+
   // Then, transform and normalize each vector
   // Output colum vectors
   ColumnVector drows(nnz);
@@ -387,25 +387,25 @@ Internal function to help in loading sparse matrices.\n\
   r = rows[0];
   int startI = 0;
   double total = 0.0;
-  
+
   for (i = 0; i < nnz; ++i) {
     if (rows[i] != r) {
       // Find the square root
       total = sqrt(total);
-      
+
       // Normalize
       for (int ti = startI; ti < i; ++ti)
         vals(ti) /= total;
-      
+
       // Reset
       r      = rows[i];
       startI = i;
       total  = 0.0;
     }
-    
+
     // Normalize
     vals(i) *= idf[cols[i]];
-    
+
     // Add it
     total += vals(i);
 
@@ -413,11 +413,11 @@ Internal function to help in loading sparse matrices.\n\
     drows(i) = double(rows[i]);
     dcols(i) = double(cols[i]);
   }
-  
+
   // The last one
   // Find the square root
   total = sqrt(total);
-  
+
   // Normalize
   for (int ti = startI; ti < nnz; ++ti)
     vals(ti) /= total;
@@ -465,13 +465,13 @@ Load the document labels as string matrices.\n\
   map<string, string> doc2cat;
   char docId  [MAX_ID_LENGTH];
   char labelId[MAX_ID_LENGTH];
-  
+
   // Read doc2cat
   int line = 1;
   while(fgets(buffer, MAX_LINE_LENGTH, file)) {
     if (sscanf(buffer, "%s %s", docId, labelId) < 2) {
       error("cread_labels: wrong line format at %s:%d",
-	    filename, line);
+            filename, line);
       return octave_value_list();
     }
 
@@ -489,7 +489,7 @@ Load the document labels as string matrices.\n\
   // Error or EOF?
   if (ferror(file)) {
     error("cread_labels: input error at %s:%d",
-	  filename, line);
+          filename, line);
     fclose(file);
     return octave_value_list();
   }
@@ -504,7 +504,7 @@ Load the document labels as string matrices.\n\
     error("cread_labels: cannot open file %s", filename);
     return octave_value_list();
   }
-  
+
   // Output1 : Category for each document
   string_vector output1;
 
@@ -516,7 +516,7 @@ Load the document labels as string matrices.\n\
   while(fgets(buffer, MAX_LINE_LENGTH, file)) {
     if (sscanf(buffer, "%s", docId) < 1) {
       error("cread_labels: wrong line format at %s:%d",
-	    filename, line);
+            filename, line);
       return octave_value_list();
     }
     output1.append(doc2cat[docId]);
@@ -527,7 +527,7 @@ Load the document labels as string matrices.\n\
   // Error or EOF?
   if (ferror(file)) {
     error("cread_labels: input error at %s",
-	  filename);
+          filename);
     fclose(file);
     return octave_value_list();
   }
@@ -541,7 +541,7 @@ Load the document labels as string matrices.\n\
        it != present.end(); ++it) {
     output2.append(*it);
   }
-  
+
   // Return the cell
   octave_value_list output;
   output.resize(2);
@@ -581,13 +581,13 @@ Load the document labels as a column vector.\n\
   map<string, string> doc2cat;
   char docId  [MAX_ID_LENGTH];
   char labelId[MAX_ID_LENGTH];
-  
+
   // Read doc2cat
   int line = 1;
   while(fgets(buffer, MAX_LINE_LENGTH, file)) {
     if (sscanf(buffer, "%s %s", docId, labelId) < 2) {
       error("read_labels_num: wrong line format at %s:%d",
-	    filename, line);
+            filename, line);
       return octave_value_list();
     }
 
@@ -605,7 +605,7 @@ Load the document labels as a column vector.\n\
   // Error or EOF?
   if (ferror(file)) {
     error("read_labels_num: input error at %s:%d",
-	  filename, line);
+          filename, line);
     fclose(file);
     return octave_value_list();
   }
@@ -620,7 +620,7 @@ Load the document labels as a column vector.\n\
     error("read_labels_num: cannot open file %s", filename);
     return octave_value_list();
   }
-  
+
   // Category for each document
   vector<int> docCats;
 
@@ -635,13 +635,13 @@ Load the document labels as a column vector.\n\
   while(fgets(buffer, MAX_LINE_LENGTH, file)) {
     if (sscanf(buffer, "%s", docId) < 1) {
       error("read_labels_num: wrong line format at %s:%d",
-	    filename, line);
+            filename, line);
       return octave_value_list();
     }
-    
+
     map<string, int>::iterator it =
       present.find(doc2cat[docId]);
-    
+
     if (it == present.end()) {
       // Not found
       present[doc2cat[docId]] = numCats;
@@ -657,7 +657,7 @@ Load the document labels as a column vector.\n\
   // Error or EOF?
   if (ferror(file)) {
     error("read_labels_num: input error at %s",
-	  filename);
+          filename);
     fclose(file);
     return octave_value_list();
   }
@@ -669,7 +669,7 @@ Load the document labels as a column vector.\n\
   ColumnVector output1(docCats.size());
   for (int i = 0; i < docCats.size(); ++i)
     output1(i) = docCats[i];
-  
+
   // Return the cell
   octave_value_list output;
   output.resize(2);
@@ -712,7 +712,7 @@ Load a clustering.\n\
 
   // Current row
   int r = 1;
-  
+
   // Auxiliary vars
   char *p, *q, *perr;
   unsigned long int col;
@@ -727,7 +727,7 @@ Load a clustering.\n\
     // Process
     if (!sscanf(buffer, "%d", &cluster)) {
       error("cread_clustering: ill formed line (not an integer) at %s:%d",
-	    filename, r);
+            filename, r);
       fclose(file);
       return octave_value_list();
     }
@@ -738,22 +738,22 @@ Load a clustering.\n\
 
     // Add it
     clustering.push_back(cluster);
-    
+
     // Next row
     ++r;
   }
-  
+
   // Error or EOF?
   if (ferror(file)) {
     error("cread_clustering: input error at %s:%d",
-	  filename, r);
+          filename, r);
     fclose(file);
     return octave_value_list();
   }
-  
+
   // Free
   fclose(file);
-  
+
   // Output colum vector
   ColumnVector dclust(clustering.size());
 
@@ -761,7 +761,7 @@ Load a clustering.\n\
   for (int i = 0; i < clustering.size(); ++i) {
     dclust(i) = double(clustering[i]);
   }
-  
+
   // Everything seems fine
   octave_value_list output;
   output.resize(2);

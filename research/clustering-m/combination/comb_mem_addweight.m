@@ -5,7 +5,7 @@ function sModel = comb_mem_addweight (inModel, Weights)
   if dummy ~= 1
     error('Should receive a column vector');
   end
-  
+
   %% Set the struct
   sModel         = inModel;
   sModel.kind    = 2;

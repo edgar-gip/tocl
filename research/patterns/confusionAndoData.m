@@ -2,7 +2,7 @@
 
 %% Minority clustering of data
 
-%% Author: Edgar Gonz‡lez i Pellicer
+%% Author: Edgar Gonz√†lez i Pellicer
 
 
 %% Division by zero
@@ -26,13 +26,13 @@ def_opts.fg_only = false();
 %% Parse options
 [ args, opts ] = ...
     get_options(def_opts, ...
-		"fg-only!", "fg_only");
+                "fg-only!", "fg_only");
 
 %% Check parameter length
 if length(args) ~= 7
   error(cstrcat("Wrong number of arguments: Expected [options]", ...
-		" <input> <distance> <d-extra> <method> <m-extra>", ...
-		" <k> <seed>"));
+                " <input> <distance> <d-extra> <method> <m-extra>", ...
+                " <k> <seed>"));
 endif
 
 %% Input file
@@ -65,7 +65,7 @@ mextra = regex_split(args{5}, '(,|\s+,)\s*');
 req_args = getfield(methods, met, "args");
 if length(mextra) ~= req_args
   error("Method '%s' requires %d extra arg(s): %s",
-	met, req_args, getfield(methods, met, "help"));
+        met, req_args, getfield(methods, met, "help"));
 endif
 
 %% k

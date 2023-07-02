@@ -27,5 +27,5 @@ function [ this ] = AlignedGaussianEM(opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "AlignedGaussianEM", ...
-	       EM(opts));
+               EM(opts));
 endfunction

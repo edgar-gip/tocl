@@ -31,7 +31,7 @@ static inline double log_factorial(unsigned int _n) {
 
 // Helper function
 static void find_factorial_normalization(RowVector& _fnorm,
-					 const SparseMatrix& _data) {
+                                         const SparseMatrix& _data) {
   // Sizes
   octave_idx_type n_cols = _data.columns();
 

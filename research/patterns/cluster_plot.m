@@ -2,7 +2,7 @@
 
 %% Plot data
 
-%% Author: Edgar Gonz‡lez i Pellicer
+%% Author: Edgar Gonz√†lez i Pellicer
 
 
 %% (Regular) cluster plot
@@ -27,11 +27,11 @@ function cluster_plot(data, truth, name, fig)
     %% Add their data
     if n_dims == 2
       plots = cell_push(plots, ...
-			data(1, cluster), data(2, cluster), "x");
+                        data(1, cluster), data(2, cluster), "x");
     else %% n_dims == 3
       plots = cell_push(plots, ...
-			data(1, cluster), data(2, cluster), ...
-			data(3, cluster), "x");
+                        data(1, cluster), data(2, cluster), ...
+                        data(3, cluster), "x");
     endif
   endfor
 

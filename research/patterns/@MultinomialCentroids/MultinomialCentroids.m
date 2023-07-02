@@ -21,5 +21,5 @@ function [ this ] = MultinomialCentroids(data_term = 1)
   %% Bless
   %% And add inheritance
   this = class(this, "MultinomialCentroids", ...
-	       Simple());
+               Simple());
 endfunction

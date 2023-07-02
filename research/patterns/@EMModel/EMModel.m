@@ -18,5 +18,5 @@ function [ this ] = EMModel()
   %% Bless
   %% And add inheritance
   this = class(this, "EMModel", ...
-	       Simple());
+               Simple());
 endfunction

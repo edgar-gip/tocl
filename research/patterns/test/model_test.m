@@ -37,13 +37,13 @@ c_ew_rbf = @(data) EWOCS(Voronoi(d_rbf),       struct("ensemble_size", 50));
 
 %% Clusterers set
 clusterers = struct("constr", { c_hy_sqe, c_hy_mah, ...
-			        c_bp_sqe, c_bp_mah, ...
-			        c_ew_sqe, c_ew_mah, c_ew_rbf },         ...
-		    "name",   { "HyperBB - SqE",    "HyperBB - Mah",    ...
-			        "BBCPress/3 - SqE", "BBCPress/3 - Mah", ...
-			        "EWOCS - SqE",      "EWOCS - Mah",      ...
-			        "EWOCS - RBF" }, ...
-		    "k",      {  1, 1, 3, 3, 1, 1, 1 });
+                                c_bp_sqe, c_bp_mah, ...
+                                c_ew_sqe, c_ew_mah, c_ew_rbf },         ...
+                    "name",   { "HyperBB - SqE",    "HyperBB - Mah",    ...
+                                "BBCPress/3 - SqE", "BBCPress/3 - Mah", ...
+                                "EWOCS - SqE",      "EWOCS - Mah",      ...
+                                "EWOCS - RBF" }, ...
+                    "k",      {  1, 1, 3, 3, 1, 1, 1 });
 n_clusterers = length(clusterers);
 
 %% ROC curves
@@ -78,9 +78,9 @@ for i = 1 : n_tries
     %% Circle
     if n_dims == 2
       circle  = variance * [ cos(pi / 4 * (1 : 9)) ; ...
-			     sin(pi / 4 * (1 : 9)) ] + mean * ones(1, 9);
+                             sin(pi / 4 * (1 : 9)) ] + mean * ones(1, 9);
       circles = cell_push(circles, circle(1, :), circle(2, :), "g-",
-			  "linewidth", 2);
+                          "linewidth", 2);
     endif
   endfor
 
@@ -103,8 +103,8 @@ for i = 1 : n_tries
   if n_dims == 2
     figure();
     plot(data(1, pos_tr), data(2, pos_tr), 'g*', ...
-	 data(1, neg_tr), data(2, neg_tr), 'r+', ...
-	 circles{:});
+         data(1, neg_tr), data(2, neg_tr), 'r+', ...
+         circles{:});
     title("Truth");
   endif
 
@@ -137,16 +137,16 @@ for i = 1 : n_tries
     if ~all(all(diffs < 1e-6))
       [ rows, cols ] = find(diffs >= 1e-6);
       for k = 1 : length(rows)
-	ri = rows(k);
-	ci = cols(k);
-	fprintf(2, "(%d, %d) -> %g -> %g  ", ...
-		ri, ci, expec(ri, ci), expec1(ri, ci));
-	if mod(k, 5) == 0
-	  fprintf(2, "\n");
-	endif
+        ri = rows(k);
+        ci = cols(k);
+        fprintf(2, "(%d, %d) -> %g -> %g  ", ...
+                ri, ci, expec(ri, ci), expec1(ri, ci));
+        if mod(k, 5) == 0
+          fprintf(2, "\n");
+        endif
       endfor
       if mod(length(rows), 5) ~= 0
-	fprintf(2, "\n");
+        fprintf(2, "\n");
       endif
       error("Model %s is not working fine", c.name);
     endif
@@ -177,10 +177,10 @@ for i = 1 : n_tries
       figure();
       subplot(1, 2, 1);
       plot(data(1, pos_pos),  data(2, pos_pos),  'g*',
-    	   data(1, pos_neg),  data(2, pos_neg),  'b*',
-    	   data(1, neg_pos),  data(2, neg_pos),  'r+',
-    	   data(1, neg_neg),  data(2, neg_neg),  'y+',
-    	   circles{:});
+           data(1, pos_neg),  data(2, pos_neg),  'b*',
+           data(1, neg_pos),  data(2, neg_pos),  'r+',
+           data(1, neg_neg),  data(2, neg_neg),  'y+',
+           circles{:});
       title(c.name);
     endif
 
@@ -198,23 +198,23 @@ for i = 1 : n_tries
 
     %% AUC
     cl_auc = sum(diff(roc_neg) .* ...
-		 (roc_pos(1 : n_data - 1) + roc_pos(2 : n_data))) / 2;
+                 (roc_pos(1 : n_data - 1) + roc_pos(2 : n_data))) / 2;
 
     %% Add to ROC plots
     roc_plots = cell_push(roc_plots, ...
-			  roc_neg, roc_pos, sprintf("-;%s;", c.name));
+                          roc_neg, roc_pos, sprintf("-;%s;", c.name));
 
     %% Plots scores
     if n_dims == 2
       subplot(1, 2, 2);
       plot3(data(1, pos_cl), data(2, pos_cl), scores(pos_cl), 'gx',
-	    data(1, neg_cl), data(2, neg_cl), scores(neg_cl), 'rx');
+            data(1, neg_cl), data(2, neg_cl), scores(neg_cl), 'rx');
       title(c.name);
     endif
 
     %% Display
     printf("%s -> t=%8g p=%.3f r=%.3f f1=%.3f auc=%.3f\n", ...
-	   c.name, cl_time, cl_prc, cl_rec, cl_f1, cl_auc);
+           c.name, cl_time, cl_prc, cl_rec, cl_f1, cl_auc);
   endfor
 
   %% Plot ROC

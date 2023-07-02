@@ -2,9 +2,9 @@
 
 %% Add something to the LOADPATH
 addpath("/home/usuaris/egonzalez/devel/research/matlabClustering/combination", ...
-	"/home/usuaris/egonzalez/devel/research/matlabClustering/io", ...
-	"/home/usuaris/egonzalez/devel/research/matlabClustering/measures", ...
-	"/home/usuaris/egonzalez/devel/research/matlabClustering/weak");
+        "/home/usuaris/egonzalez/devel/research/matlabClustering/io", ...
+        "/home/usuaris/egonzalez/devel/research/matlabClustering/measures", ...
+        "/home/usuaris/egonzalez/devel/research/matlabClustering/weak");
 
 %% Check arguments
 [ length dummy ] = size(argv);
@@ -37,5 +37,3 @@ fprintf(stderr, "Best: %d %g\n", Sizes(idx), Lls(idx));
 printf("%d\n", Models{idx});
 
 %% Bye Bye
-
-

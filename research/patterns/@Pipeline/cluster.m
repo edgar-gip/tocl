@@ -10,7 +10,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Check arguments
   if ~any(nargin() == [ 2, 3, 4 ])
     usage(cstrcat("[ expec, model, info ] = ",
-		  "@Pipeline/cluster(this, data [, k [, expec_0]])"));
+                  "@Pipeline/cluster(this, data [, k [, expec_0]])"));
   endif
 
   %% Current k
@@ -35,7 +35,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
     %% Cluster
     method = this.methods{i};
     [ next_expec, next_model, next_info ] = ...
-	cluster(method, data, cur_k, cur_expec_0);
+        cluster(method, data, cur_k, cur_expec_0);
 
     %% Update
     cur_k = size(next_expec, 1);

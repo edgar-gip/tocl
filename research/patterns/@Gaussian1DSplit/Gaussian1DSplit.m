@@ -26,5 +26,5 @@ function [ this ] = Gaussian1DSplit(opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "Gaussian1DSplit", ...
-	       Simple());
+               Simple());
 endfunction

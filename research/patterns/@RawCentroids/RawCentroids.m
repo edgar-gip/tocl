@@ -15,5 +15,5 @@ function [ this ] = RawCentroids()
   %% Bless
   %% And add inheritance
   this = class(struct(), "RawCentroids", ...
-	       Simple());
+               Simple());
 endfunction

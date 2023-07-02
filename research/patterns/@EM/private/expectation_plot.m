@@ -2,12 +2,12 @@
 
 %% Plot expectation
 
-%% Author: Edgar Gonz‡lez i Pellicer
+%% Author: Edgar Gonz√†lez i Pellicer
 
 
 %% Expectation plot
 function expectation_plot(data, model, expec = [], add_bg = false(), ...
-			  fig = [], opts = struct());
+                          fig = [], opts = struct());
   %% Options
   n_grid = getfielddef(opts, "n_grid", 20);
 
@@ -41,7 +41,7 @@ function expectation_plot(data, model, expec = [], add_bg = false(), ...
 
   %% Reshape them
   grid_data = [ reshape(xx, 1, n_grid * n_grid) ; ...
-	        reshape(yy, 1, n_grid * n_grid) ];
+                reshape(yy, 1, n_grid * n_grid) ];
 
   %% Find its expectation
   grid_expec = expectation(model, grid_data);

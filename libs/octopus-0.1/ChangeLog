@@ -1,11 +1,11 @@
-2010-01-13  Edgar Gonz‡lez i Pellicer <edgar.gip@gmail.com>
+2010-01-13  Edgar Gonz√†lez i Pellicer <edgar.gip@gmail.com>
 
 	* liboctave: Started version 0.1 of the library
 
-2010-02-05  Edgar Gonz‡lez i Pellicer <edgar.gip@gmail.com>
+2010-02-05  Edgar Gonz√†lez i Pellicer <edgar.gip@gmail.com>
 
 	* liboctave: Switched to an autotools-based package
 
-2010-02-08  Edgar Gonz‡lez i Pellicer <edgar.gip@gmail.com>
+2010-02-08  Edgar Gonz√†lez i Pellicer <edgar.gip@gmail.com>
 
 	* octopus: Changed name from liboctave to octopus

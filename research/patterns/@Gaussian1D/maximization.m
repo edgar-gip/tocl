@@ -38,7 +38,7 @@ function [ model ] = maximization(this, data, expec)
 
   %% Create the model
   model = Gaussian1DModel(k, ...
-			  cl_sizes, ... % 1 * k
-			  cl_mean, ...  % 1 * k
-			  cl_var);      % 1 * k
+                          cl_sizes, ... % 1 * k
+                          cl_mean, ...  % 1 * k
+                          cl_var);      % 1 * k
 endfunction

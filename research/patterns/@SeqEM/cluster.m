@@ -10,7 +10,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Check arguments
   if ~any(nargin() == [ 3, 4 ])
     usage(cstrcat("[ expec, model, info ] = ", ...
-		  "@SeqEM/cluster(this, data, k [, expec_0 ])"));
+                  "@SeqEM/cluster(this, data, k [, expec_0 ])"));
   endif
 
   %% Number of clusters
@@ -52,7 +52,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   for c = 1 : n_clusterers
     %% Cluster in chain
     [ expec_i, model_i, info_i ] = ...
-	cluster(this.clusterers{c}, data{c}, k, expec_i);
+        cluster(this.clusterers{c}, data{c}, k, expec_i);
   endfor
 
   %% Info
@@ -71,7 +71,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   else
     %% Final maximization
     model = maximization(this.clusterers{this.final_model}, ...
-			 data{this.final_model}, expec_i);
+                         data{this.final_model}, expec_i);
 
     %% Final expectation
     [ expec, log_like ] = expectation(model, data{this.final_model});

@@ -1,4 +1,4 @@
-// Copyright (C) 2010 Edgar Gonz‡lez i Pellicer <edgar.gip@gmail.com>
+// Copyright (C) 2010 Edgar Gonz√†lez i Pellicer <edgar.gip@gmail.com>
 //
 // This file is part of octopus-0.1.
 //
@@ -11,7 +11,7 @@
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 // FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 // for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with octopus; see the file COPYING.  If not, see
 // <http://www.gnu.org/licenses/>.
@@ -44,7 +44,7 @@ Match regular expression @var{regex} to @var{target}\n\
     // Check the number of parameters
     if (args.length() != 2 or nargout < 1)
       throw (const char*)0;
-	
+
     // Get target
     if (not args(0).is_string())
       throw "target should be a string";
@@ -53,7 +53,7 @@ Match regular expression @var{regex} to @var{target}\n\
     // Check regex
     if (not args(1).is_string())
       throw "regex should be a string";
-    
+
     // Create the regular expression
     boost::regex re(args(1).string_value());
 
@@ -61,23 +61,23 @@ Match regular expression @var{regex} to @var{target}\n\
     boost::smatch match;
     if (boost::regex_match(target, match, re)) {
       // Matched
-      
+
       // Set the result to the submatches
       result.resize(nargout);
       for (int i = 0; i < nargout; ++i)
-	if (i < match.size())
-	  result(i) = match.str(i);
-	else
-	  result(i) = "";;
+        if (i < match.size())
+          result(i) = match.str(i);
+        else
+          result(i) = "";;
     }
     else {
       // No match!
-      
+
       // Set the first to false, and the others remain empty
       result.resize(nargout);
       result(0) = false;
       for (int i = 1; i < nargout; ++i)
-	result(i) = "";
+        result(i) = "";
     }
   }
   // Was there an error?
@@ -119,7 +119,7 @@ Search regular expression @var{regex} in @var{target}\n\
     // Check the number of parameters
     if (args.length() != 2 or nargout < 1)
       throw (const char*)0;
-	
+
     // Get target
     if (not args(0).is_string())
       throw "target should be a string";
@@ -128,7 +128,7 @@ Search regular expression @var{regex} in @var{target}\n\
     // Check regex
     if (not args(1).is_string())
       throw "regex should be a string";
-    
+
     // Create the regular expression
     boost::regex re(args(1).string_value());
 
@@ -136,23 +136,23 @@ Search regular expression @var{regex} in @var{target}\n\
     boost::smatch match;
     if (boost::regex_search(target, match, re)) {
       // Matched
-      
+
       // Set the result to the submatches
       result.resize(nargout);
       for (int i = 0; i < nargout; ++i)
-	if (i < match.size())
-	  result(i) = match.str(i);
-	else
-	  result(i) = "";
+        if (i < match.size())
+          result(i) = match.str(i);
+        else
+          result(i) = "";
     }
     else {
       // No match!
-      
+
       // Set the first to false, and the others remain empty
       result.resize(nargout);
       result(0) = false;
       for (int i = 1; i < nargout; ++i)
-	result(i) = "";
+        result(i) = "";
     }
   }
   // Was there an error?
@@ -194,16 +194,16 @@ Split @var{target} by regular expression @var{regex}\n\
     // Check the number of parameters
     if (args.length() != 2 or nargout != 1)
       throw (const char*)0;
-	
+
     // Get target
     if (not args(0).is_string())
       throw "target should be a string";
     std::string target = args(0).string_value();
-    
+
     // Check regex
     if (not args(1).is_string())
       throw "regex should be a string";
-    
+
     // Create the regular expression
     boost::regex re(args(1).string_value());
 

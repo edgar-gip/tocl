@@ -55,13 +55,13 @@ Read the seeds from a result file\n\
       /* Trying to save some time by a simple comparison
        */
       if (line[0] == '#') {
-	// Match it
-	boost::smatch match;
-	if (boost::regex_match(line, match, seeds_re)) {
-	  // Matched -> Add it
-	  seeds.push_back(atoi(match.str(2).c_str()));
-	  seeds.push_back(atoi(match.str(3).c_str()));
-	}
+        // Match it
+        boost::smatch match;
+        if (boost::regex_match(line, match, seeds_re)) {
+          // Matched -> Add it
+          seeds.push_back(atoi(match.str(2).c_str()));
+          seeds.push_back(atoi(match.str(3).c_str()));
+        }
       }
     }
 

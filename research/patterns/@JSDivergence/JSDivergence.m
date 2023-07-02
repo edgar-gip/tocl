@@ -15,5 +15,5 @@ function [ this ] = JSDivergence()
   %% Bless
   %% And add inheritance
   this = class(struct(), "JSDivergence", ...
-	       Simple());
+               Simple());
 endfunction

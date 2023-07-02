@@ -31,8 +31,8 @@ for r = 1 : repeats
   %% Expectation (As raw log-probs)
   expec = [ log(alpha_1) - 0.5 * log(2 * pi * var_1) ...
                 - ((x - mu_1) .^ 2) / (2 * var_1) ;
-	    log(alpha_2) - 0.5 * log(2 * pi * var_2) ...
-	        - ((x - mu_2) .^ 2) / (2 * var_2) ];
+            log(alpha_2) - 0.5 * log(2 * pi * var_2) ...
+                - ((x - mu_2) .^ 2) / (2 * var_2) ];
 
   %% Normalize
   max_expec = max(expec);
@@ -60,7 +60,7 @@ for r = 1 : repeats
 
     %% Find cdf
     an_cdf = alpha_1 * normcdf(an, mu_1, stdev_1) + ...
-	     alpha_2 * normcdf(an, mu_2, stdev_2);
+             alpha_2 * normcdf(an, mu_2, stdev_2);
   else
     %% No!
     an     = [];
@@ -75,10 +75,10 @@ for r = 1 : repeats
   %% Generate some samples
   n_samples = 1000;
   rnd_data  = [ normrnd(mu_1, stdev_1, 1, n_samples) ;
-	        normrnd(mu_2, stdev_2, 1, n_samples) ];
+                normrnd(mu_2, stdev_2, 1, n_samples) ];
   selector  = 1 + (rand(1, n_samples) > alpha_1);
   rnd_data  = full(sum(rnd_data .* sparse(selector, 1 : n_samples, ...
-					  ones(1, n_samples)), 1));
+                                          ones(1, n_samples)), 1));
   sort_rnd_data = sort(rnd_data);
 
   %% Cut
@@ -90,7 +90,7 @@ for r = 1 : repeats
   %% Window
   figure();
   title(sprintf("%.3f * N(%.3f, %.3f) + %.3f * N(%.3f, %.3f)", ...
-		alpha_1, mu_1, var_1, alpha_2, mu_2, var_2));
+                alpha_1, mu_1, var_1, alpha_2, mu_2, var_2));
 
   %% First plot
   subplot(1, 2, 1);

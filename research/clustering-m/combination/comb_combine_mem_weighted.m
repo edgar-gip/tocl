@@ -12,7 +12,7 @@ function [ Lls Sizes Models ] = comb_combine_mem_weighted (Nclusters, varargin)
     %% Add weight
     Weights = [ Weights ; varargin{i} ];
     i       = i + 1;
-    
+
     %% Type of current
     curType = typeinfo(varargin{i});
     if strcmp(curType, 'string')
@@ -35,7 +35,7 @@ function [ Lls Sizes Models ] = comb_combine_mem_weighted (Nclusters, varargin)
   %% Normalize weights
   [ nfeats dummy ] = size(Weights);
   Weights = Weights * nfeats / sum(Weights);
-  
+
   %% Create the multinomial matrix
   [ CM KM ] = comb_multinomial_matrix (target{:});
 
@@ -56,7 +56,7 @@ function [ Lls Sizes Models ] = comb_combine_mem_weighted (Nclusters, varargin)
   %% Save state
   Lls    = zeros(tests, 1);
   Models = {};
-  
+
   %% Try
   for i = 1:tests
     %% Local best
@@ -67,39 +67,39 @@ function [ Lls Sizes Models ] = comb_combine_mem_weighted (Nclusters, varargin)
       %% Random starting model
       model = comb_mem_initialize(Nclusters(i), KM);
       model = comb_mem_addweight(model, Weights);
-      
+
       %% Initial expectation
       Exp = comb_mem_expectation(model, CM);
-      
+
       %% Maximization
       do
-	OExp  = Exp;
-	model = comb_mem_maximization(CM, KM, Exp);
-	model = comb_mem_addweight(model, Weights);
-	Exp   = comb_mem_expectation(model, CM);
-	delta = sum(sum((Exp - OExp) .^ 2));
+        OExp  = Exp;
+        model = comb_mem_maximization(CM, KM, Exp);
+        model = comb_mem_addweight(model, Weights);
+        Exp   = comb_mem_expectation(model, CM);
+        delta = sum(sum((Exp - OExp) .^ 2));
       until (delta < deltaTh)
-      
+
       %% Result
       [ Max Idx ] = max(Exp');
       Combi = Idx' - 1;
-      
+
       %% Log-likelihood
       ll = comb_mem_loglike(model, CM);
-    
+
       %% Average
       avgLl = avgLl + ll;
 
       %% Is it the local best?
       if ll > localBestLl
-	localBest   = Combi;
-	localBestLl = ll;
+        localBest   = Combi;
+        localBestLl = ll;
       end
     end
-      
+
     %% Average
     avgLl = avgLl / 5;
-    
+
     %% Add it
     Lls(i)    = avgLl;
     Models{i} = localBest;
@@ -109,5 +109,3 @@ function [ Lls Sizes Models ] = comb_combine_mem_weighted (Nclusters, varargin)
   Sizes = Nclusters;
 
 % end function
-
-

@@ -22,5 +22,5 @@ function [ this ] = SmoothKLDivergence(src_term, tgt_term = src_term)
   %% Bless
   %% And add inheritance
   this = class(this, "SmoothKLDivergence", ...
-	       Simple());
+               Simple());
 endfunction

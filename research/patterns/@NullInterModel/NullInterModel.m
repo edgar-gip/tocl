@@ -18,5 +18,5 @@ function [ this ] = NullInterModel()
   %% Bless
   %% And add inheritance
   this = class(this, "NullInterModel", ...
-	       Simple());
+               Simple());
 endfunction

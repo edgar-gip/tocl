@@ -9,17 +9,17 @@ function Contrib = som_fraction_pie(sM, Data, Labels, Present, BMUs)
     if nargin < 5
         BMUs = som_bmus_sparse(sM, Data)
     end
-    
+
     % Contribution
     Contrib = zeros(ncells, nlabels);
-    
+
     % For each
     for i = 1 : ndocs
         idx = find(strcmp(Labels(i), Present));
         Contrib(BMUs(i), idx) = Contrib(BMUs(i), idx) + 1;
     end
-    
+
     % You can plot with
     % som_pieplane(sM, Contrib);
 
-% end function    
+% end function

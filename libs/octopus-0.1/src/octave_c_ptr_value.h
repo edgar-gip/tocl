@@ -1,4 +1,4 @@
-// Copyright (C) 2010 Edgar Gonz‡lez i Pellicer <edgar.gip@gmail.com>
+// Copyright (C) 2010 Edgar Gonz√†lez i Pellicer <edgar.gip@gmail.com>
 //
 // This file is part of octopus-0.1.
 //
@@ -11,7 +11,7 @@
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 // FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 // for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with octopus; see the file COPYING.  If not, see
 // <http://www.gnu.org/licenses/>.
@@ -40,7 +40,7 @@ private:
 
 public:
   /// Constructor
-  octave_c_pointer_value(T* _ptr = 0) : 
+  octave_c_pointer_value(T* _ptr = 0) :
     data_(_ptr) {
   }
 
@@ -88,26 +88,26 @@ private:
 /// Templated DEFINE_OCTAVE_ALLOCATOR
 /** Adapted from <octave/oct-alloc.h>
  */
-#define DEFINE_TEMPLATED_OCTAVE_ALLOCATOR(t)	\
+#define DEFINE_TEMPLATED_OCTAVE_ALLOCATOR(t)    \
   template <> octave_allocator t::allocator (sizeof (t))
 
 /// Templated DEFINE_OV_TYPEID_FUNCTIONS_AND_DATA
 /** Adapted from <octave/ov-base.h>
  */
-#define DEFINE_TEMPLATED_OV_TYPEID_FUNCTIONS_AND_DATA(t, n, c)		\
-  template <> int t::t_id (-1);						\
-  template <> const std::string t::t_name (n);				\
-  template <> const std::string t::c_name (c);				\
-  template <> void t::register_type()	{				\
-    t_id = octave_value_typeinfo::register_type (t::t_name,		\
-						 t::c_name,		\
-						 octave_value (new t ())); \
+#define DEFINE_TEMPLATED_OV_TYPEID_FUNCTIONS_AND_DATA(t, n, c)          \
+  template <> int t::t_id (-1);                                         \
+  template <> const std::string t::t_name (n);                          \
+  template <> const std::string t::c_name (c);                          \
+  template <> void t::register_type()   {                               \
+    t_id = octave_value_typeinfo::register_type (t::t_name,             \
+                                                 t::c_name,             \
+                                                 octave_value (new t ())); \
   }
 
 /// Octave C Pointer Definitions
-#define octave_c_pointer_static(T, typeName)				\
-  DEFINE_TEMPLATED_OCTAVE_ALLOCATOR(octave_c_pointer_value<T>);		\
+#define octave_c_pointer_static(T, typeName)                            \
+  DEFINE_TEMPLATED_OCTAVE_ALLOCATOR(octave_c_pointer_value<T>);         \
   DEFINE_TEMPLATED_OV_TYPEID_FUNCTIONS_AND_DATA(octave_c_pointer_value<T>, \
-						typeName, typeName);
+                                                typeName, typeName);
 
 #endif

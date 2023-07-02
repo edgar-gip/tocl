@@ -44,12 +44,12 @@ struct redo_info {
 
       // Found?
       if (end == string::npos) {
-	// End!
-	finish = true;
+        // End!
+        finish = true;
       }
       else {
-	// Move
-	st = end + 1;
+        // Move
+        st = end + 1;
       }
     }
 
@@ -99,23 +99,23 @@ Read a the contents of a redo file section from a file\n\
     while (getline(*is, line)) {
       // Non-empty line
       if (not line.empty()) {
-	// Is it a header?
-	if (line[0] == '#') {
-	  // Were we inside?
-	  if (inside) {
-	    // Done
-	    break;
-	  }
-	  else {
-	    // We are inside if we enter the target header
-	    inside = boost::regex_match(line, target_header_re);
-	  }
-	}
-	// Regular line -> Are we inside?
-	else if (inside) {
-	  // Split it
-	  information.push_back(redo_info(line));
-	}
+        // Is it a header?
+        if (line[0] == '#') {
+          // Were we inside?
+          if (inside) {
+            // Done
+            break;
+          }
+          else {
+            // We are inside if we enter the target header
+            inside = boost::regex_match(line, target_header_re);
+          }
+        }
+        // Regular line -> Are we inside?
+        else if (inside) {
+          // Split it
+          information.push_back(redo_info(line));
+        }
       }
     }
 
@@ -123,7 +123,7 @@ Read a the contents of a redo file section from a file\n\
     Matrix m(information.size(), redo_info::n_fields);
     for (int i = 0; i < information.size(); ++i)
       for (int f = 0; f < redo_info::n_fields; ++f)
-	m(i, f) = information[i].fields[f];
+        m(i, f) = information[i].fields[f];
 
     // Result
     result.resize(nargout);

@@ -25,5 +25,5 @@ function [ this ] = KMDUniform(data)
   %% Bless
   %% And add inheritance
   this = class(this, "KMDUniform", ...
-	       KMDComponent());
+               KMDComponent());
 endfunction

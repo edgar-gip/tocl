@@ -2,7 +2,7 @@
 
 %% Minority clustering of data
 
-%% Author: Edgar Gonz‡lez i Pellicer
+%% Author: Edgar Gonz√†lez i Pellicer
 
 
 %% Octopus
@@ -18,7 +18,7 @@ source(binrel("andoElements.m"));
 
 %% Histogram plot
 function histogram_plot(sort_scores, msort_scores, msort_model, sort_truth, ...
-			th_cuts, do_log)
+                        th_cuts, do_log)
   %% Histogram bins
   histo_bins = 100;
 
@@ -44,7 +44,7 @@ function histogram_plot(sort_scores, msort_scores, msort_model, sort_truth, ...
 
     %% Histogram
     [ histo, bin_limits ] = ...
-	make(h, sort_scores(xcluster), histo_bins, min_score, max_score);
+        make(h, sort_scores(xcluster), histo_bins, min_score, max_score);
 
     %% Is it the noise cluster?
     if cl == 1
@@ -66,8 +66,8 @@ function histogram_plot(sort_scores, msort_scores, msort_model, sort_truth, ...
   for th = th_cuts
     %% Add the plot
     plots = cell_push(plots, ...
-		      [ th.value ], [ 1 ], ...
-		      sprintf("*;%s;", th.name), "linewidth", 4);
+                      [ th.value ], [ 1 ], ...
+                      sprintf("*;%s;", th.name), "linewidth", 4);
   endfor
 
 
@@ -99,8 +99,8 @@ function f1_plot(sort_struth, sort_truth, th_cuts)
 
   %% Plots
   plots = { 1 : n_data, prc, "-;Precision;", ...
-	    1 : n_data, rec, "-;Recall;", ...
-	    1 : n_data, f1,  "-;F1;" };
+            1 : n_data, rec, "-;Recall;", ...
+            1 : n_data, f1,  "-;F1;" };
 
   %% Number of groups
   n_groups = max(sort_truth);
@@ -113,16 +113,16 @@ function f1_plot(sort_struth, sort_truth, th_cuts)
 
     %% Plot
     plots = cell_push(plots, ...
-		      1 : n_data, cl_rec, ...
-		      sprintf("-;Recall (%d);", cl));
+                      1 : n_data, cl_rec, ...
+                      sprintf("-;Recall (%d);", cl));
   endfor
 
   %% Add thresholds
   for th = th_cuts
     %% Add the plot
     plots = cell_push(plots, ...
-		      [ th.index ], [ f1(th.index) ], ...
-		      sprintf("*;%s;", th.name), "linewidth", 4);
+                      [ th.index ], [ f1(th.index) ], ...
+                      sprintf("*;%s;", th.name), "linewidth", 4);
   endfor
 
   %% For
@@ -153,16 +153,16 @@ endfunction
 %% Parse options
 [ args, opts ] = ...
     get_options(def_opts, ...
-		"pairwise!", "pairwise", ...
-		"log!",      "do_log", ...
-		"n-model!",  "n_model", ...
-		"full",      @s_full, ...
-		"extra",     @s_extra);
+                "pairwise!", "pairwise", ...
+                "log!",      "do_log", ...
+                "n-model!",  "n_model", ...
+                "full",      @s_full, ...
+                "extra",     @s_extra);
 
 %% Arguments
 if length(args) ~= 7
   error(cstrcat("Wrong number of arguments: Expected [options]", ...
-		" <input> <distance> <d-extra> <method> <m-extra> <k> <seed>"));
+                " <input> <distance> <d-extra> <method> <m-extra> <k> <seed>"));
 endif
 
 %% Input file
@@ -195,7 +195,7 @@ mextra = regex_split(args{5}, '(,|\s+,)\s*');
 req_args = getfield(methods, met, "args");
 if length(mextra) ~= req_args
   error("Method '%s' requires %d extra arg(s): %s",
-	met, req_args, getfield(methods, met, "help"));
+        met, req_args, getfield(methods, met, "help"));
 endif
 
 %% k
@@ -272,7 +272,7 @@ if getfield(methods, met, "scor")
 
   %% AUC
   auc = sum(diff(roc_neg) .* ...
-	    (roc_pos(1 : n_data - 1) + roc_pos(2 : n_data))) / 2;
+            (roc_pos(1 : n_data - 1) + roc_pos(2 : n_data))) / 2;
 
   %% Prc/Rec/F1 curves
   prc_c = acc_pos ./ (acc_pos .+ acc_neg);
@@ -298,7 +298,7 @@ if getfield(methods, met, "scor")
       %% Find the threshold
       thfun    = getfield(th, "find");
       th_value = thfun(sort_scores, sort_struth, msort_scores, msort_model, ...
-		       f1_c, model);
+                       f1_c, model);
 
       %% Negative/positive cluster
       pos_cl = find(sort_scores >= th_value); n_pos_cl = length(pos_cl);
@@ -331,12 +331,12 @@ if getfield(methods, met, "scor")
 
       %% Display
       printf("%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
-	     getfield(th, "name"), n_pos_cl, prc, rec, nrec, f1);
+             getfield(th, "name"), n_pos_cl, prc, rec, nrec, f1);
 
       %% Plot data
       if opts.pairwise
-	th_truth = 1 + (scores >= th_value);
-	pairwise_cluster_plot(data, th_truth, th.name);
+        th_truth = 1 + (scores >= th_value);
+        pairwise_cluster_plot(data, th_truth, th.name);
       endif
 
       %% Next
@@ -346,7 +346,7 @@ if getfield(methods, met, "scor")
 
   %% Histogram plot
   histogram_plot(sort_scores, msort_scores, msort_model, sort_truth, ...
-		 th_cuts, opts.do_log);
+                 th_cuts, opts.do_log);
 
   %% F1 plot
   f1_plot(sort_struth, sort_truth, th_cuts);
@@ -382,9 +382,9 @@ else
   %% Display
   printf("*** %8g %5.3f ***\n", cluster_time, auc);
   printf("%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
-	 "All", n_data, all_prc, 1.0, 1.0, all_f1);
+         "All", n_data, all_prc, 1.0, 1.0, all_f1);
   printf("%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
-	 "Model", n_pos_cl, prc, rec, nrec, f1);
+         "Model", n_pos_cl, prc, rec, nrec, f1);
 
   %% Plot data
   if opts.pairwise

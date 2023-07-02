@@ -15,7 +15,7 @@ function [ CM KM ] = comb_itmedian_matrix (varargin)
   %% First element
   Clust1 = varargin{1};
   k1     = varargin{2};
-  
+
   %% Number of elements
   [ nelems dummy ] = size(Clust1);
   if dummy ~= 1
@@ -59,7 +59,7 @@ function [ CM KM ] = comb_itmedian_matrix (varargin)
 
     %% Add to the values
     CM(:, off : (off + kn - 1)) = ...
-	((Clustn * ones(1, kn)) == (ones(nelems, 1) * [ 0 : (kn - 1) ]));
+        ((Clustn * ones(1, kn)) == (ones(nelems, 1) * [ 0 : (kn - 1) ]));
 
     %% Update off
     off = off + kn;

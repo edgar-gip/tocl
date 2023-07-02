@@ -6,12 +6,12 @@
 %% Author: Edgar Gonzalez
 
 function [ this ] = SoftBBCEMModel(divergence, beta, k, ...
-				   bg_alpha, alpha, centroids)
+                                   bg_alpha, alpha, centroids)
 
   %% Check arguments
   if nargin() ~= 6
     usage(cstrcat("[ this ] = SoftBBCEMModel(divergence, beta, k,", ...
-		  " bg_alpha, alpha, centroids)"));
+                  " bg_alpha, alpha, centroids)"));
   endif
 
   %% This object
@@ -28,5 +28,5 @@ function [ this ] = SoftBBCEMModel(divergence, beta, k, ...
   %% Bless
   %% And add inheritance
   this = class(this, "SoftBBCEMModel", ...
-	       EMModel());
+               EMModel());
 endfunction

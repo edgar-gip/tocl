@@ -21,5 +21,5 @@ function [ this ] = KernelDistanceGenerator(kernel_gen)
   %% Bless
   %% And add inheritance
   this = class(this, "KernelDistanceGenerator", ...
-	       Simple());
+               Simple());
 endfunction

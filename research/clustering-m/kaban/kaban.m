@@ -22,8 +22,8 @@ function [ Exp Resp Xk ] = kaban(Data, sqrt_l, sqrt_k, iter)
         % Find posterior probabilities
         R = posterior_probabilities(Data, A, Phi);
 
-	% Plot posterior
-	E = R' * Xk;
+        % Plot posterior
+        E = R' * Xk;
         plot(Xk(:,1), Xk(:,2), '@*1', E(:,1), E(:,2), '@+2');
 
         % Update A

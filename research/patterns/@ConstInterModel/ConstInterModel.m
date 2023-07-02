@@ -22,5 +22,5 @@ function [ this ] = ConstInterModel(value_in, value)
   %% Bless
   %% And add inheritance
   this = class(this, "ConstInterModel", ...
-	       Simple());
+               Simple());
 endfunction

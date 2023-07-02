@@ -15,5 +15,5 @@ function [ this ] = SingleModel()
   %% Bless
   %% And add inheritance
   this = class(struct(), "SingleModel", ...
-	       Simple());
+               Simple());
 endfunction

@@ -10,7 +10,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Check arguments
   if ~any(nargin() == [ 2, 3, 4 ])
     usage(cstrcat("[ expec, model, info ] = ",
-		  "@HOCC/cluster(this, data [, k [, expec_0]])"));
+                  "@HOCC/cluster(this, data [, k [, expec_0]])"));
   endif
 
   %% The number of clusters must be 1
@@ -45,7 +45,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
 
   %% Expectation
   expec = sparse(ones(1, size), cluster, ones(1, size), ...
-		 1, n_samples);
+                 1, n_samples);
 
   %% Info
   info              = struct();

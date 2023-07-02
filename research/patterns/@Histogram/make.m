@@ -10,7 +10,7 @@ function [ histo, bin_limits ] = make(this, data, n_bins, min_data, max_data)
   %% Check arguments
   if ~any(nargin() == [ 3, 5 ])
     usage(cstrcat("[ histo, bin_limits ] =", ...
-		  " @Histogram/make(this, data, bins [, min_data, max_data])"));
+                  " @Histogram/make(this, data, bins [, min_data, max_data])"));
   endif
 
   %% Size
@@ -36,7 +36,7 @@ function [ histo, bin_limits ] = make(this, data, n_bins, min_data, max_data)
 
     %% Histogram
     histo = full(sum(sparse(bins, 1 : n_data, ones(1, n_data), ...
-			    n_bins, n_data), 2));
+                            n_bins, n_data), 2));
 
   else
     %% A single one

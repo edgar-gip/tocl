@@ -10,7 +10,7 @@
 
 function [ omega, b, xi, obj, its ] = ...
       CPMMC_CCCP_dual(data, omega, b, xi, W, C, l, per_quit, x_k, c_k, ...
-		      iterations, violation, verbose);
+                      iterations, violation, verbose);
 
   %% Sizes
   [ n_data, n_constraints ] = size(W);
@@ -18,12 +18,12 @@ function [ omega, b, xi, obj, its ] = ...
 
   %% Starting objective function value
   obj = CPM3C_cost(omega, xi, C);
-  
+
   %% Display
   if verbose
     if rem(iterations + 1, 10) == 0
       fprintf(2, "+ %6d %4d %8g %8g %8g\n", iterations + 1, n_constraints, ...
-	      obj, xi, violation);
+              obj, xi, violation);
     else
       fprintf(2, "+");
     endif
@@ -67,13 +67,13 @@ function [ omega, b, xi, obj, its ] = ...
 
     %% Find the z_k
     z_k = data * s_W / n_data; % n_dims * n_constraints
-    
+
     %% Find the x_mat
     x_mat = [ z_k, -x_k, x_k ]; % n_dims * (n_constraints + 2)
 
     %% Objective function
     H = x_mat' * x_mat; % (n_constraints + 2) * (n_constraints + 2)
-    
+
     %% Inequalities
     Aeq = [ -s_k, n_data, -n_data ]; % 1 * (n_constraints + 2)
 
@@ -96,10 +96,10 @@ function [ omega, b, xi, obj, its ] = ...
     %% Display
     if verbose
       if rem(iterations + its + 1, 10) == 0
-	fprintf(2, ". %6d %4d %8g %8g %8g\n", iterations + its + 1, ...
-		n_constraints, obj, xi, violation);
+        fprintf(2, ". %6d %4d %8g %8g %8g\n", iterations + its + 1, ...
+                n_constraints, obj, xi, violation);
       else
-	fprintf(2, ".");
+        fprintf(2, ".");
       endif
     endif
 

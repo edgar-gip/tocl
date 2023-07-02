@@ -21,5 +21,5 @@ function [ this ] = Pipeline(varargin)
   %% Bless
   %% And add inheritance
   this = class(this, "Pipeline", ...
-	       Simple());
+               Simple());
 endfunction

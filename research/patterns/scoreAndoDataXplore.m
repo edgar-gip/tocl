@@ -2,7 +2,7 @@
 
 %% Minority clustering of data
 
-%% Author: Edgar Gonz‡lez i Pellicer
+%% Author: Edgar Gonz√†lez i Pellicer
 
 
 %% Octopus
@@ -40,7 +40,7 @@ function [ prc_c, rec_c, f1_c ] = performance_curves(sort_struth)
 
   %% AUC
   auc = sum(diff(roc_neg) .* ...
-	    (roc_pos(1 : n_data - 1) + roc_pos(2 : n_data))) / 2;
+            (roc_pos(1 : n_data - 1) + roc_pos(2 : n_data))) / 2;
 
   %% Prc/Rec/F1 curves
   prc_c = acc_pos ./ (acc_pos .+ acc_neg);
@@ -97,15 +97,15 @@ function [ plots, max_histo, min_score, max_score ] = ...
 
     %% Histogram
     [ histo, bin_limits ] = ...
-	make(h, sort_scores(xcluster), histo_bins, min_score, max_score);
+        make(h, sort_scores(xcluster), histo_bins, min_score, max_score);
 
     %% Is it the noise cluster?
       if cl == 1
-	plots = cell_push(plots, bin_limits, histo, "-r", "linewidth", 2);
+        plots = cell_push(plots, bin_limits, histo, "-r", "linewidth", 2);
       elseif cmd_opts.simple
-	plots = cell_push(plots, bin_limits, histo, "-g", "linewidth", 2);
+        plots = cell_push(plots, bin_limits, histo, "-g", "linewidth", 2);
       else
-	plots = cell_push(plots, bin_limits, histo, "-");
+        plots = cell_push(plots, bin_limits, histo, "-");
       endif
   endfor
 
@@ -134,10 +134,10 @@ function [ nm_expec, nm_model, gs_expec ] = ...
 
     %% Fit the model
     [ raw_expec, raw_model, raw_info ] = ...
-	cluster(CriterionClusterer(inner, BIC(),  ...
-				   struct("max_k",  10, ...
-					  "repeats", 1)), ...
-		{ msort_scores, [ msort_scores ; sort_data ] });
+        cluster(CriterionClusterer(inner, BIC(),  ...
+                                   struct("max_k",  10, ...
+                                          "repeats", 1)), ...
+                { msort_scores, [ msort_scores ; sort_data ] });
 
     %% Gaussian expectation
     gs_expec = raw_info.expec_f;
@@ -145,10 +145,10 @@ function [ nm_expec, nm_model, gs_expec ] = ...
   else
     %% Fit the model
     [ raw_expec, raw_model ] = ...
-	cluster(CriterionClusterer(Gaussian1D(), BIC(),  ...
-				   struct("max_k",  10, ...
-					  "repeats", 1)), ...
-		msort_scores);
+        cluster(CriterionClusterer(Gaussian1D(), BIC(),  ...
+                                   struct("max_k",  10, ...
+                                          "repeats", 1)), ...
+                msort_scores);
 
     %% No Gaussian expectation
     gs_expec = [];
@@ -198,8 +198,8 @@ function [ model_plots ] = gaussian_model_plots(model, max_histo, msort_model)
   for c = 1 : k
     %% Add it
     model_plots = cell_push(model_plots, xs(c, :), ps(c, :), ...
-			    sprintf("-%d", mod(c - 1, 6)), ...
-			    "linewidth", 2);
+                            sprintf("-%d", mod(c - 1, 6)), ...
+                            "linewidth", 2);
   endfor
 endfunction
 
@@ -221,9 +221,9 @@ function [ nm_th_idxs ] = model_th_cutpoints(nm_expec, sort_scores)
     if ~isempty(cut_idx)
       %% Add it
       nm_th_idxs = [ nm_th_idxs, ...
-		    struct("name",  sprintf("1:%d", c), ...
-			   "index", cut_idx,
-			   "score", sort_scores(cut_idx)) ];
+                    struct("name",  sprintf("1:%d", c), ...
+                           "index", cut_idx,
+                           "score", sort_scores(cut_idx)) ];
     endif
   endfor
 endfunction
@@ -273,13 +273,13 @@ function [ out_plots ] = push_bar_plots(in_plots, points, low, high, cmd_opts)
     %% Add'em
     if cmd_opts.bars
       out_plots = cell_push(out_plots, ...
-			    [ p.score, p.score ], [ low, high ], ...
-			    sprintf("-%d;%s;", mod(i, 6), p.name), ...
-			    "linewidth", 2);
+                            [ p.score, p.score ], [ low, high ], ...
+                            sprintf("-%d;%s;", mod(i, 6), p.name), ...
+                            "linewidth", 2);
     else
       out_plots = cell_push(out_plots, ...
-			    [ p.score ], [ low ], ...
-			    sprintf("*%d;%s;", mod(i, 6), p.name));
+                            [ p.score ], [ low ], ...
+                            sprintf("*%d;%s;", mod(i, 6), p.name));
     endif
 
     %% Next
@@ -299,17 +299,17 @@ function plot_performance(prc_c, rec_c, f1_c, points)
 
   %% Plots
   plots = { 1 : n_data, prc_c, "-;Precision;", ...
-	    1 : n_data, rec_c, "-;Recall;", ...
-	    1 : n_data, f1_c,  "-;F1;" };
+            1 : n_data, rec_c, "-;Recall;", ...
+            1 : n_data, f1_c,  "-;F1;" };
 
   %% For each one
   i = 0;
   for p = points
     %% Add'em
     plots = cell_push(plots, ...
-		      [ p.index ], [ f1_c(p.index) ], ...
-		      sprintf("*%d;%s;", mod(i, 6), p.name), ...
-		      "linewidth", 4);
+                      [ p.index ], [ f1_c(p.index) ], ...
+                      sprintf("*%d;%s;", mod(i, 6), p.name), ...
+                      "linewidth", 4);
 
     %% Next
     i += 1;
@@ -323,7 +323,7 @@ endfunction
 %% Plot a histogram
 %% From ../../../production/journals/jmlr/plots/scores.m:plot_histo
 function plot_histogram(curves, points, max_histo, min_score, max_score, ...
-			cmd_opts)
+                        cmd_opts)
   %% Margin
   margin = 0.01 * (max_score - min_score);
 
@@ -339,19 +339,19 @@ function plot_histogram(curves, points, max_histo, min_score, max_score, ...
 
     %% Add bars
     plots = push_bar_plots(curves, points, cmd_opts.histo_top, max_histo, ...
-			   cmd_opts);
+                           cmd_opts);
 
     %% Log?
     if cmd_opts.log
       %% Log Plot
       semilogy(plots{:});
       axis([ min_score - margin, max_score + margin, ...
-	     cmd_opts.histo_top, max_histo ], "ticy");
+             cmd_opts.histo_top, max_histo ], "ticy");
     else
       %% Regular Plot
       plot(plots{:});
       axis([ min_score - margin, max_score + margin, ...
-	     cmd_opts.histo_top, max_histo ], "ticy");
+             cmd_opts.histo_top, max_histo ], "ticy");
     endif
 
     %% Lower part
@@ -365,7 +365,7 @@ function plot_histogram(curves, points, max_histo, min_score, max_score, ...
       %% Log Plot
       semilogy(plots{:});
       axis([ min_score - margin, max_score + margin, ...
-	     1, cmd_opts.histo_top ]);
+             1, cmd_opts.histo_top ]);
     else
       %% Add bars
       plots = push_bar_plots(curves, points, 0, cmd_opts.histo_top, cmd_opts);
@@ -373,7 +373,7 @@ function plot_histogram(curves, points, max_histo, min_score, max_score, ...
       %% Regular Plot
       plot(plots{:});
       axis([ min_score - margin, max_score + margin, ...
-	     0, cmd_opts.histo_top ]);
+             0, cmd_opts.histo_top ]);
     endif
 
     %% No legend here
@@ -391,7 +391,7 @@ function plot_histogram(curves, points, max_histo, min_score, max_score, ...
       %% Log Plot
       semilogy(plots{:});
       axis([ min_score - margin, max_score + margin, ...
-	     1, max_histo ]);
+             1, max_histo ]);
     else
       %% Add bars
       plots = push_bar_plots(curves, points, 0, max_histo, cmd_opts);
@@ -399,7 +399,7 @@ function plot_histogram(curves, points, max_histo, min_score, max_score, ...
       %% Regular Plot
       plot(plots{:});
       axis([ min_score - margin, max_score + margin, ...
-	     0, max_histo ]);
+             0, max_histo ]);
     endif
   endif
 
@@ -420,8 +420,8 @@ function plot_heterogeneousness(nm_means, hetero, lhetero, rhetero)
   for i = 1 : k
     %% Add it
     plots = cell_push(plots, [ nm_means(i) ], [ hetero(i) ], ...
-		      sprintf("*%d", mod(i - 1, 6)), ...
-		      "linewidth", 4);
+                      sprintf("*%d", mod(i - 1, 6)), ...
+                      "linewidth", 4);
   endfor
 
   %% Good hetero's
@@ -429,9 +429,9 @@ function plot_heterogeneousness(nm_means, hetero, lhetero, rhetero)
 
   %% Add the lines
   plots = cell_push(plots, ...
-		    nm_means(good_h), hetero(good_h), "-;Het.;", ...
-		    nm_means, lhetero, "-;L-Het.;", ...
-		    nm_means, rhetero, "-;R-Het.;");
+                    nm_means(good_h), hetero(good_h), "-;Het.;", ...
+                    nm_means, lhetero, "-;L-Het.;", ...
+                    nm_means, rhetero, "-;R-Het.;");
 
   %% Range
   min_mn = nm_means(k);
@@ -471,18 +471,18 @@ def_opts.two_step  = false();
 %% Parse options
 [ args, opts ] = ...
     get_options(def_opts, ...
-		"bars!",       "bars", ...
-		"hetero!",     "hetero", ...
-		"histo-top=f", "histo_top", ...
-		"log!",        "log",  ...
-		"pairwise!",   "pairwise", ...
-		"simple!",     "simple", ...
-		"two-step!",   "two_step");
+                "bars!",       "bars", ...
+                "hetero!",     "hetero", ...
+                "histo-top=f", "histo_top", ...
+                "log!",        "log",  ...
+                "pairwise!",   "pairwise", ...
+                "simple!",     "simple", ...
+                "two-step!",   "two_step");
 
 %% Arguments
 if length(args) ~= 7
   error(cstrcat("Wrong number of arguments: Expected [options]", ...
-		" <input> <distance> <d-extra> <method> <m-extra> <k> <seed>"));
+                " <input> <distance> <d-extra> <method> <m-extra> <k> <seed>"));
 endif
 
 %% Input file
@@ -520,7 +520,7 @@ mextra = regex_split(args{5}, '(,|\s+,)\s*');
 req_args = getfield(methods, met, "args");
 if length(mextra) ~= req_args
   error("Method '%s' requires %d extra arg(s): %s",
-	met, req_args, getfield(methods, met, "help"));
+        met, req_args, getfield(methods, met, "help"));
 endif
 
 %% k
@@ -598,7 +598,7 @@ th_cuts = model_th_cutpoints(nm_expec, sort_scores);
 %% Plot everything
 plot_performance(prc_c, rec_c, f1_c, th_cuts);
 plot_histogram({ model_plots{:}, histo_plots{:} }, th_cuts, ...
-	       max_histo, min_score, max_score, opts);
+               max_histo, min_score, max_score, opts);
 
 %% Model heterogeneousness
 if opts.hetero

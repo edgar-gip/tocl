@@ -1,4 +1,4 @@
-%% Copyright (C) 2010 Edgar Gonz‡lez i Pellicer <edgar.gip@gmail.com>
+%% Copyright (C) 2010 Edgar Gonz√†lez i Pellicer <edgar.gip@gmail.com>
 %%
 %% This file is part of octopus-0.1.
 %%
@@ -40,7 +40,7 @@ function enum(varargin)
       eval(sprintf("function v = %s(); v = %d; end;", varargin{i}, last));
 
     elseif (([ match, name, value ] = ...
-	     regex_match(varargin{i}, '([a-zA-Z]\w*)=([\+\-]?\d+)')))
+             regex_match(varargin{i}, '([a-zA-Z]\w*)=([\+\-]?\d+)')))
       %% Define the function to be equal to the specified value
       last = fix(str2double(value));
       eval(sprintf("function v = %s(); v = %d; end;", name, last));

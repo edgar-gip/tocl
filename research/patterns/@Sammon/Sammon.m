@@ -30,5 +30,5 @@ function [ this ] = Sammon(opts = struct())
   %% Bless
   %% And add inheritance
   this = class(struct(), "Sammon", ...
-	       Simple());
+               Simple());
 endfunction

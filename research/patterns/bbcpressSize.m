@@ -2,7 +2,7 @@
 
 %% BBCPress size parameter influence
 
-%% Author: Edgar Gonz‡lez i Pellicer
+%% Author: Edgar Gonz√†lez i Pellicer
 
 
 %% Division by zero
@@ -61,14 +61,14 @@ def_opts.ratio_steps = 18;
 %% Parse options
 [ cmd_args, cmd_opts ] = ...
     get_options(def_opts, ...
-		"min-ratio=f",   "min_ratio", ...
-		"max-ratio=f",   "max_ratio", ...
-		"ratio-steps=i", "ratio_steps");
+                "min-ratio=f",   "min_ratio", ...
+                "max-ratio=f",   "max_ratio", ...
+                "ratio-steps=i", "ratio_steps");
 
 %% Check parameter length
 if length(cmd_args) ~= 5
   error(cstrcat("Wrong number of arguments: Expected", ...
-		" <input> <distance> <d-extra> <k> <seed>"));
+                " <input> <distance> <d-extra> <k> <seed>"));
 endif
 
 %% Input file
@@ -161,7 +161,7 @@ for ratio = ratios
 
   %% AUC
   auc = sum(diff(roc_neg) .* ...
-	    (roc_pos(1 : n_data - 1) + roc_pos(2 : n_data))) / 2;
+            (roc_pos(1 : n_data - 1) + roc_pos(2 : n_data))) / 2;
 
   %% Prc/Rec/F1 curves
   prc_c = acc_pos ./ (acc_pos .+ acc_neg);
@@ -201,9 +201,9 @@ for ratio = ratios
 
   %% Display
   printf("%1s %.3f Roc  %8g %5.3f nan nan nan\n", ...
-	 prefix, ratio, cluster_time, auc);
+         prefix, ratio, cluster_time, auc);
   printf("%1s %.3f Best  %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
-	 prefix, ratio, best_n_pos_cl, best_prc, best_rec, best_nrec, best_f1);
+         prefix, ratio, best_n_pos_cl, best_prc, best_rec, best_nrec, best_f1);
   printf("%1s %.3f Size  %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
-	 prefix, ratio, size_n_pos_cl, size_prc, size_rec, size_nrec, size_f1);
+         prefix, ratio, size_n_pos_cl, size_prc, size_rec, size_nrec, size_f1);
 endfor

@@ -15,5 +15,5 @@ function matrix = read_sparse (filename, normalization)
 
   % Create the sparse matrix
   matrix = sparse(R, C, V, nr, nc, nnz);
-    
+
 % end function

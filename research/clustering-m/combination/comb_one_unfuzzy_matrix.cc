@@ -17,23 +17,23 @@ using namespace std;
 
 // Fill an unfuzzy matrix
 bool fillUnfuzzy(Matrix& unfuzzy,
-		 string_vector& labels, 
-		 Matrix& clustering,
-		 string rlabel) {
+                 string_vector& labels,
+                 Matrix& clustering,
+                 string rlabel) {
   // Line buffer
   char buffer[MAX_LINE_LENGTH];
-  
+
   // Open the file
   FILE* file = fopen(rlabel.c_str(), "r");
   if (!file) {
     error("cannot open file %s", rlabel.c_str());
     return false;
   }
-  
+
   // Map
   map<string, int> docMap;
   int nDocs = 0;
-  
+
   // NData
   int nData = clustering.rows();
 
@@ -43,11 +43,11 @@ bool fillUnfuzzy(Matrix& unfuzzy,
     // Check
     if (line > nData) {
       error("too many rows in rlabel file at %s:%d",
-	    rlabel.c_str(), line);
+            rlabel.c_str(), line);
       fclose(file);
       return false;
     }
-    
+
     // Find the end
     int len = strlen(buffer);
     if (len == 0) {
@@ -60,9 +60,9 @@ bool fillUnfuzzy(Matrix& unfuzzy,
     char* end = buffer + len - 1;
     while (isspace(*end)) {
       if (end == buffer) {
-	error("empty line at %s:%d", rlabel.c_str(), line);
-	fclose(file);
-	return false;
+        error("empty line at %s:%d", rlabel.c_str(), line);
+        fclose(file);
+        return false;
       }
       --end;
     }
@@ -71,8 +71,8 @@ bool fillUnfuzzy(Matrix& unfuzzy,
     char *p = end;
     while (isdigit(*p)) {
       if (p == buffer) {
-	error("ill-formed line (all numbers) at %s:%d", rlabel.c_str(), line);
-	return false;
+        error("ill-formed line (all numbers) at %s:%d", rlabel.c_str(), line);
+        return false;
       }
       --p;
     }
@@ -106,14 +106,14 @@ bool fillUnfuzzy(Matrix& unfuzzy,
       docMap.insert(make_pair(doc, nDocs++));
       labels.append(doc);
     }
-    
+
     // Assign matrix
     ++unfuzzy(docMap[doc], int(clustering(line - 1)));
-    
+
     // Next line
     ++line;
   }
-  
+
   // Error or EOF?
   if (ferror(file)) {
     error("input error at %s:%d", rlabel.c_str(), line);
@@ -126,7 +126,7 @@ bool fillUnfuzzy(Matrix& unfuzzy,
 
   // Extract
   unfuzzy = unfuzzy.extract(0, 0, nDocs - 1, unfuzzy.cols() - 1);
-  
+
   // Everything OK
   return true;
 }
@@ -165,20 +165,20 @@ Find the unfuzzy matrix for one clustering.\n\
     error("RLABEL_FILE should be a filename");
     return octave_value_list();
   }
-  
+
   // Check dimensions of CLUSTERING
   Matrix clustering = args(0).matrix_value();
   if (clustering.cols() != 1) {
     error("CLUSTERING should be a column vector");
     return octave_value_list();
   }
-  
+
   // Sizes
   int nData  = clustering.rows();
   int nClust = args(1).int_value();
 
   // String
-  string rlabel = args(2).string_value(); 
+  string rlabel = args(2).string_value();
 
   // Return values
   Matrix        unfuzzy(nData, nClust, 0.0);
@@ -187,7 +187,7 @@ Find the unfuzzy matrix for one clustering.\n\
   // Call the function
   if (!fillUnfuzzy(unfuzzy, labels, clustering, rlabel))
     return octave_value_list();
-  
+
   // Return
   octave_value_list output;
   output.resize(2);

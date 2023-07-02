@@ -15,5 +15,5 @@ function [ this ] = CosineDistance()
   %% Bless
   %% And add inheritance
   this = class(struct(), "CosineDistance", ...
-	       Simple());
+               Simple());
 endfunction

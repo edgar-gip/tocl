@@ -25,5 +25,5 @@ function [ this ] = BregmanEMModel(divergence, beta, k, alpha, centroids)
   %% Bless
   %% And add inheritance
   this = class(this, "BregmanEMModel", ...
-	       Simple());
+               Simple());
 endfunction

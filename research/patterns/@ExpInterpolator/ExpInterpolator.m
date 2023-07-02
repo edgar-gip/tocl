@@ -23,5 +23,5 @@ function [ this ] = ExpInterpolator(low = 0.0, high = 1.0, convexity = 1.0)
   %% Bless
   %% And add inheritance
   this = class(this, "ExpInterpolator", ...
-	       Simple());
+               Simple());
 endfunction

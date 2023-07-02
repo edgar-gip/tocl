@@ -22,5 +22,5 @@ function [ this ] = RandomModel(concentration, k)
   %% Bless
   %% And add inheritance
   this = class(this, "RandomModel", ...
-	       Simple());
+               Simple());
 endfunction

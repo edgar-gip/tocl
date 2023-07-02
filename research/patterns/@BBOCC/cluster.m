@@ -10,7 +10,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Check arguments
   if ~any(nargin() == [ 2, 3, 4 ])
     usage(cstrcat("[ expec, model, info ] = ",
-		  "@BBOCC/cluster(this, data [, k [, expec_0]])"));
+                  "@BBOCC/cluster(this, data [, k [, expec_0]])"));
   endif
 
   %% The number of clusters must be 1
@@ -28,7 +28,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
     cluster = find(expec_0 > 0.5);
     size    = length(cluster);
     expec   = sparse(ones(1, size), cluster, ones(1, size), ...
-		     1, n_samples);
+                     1, n_samples);
 
   else %% nargin() < 4
     %% Select a starting centroid at random
@@ -66,7 +66,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
     %% Expectation
     size  = length(cluster);
     expec = sparse(ones(1, size), cluster, ones(1, size), ...
-		   1, n_samples);
+                   1, n_samples);
 
     %% Centroid
     centroid = apply(this.centroid_finder, data, expec);

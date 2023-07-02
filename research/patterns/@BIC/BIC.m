@@ -15,5 +15,5 @@ function [ this ] = BIC()
   %% Bless
   %% And add inheritance
   this = class(struct(), "BIC", ...
-	       Simple());
+               Simple());
 endfunction

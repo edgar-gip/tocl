@@ -15,7 +15,7 @@ function som_plot(Mapping, Labels, Different, dim)
   %% Output line
   line = {};
   lidx = 1;
-  
+
   %% For each label
   for l = 1 : nlabels
     %% Find the labels that are equal
@@ -25,8 +25,8 @@ function som_plot(Mapping, Labels, Different, dim)
     %% For each document
     for d = 1 : ndocs
       if strcmp(Labels{d}, Different{l})
-	Idx(i) = d;
-	i = i + 1;
+        Idx(i) = d;
+        i = i + 1;
       end
     end
 
@@ -52,4 +52,3 @@ function som_plot(Mapping, Labels, Different, dim)
   end
 
 % end function
-

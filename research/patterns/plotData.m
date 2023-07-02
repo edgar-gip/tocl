@@ -2,7 +2,7 @@
 
 %% Plot data
 
-%% Author: Edgar Gonz‡lez i Pellicer
+%% Author: Edgar Gonz√†lez i Pellicer
 
 
 %% Octopus
@@ -16,8 +16,8 @@ def_opts.pairwise = false();
 %% Parse options
 [ cmd_args, cmd_opts ] = ...
     get_options(def_opts, ...
-		"parallel!", "parallel", ...
-		"pairwise!", "pairwise");
+                "parallel!", "parallel", ...
+                "pairwise!", "pairwise");
 
 %% Arguments
 if length(cmd_args) < 1

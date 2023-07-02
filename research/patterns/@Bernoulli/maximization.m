@@ -37,7 +37,7 @@ function [ model ] = maximization(this, data, expec)
 
   %% Create the model
   model = BernoulliModel(k, ...
-			 cl_sizes, ...              % k * 1
-			 cl_sizes .+ cl_ctheta, ... % k * 1
-			 cl_theta');                % k * n_dims
+                         cl_sizes, ...              % k * 1
+                         cl_sizes .+ cl_ctheta, ... % k * 1
+                         cl_theta');                % k * n_dims
 endfunction

@@ -33,5 +33,5 @@ function [ this ] = KMeans(divergence, opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "KMeans", ...
-	       Simple());
+               Simple());
 endfunction

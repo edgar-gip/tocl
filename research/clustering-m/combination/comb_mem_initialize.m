@@ -16,7 +16,7 @@ function sModel = comb_mem_initialize (nclusters, FeatureSizes)
     TCoefs   = rand(nclusters, FeatureSizes(i));
     Coefs{i} = TCoefs ./ (sum(TCoefs, 2) * ones(1, FeatureSizes(i)));
   end
-  
+
   %% Set the struct
   sModel.kind  = 1;
   sModel.alpha = Alpha;

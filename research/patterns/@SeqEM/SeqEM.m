@@ -28,5 +28,5 @@ function [ this ] = SeqEM(clusterers, opts = struct())
 
   %% Bless
   this = class(this, "SeqEM", ...
-	       Simple());
+               Simple());
 endfunction

@@ -33,6 +33,6 @@ function [ model ] = maximization(this, data, expec)
 
   %% Create the model
   model = MultinomialModel(k, ...
-			   cl_sizes, ... % k * 1
-			   cl_active');  % k * n_dims
+                           cl_sizes, ... % k * 1
+                           cl_active');  % k * n_dims
 endfunction

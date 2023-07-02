@@ -1,4 +1,4 @@
-%% Copyright (C) 2012 Edgar Gonz‡lez i Pellicer <edgar.gip@gmail.com>
+%% Copyright (C) 2012 Edgar Gonz√†lez i Pellicer <edgar.gip@gmail.com>
 %%
 %% This file is part of octopus-0.1.
 %%

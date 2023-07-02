@@ -58,5 +58,5 @@ function [ this ] = KMD(fg_component, bg_component, opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "KMD", ...
-	       Simple());
+               Simple());
 endfunction

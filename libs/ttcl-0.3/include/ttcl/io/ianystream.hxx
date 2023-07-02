@@ -28,12 +28,12 @@ namespace ttcl {
       /// Open a file
       static std::istream*
       open(const char* _filename,
-	   std::ios::openmode _mode = std::ios::in);
+           std::ios::openmode _mode = std::ios::in);
 
       /// Open a file
       static std::ifstream*
       open_raw(const char* _filename,
-	       std::ios::openmode _mode = std::ios::in);
+               std::ios::openmode _mode = std::ios::in);
     };
   }
 }

@@ -50,5 +50,5 @@ function [ this ] = DS(divergence, opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "DS", ...
-	       Simple());
+               Simple());
 endfunction

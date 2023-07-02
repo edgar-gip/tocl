@@ -2,7 +2,7 @@
 
 %% Add something to the LOADPATH
 addpath("/home2/edgar/devel/research/matlabClustering/io", ...
-	"/home2/edgar/devel/research/matlabClustering/measures");
+        "/home2/edgar/devel/research/matlabClustering/measures");
 
 %% Get arguments
 doc2cat = argv{1};

@@ -24,5 +24,5 @@ function [ this ] = KdeEMModel(kernel, data, expec)
   %% Bless
   %% And add inheritance
   this = class(this, "KdeEMModel", ...
-	       Simple());
+               Simple());
 endfunction

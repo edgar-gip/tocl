@@ -1,4 +1,4 @@
-// Copyright (C) 2010 Edgar Gonz‡lez i Pellicer <edgar.gip@gmail.com>
+// Copyright (C) 2010 Edgar Gonz√†lez i Pellicer <edgar.gip@gmail.com>
 //
 // This file is part of octopus-0.1.
 //
@@ -11,7 +11,7 @@
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 // FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 // for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with octopus; see the file COPYING.  If not, see
 // <http://www.gnu.org/licenses/>.
@@ -31,17 +31,17 @@
 // Fortran qpgen2_ function
 extern "C"
 void qpgen2_(double* dmat, double* dvec, const int& fddmat, const int& n,
-	     double* sol,  double* lagr, double& crval,
-	     double* amat, double* bvec, const int& fdamat,
-	     const int& q, const int& meq, int* iact, int& nact, int* iter,
-	     double* work, int& ierr);
+             double* sol,  double* lagr, double& crval,
+             double* amat, double* bvec, const int& fdamat,
+             const int& q, const int& meq, int* iact, int& nact, int* iter,
+             double* work, int& ierr);
 
 // Solve quadratic programming problems
 DEFUN_DLD(quadprog_turlach, args, /* nargout */,
           "-*- texinfo -*-\n\
 @deftypefn {Loadable Function} {[ @var{x}, @var{fval}, @var{info} ] =}\
  quadprog_turlach(@var{H}, @var{f}, @var{Aineq}, @var{bineq}, @var{Aeq}, @var{beq},\
- @var{lb}, @var{ub}, @var{x0}, @var{options})\n	\
+ @var{lb}, @var{ub}, @var{x0}, @var{options})\n         \
 \n\
 Solve quadratic programming problems using Berwin A. Turlach's implementation\n\
 of the Goldfarb/Idnani algorithm.\n\
@@ -56,8 +56,8 @@ of the Goldfarb/Idnani algorithm.\n\
     ColumnVector _f, _bineq, _beq, _lb, _ub, _x;
     Octave_map _opts;
     parse_quadprog_args(args, _n_vars, _n_ineq,  _n_eq, _H, _f,
-			_Aineq, _bineq, _Aeq, _beq, _lb, _ub,
-			_x, _opts);
+                        _Aineq, _bineq, _Aeq, _beq, _lb, _ub,
+                        _x, _opts);
 
     // Make copies of required data
     Matrix       dmat =  _H;
@@ -69,7 +69,7 @@ of the Goldfarb/Idnani algorithm.\n\
       if (std::isfinite(_lb(i))) ++n_eff;
       if (std::isfinite(_ub(i))) ++n_eff;
     }
-	
+
     // Total number of constraints
     int n_constraints = _n_eq + _n_ineq + n_eff;
 
@@ -87,14 +87,14 @@ of the Goldfarb/Idnani algorithm.\n\
     int c = _n_eq + _n_ineq;
     for (int i = 0; i < _n_vars; ++i) {
       if (std::isfinite(_lb(i))) {
-	amat(i, c) = 1.0;
-	bvec(c)    = _lb(i);
-	++c;
+        amat(i, c) = 1.0;
+        bvec(c)    = _lb(i);
+        ++c;
       }
       if (std::isfinite(_ub(i))) {
-	amat(i, c) = -1.0;
-	bvec(c)    = -_ub(i);
-	++c;
+        amat(i, c) = -1.0;
+        bvec(c)    = -_ub(i);
+        ++c;
       }
     }
 
@@ -108,7 +108,7 @@ of the Goldfarb/Idnani algorithm.\n\
     std::vector<int> iact(n_constraints);
     int nact;
     int iter[2];
-    
+
     // Working space
     int r     = std::min(_n_vars, n_constraints);
     int wsize = 2 * _n_vars + r * (r + 5) / 2 + 2 * n_constraints + 1;
@@ -119,7 +119,7 @@ of the Goldfarb/Idnani algorithm.\n\
     std::cerr << "dmat = " << std::endl;
     for (uint r = 0; r < _n_vars; ++r) {
       for (uint c = 0; c < _n_vars; ++c)
-	std::cerr  << ' ' << dmat(r, c);
+        std::cerr  << ' ' << dmat(r, c);
       std::cerr << std::endl;
     }
 
@@ -133,17 +133,17 @@ of the Goldfarb/Idnani algorithm.\n\
     std::cerr << "amat, bvec = " << std::endl;
     for (uint c = 0; c < n_constraints; ++c) {
       for (uint r = 0; r < _n_vars; ++r)
-	std::cerr  << ' ' << amat(r, c);
+        std::cerr  << ' ' << amat(r, c);
       std::cerr << (c < _n_eq ? " = " : " >= ") << bvec(c) << std::endl;
     }
     */
 
     // Call!!
-    qpgen2_(dmat.fortran_vec(), dvec.fortran_vec(), _n_vars, _n_vars, 
-	    sol.fortran_vec(), lagr.fortran_vec(), crval,
-	    amat.fortran_vec(), bvec.fortran_vec(), _n_vars,
-	    n_constraints, _n_eq, &iact.front(), nact, iter,
-	    &work.front(), ierr);
+    qpgen2_(dmat.fortran_vec(), dvec.fortran_vec(), _n_vars, _n_vars,
+            sol.fortran_vec(), lagr.fortran_vec(), crval,
+            amat.fortran_vec(), bvec.fortran_vec(), _n_vars,
+            n_constraints, _n_eq, &iact.front(), nact, iter,
+            &work.front(), ierr);
 
     // Extract the fields
     Octave_map info;

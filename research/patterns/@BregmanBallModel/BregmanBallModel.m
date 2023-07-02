@@ -27,5 +27,5 @@ function [ this ] = BregmanBallModel(divergence, centroids, radius)
   %% Bless
   %% And add inheritance
   this = class(this, "BregmanBallModel", ...
-	       Simple());
+               Simple());
 endfunction

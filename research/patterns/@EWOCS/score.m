@@ -56,7 +56,7 @@ function [ scores, model, info, expec ] = score(this, data)
 
     %% Find the model
     [ ind_expec, ind_model, ind_info ] = ...
-	cluster(this.clusterer, data, k, seed_expec);
+        cluster(this.clusterer, data, k, seed_expec);
 
     %% Log
     if this.verbose
@@ -87,7 +87,7 @@ function [ scores, model, info, expec ] = score(this, data)
 
   %% Create the model
   model = EWOCSModel(ensemble_models, ensemble_cluster_scores, ...
-		     inter_model);
+                     inter_model);
 
   %% Create the information
   info = struct();

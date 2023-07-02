@@ -10,7 +10,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Check arguments
   if ~any(nargin() == [ 2, 3, 4 ])
     usage(cstrcat("[ expec, model, info ] = ",
-		  "@AutoDGRADE/cluster(this, data [, k [, expec_0]])"));
+                  "@AutoDGRADE/cluster(this, data [, k [, expec_0]])"));
   endif
 
   %% Warn that k is ignored
@@ -48,8 +48,8 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   while k > 1 && s_one < n_samples && ~prune
     %% Cluster
     [ hard_expec, centroid_indices, radius ] = ...
-	cluster_sone(this, n_samples, target_size, s_one, ...
-		     divs, sorted_divs, nearest_neighbours);
+        cluster_sone(this, n_samples, target_size, s_one, ...
+                     divs, sorted_divs, nearest_neighbours);
 
     %% Check number of clusters
     k = length(centroid_indices);
@@ -63,18 +63,18 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
 
       %% Prune
       if cur_k == 2 && cur_stability > best_stability
-	best_k = 2;
-	best_stability = cur_stability;
-	best_s_one = cur_min_s_one;
-	prune = true();
+        best_k = 2;
+        best_stability = cur_stability;
+        best_s_one = cur_min_s_one;
+        prune = true();
       endif
 
     else
       %% Update best
       if cur_stability > best_stability
-	best_k = cur_k;
-	best_stability = cur_stability;
-	best_s_one = cur_min_s_one;
+        best_k = cur_k;
+        best_stability = cur_stability;
+        best_s_one = cur_min_s_one;
       endif
 
       %% New k value
@@ -91,17 +91,17 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   if this.verbose
     if prune
       fprintf(2, "Most stable k=%d (s_one=%d-%d+ [pruned])\n", ...
-	      best_k, best_s_one, best_s_one + best_stability - 1);
+              best_k, best_s_one, best_s_one + best_stability - 1);
     else
       fprintf(2, "Most stable k=%d (s_one=%d-%d)\n", ...
-	      best_k, best_s_one, best_s_one + best_stability - 1);
+              best_k, best_s_one, best_s_one + best_stability - 1);
     endif
   endif
 
   %% Call helper to cluster with most stable s_one
   [ hard_expec, centroid_indices, radius ] = ...
       cluster_sone(this, n_samples, target_size, best_s_one, ...
-		   divs, sorted_divs, nearest_neighbours);
+                   divs, sorted_divs, nearest_neighbours);
 
   %% Centroids
   centroids = data(:, centroid_indices);
@@ -111,7 +111,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   expec_on = find(hard_expec);
   expec    = ...
       sparse(hard_expec(expec_on), expec_on, ones(1, length(expec_on)), ...
-	     k, n_samples);
+             k, n_samples);
 
   %% Model
   model = BregmanBallModel(this.divergence, centroids, radius);

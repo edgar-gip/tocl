@@ -29,8 +29,8 @@ function [ output, model, info ] = apply(this, input)
     %% Map
     log_denom  = log(high_in / low_in);
     output     = ...
-	this.low + (this.high - this.low) * ...
-	           log(input / low_in) / log_denom;
+        this.low + (this.high - this.low) * ...
+                   log(input / low_in) / log_denom;
 
     %% Model
     model = LogInterModel(this.low, this.high, low_in, high_in, log_denom);

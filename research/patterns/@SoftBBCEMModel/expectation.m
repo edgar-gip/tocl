@@ -23,7 +23,7 @@ function [ expec, log_like ] = expectation(this, data)
   max_expec = max(max(expec, [], 1), this.bg_alpha);
   sum_expec = max_expec .+ ...
               log(sum(exp(expec .- ones(this.k, 1) * max_expec)) + ...
-		  exp(this.bg_alpha - max_expec));
+                  exp(this.bg_alpha - max_expec));
   expec     = exp(expec .- ones(this.k, 1) * sum_expec );
 
   %% Log-likelihood

@@ -10,9 +10,9 @@ function Clustering = weak_kmeans (nClusters, Data)
 
   %% Find responsabilities
   [ Dummy Resp ] = min((( ones(nClusters, 1) * sum((Data .^ 2)', 1))' ...
-			+ ones(nData, 1) * sum((Centroids .^ 2)', 1) ...
-			- 2 .* (Data * (Centroids')))');
-  
+                        + ones(nData, 1) * sum((Centroids .^ 2)', 1) ...
+                        - 2 .* (Data * (Centroids')))');
+
   %% Loop
   do
     %% Save Responsabilites
@@ -23,14 +23,14 @@ function Clustering = weak_kmeans (nClusters, Data)
       Idx = find(Resp == c);
       n   = length(Idx);
       if n
-	Centroids(c, :) = sum(Data(Idx, :)) / n;
+        Centroids(c, :) = sum(Data(Idx, :)) / n;
       end
     end
 
     %% Find Responsabilites
     [ Dummy Resp ] = min((( ones(nClusters, 1) * sum((Data .^ 2)', 1))' ...
-			  + ones(nData, 1) * sum((Centroids .^ 2)', 1) ...
-			  - 2 .* (Data * (Centroids')))');
+                          + ones(nData, 1) * sum((Centroids .^ 2)', 1) ...
+                          - 2 .* (Data * (Centroids')))');
 
     %% Changes
     changes = sum(Resp ~= OResp);

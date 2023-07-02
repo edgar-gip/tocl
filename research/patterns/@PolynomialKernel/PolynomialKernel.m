@@ -22,5 +22,5 @@ function [ this ] = PolynomialKernel(degree, heterogeneous = 0)
   %% Bless
   %% And add inheritance
   this = class(this, "PolynomialKernel", ...
-	       Simple());
+               Simple());
 endfunction

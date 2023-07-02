@@ -5,7 +5,7 @@
 
 /** @file
     Handy type definitions
-    @author Edgar Gonz‡lez i Pellicer
+    @author Edgar Gonz√†lez i Pellicer
 */
 
 /// TTCL Namespace

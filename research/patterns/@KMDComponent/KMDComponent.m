@@ -16,5 +16,5 @@ function [ this ] = KMDComponent()
   %% Bless
   %% And add inheritance
   this = class(struct(), "KMDComponent", ...
-	       Simple());
+               Simple());
 endfunction

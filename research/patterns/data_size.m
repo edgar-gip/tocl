@@ -2,7 +2,7 @@
 
 %% Data size
 
-%% Author: Edgar Gonz‡lez i Pellicer
+%% Author: Edgar Gonz√†lez i Pellicer
 
 function [ n_data ] = data_size(data)
 

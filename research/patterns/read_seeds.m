@@ -2,7 +2,7 @@
 
 %% Read seeds from a file
 
-%% Author: Edgar Gonz‡lez i Pellicer
+%% Author: Edgar Gonz√†lez i Pellicer
 
 function [ seeds ] = read_seeds(file)
   %% Open the file
@@ -15,7 +15,7 @@ function [ seeds ] = read_seeds(file)
   while ischar(line = istream_readline(f))
     %% Match?
     if (([ match, run, seed1, seed2 ] =
-	 regex_match(line, '# Run: #(\d+) Seeds: (\d+), (\d+)')))
+         regex_match(line, '# Run: #(\d+) Seeds: (\d+), (\d+)')))
       %% Save
       seeds = [ seeds ; str2num(run), str2num(seed1), str2num(seed2) ];
     endif

@@ -7,10 +7,10 @@
 // Helper function
 template <typename SMatrix, typename TMatrix>
 static void skl_divergence(Matrix& _distances,
-			   double _src_term,
-			   double _tgt_term,
-			   const SMatrix& _source,
-			   const TMatrix& _target) {
+                           double _src_term,
+                           double _tgt_term,
+                           const SMatrix& _source,
+                           const TMatrix& _target) {
   // Number of dimensions
   octave_idx_type n_dims = _source.rows(); // == _target.rows();
 
@@ -31,28 +31,28 @@ static void skl_divergence(Matrix& _distances,
       double sum_t  = 0.0;
       double sum_st = 0.0;
       for (octave_idx_type i = 0; i < n_dims; ++i) {
-	sum_s += _source(i, src);
-	sum_t += _target(i, tgt);
-	if (_target(i, tgt) + _tgt_term)
-	  sum_st += (_target(i, tgt) + _tgt_term)
-	          * std::log((_target(i, tgt) + _tgt_term) /
-			     (_source(i, src) + _src_term));
+        sum_s += _source(i, src);
+        sum_t += _target(i, tgt);
+        if (_target(i, tgt) + _tgt_term)
+          sum_st += (_target(i, tgt) + _tgt_term)
+                  * std::log((_target(i, tgt) + _tgt_term) /
+                             (_source(i, src) + _src_term));
       }
 
       // Normalize and set
       _distances(src, tgt) = sum_st / (sum_t + _tgt_term * n_dims)
-	                   - std::log((sum_t + _tgt_term * n_dims) /
-				      (sum_s + _src_term * n_dims));
+                           - std::log((sum_t + _tgt_term * n_dims) /
+                                      (sum_s + _src_term * n_dims));
     }
   }
 }
 
 // Specialization for two sparse matrices
 static void skl_divergence(Matrix& _distances,
-			   double _src_term,
-			   double _tgt_term,
-			   const SparseMatrix& _source,
-			   const SparseMatrix& _target) {
+                           double _src_term,
+                           double _tgt_term,
+                           const SparseMatrix& _source,
+                           const SparseMatrix& _target) {
   // Number of dimensions
   octave_idx_type n_dims = _source.rows(); // == _target.rows();
 
@@ -91,87 +91,87 @@ static void skl_divergence(Matrix& _distances,
       octave_idx_type src_i = src_cidx[src];
       octave_idx_type tgt_i = tgt_cidx[tgt];
       while (src_i < src_cidx[src + 1] and
-	     tgt_i < tgt_cidx[tgt + 1]) {
-	// What?
-	if (src_ridx[src_i] < tgt_ridx[tgt_i]) {
-	  // Update
-	  sum_s += src_data[src_i];
-	  if (_tgt_term)
-	    sum_st += _tgt_term
-	            * std::log(_tgt_term / (src_data[src_i] + _src_term));
+             tgt_i < tgt_cidx[tgt + 1]) {
+        // What?
+        if (src_ridx[src_i] < tgt_ridx[tgt_i]) {
+          // Update
+          sum_s += src_data[src_i];
+          if (_tgt_term)
+            sum_st += _tgt_term
+                    * std::log(_tgt_term / (src_data[src_i] + _src_term));
 
-	  // One active
-	  ++active_dims;
+          // One active
+          ++active_dims;
 
-	  // Advance source
-	  ++src_i;
-	}
-	else if (src_ridx[src_i] > tgt_ridx[tgt_i]) {
-	  // Update
-	  sum_t  += tgt_data[tgt_i];
-	  sum_st += (tgt_data[tgt_i] + _tgt_term)
-	          * std::log((tgt_data[tgt_i] + _tgt_term) / _src_term);
+          // Advance source
+          ++src_i;
+        }
+        else if (src_ridx[src_i] > tgt_ridx[tgt_i]) {
+          // Update
+          sum_t  += tgt_data[tgt_i];
+          sum_st += (tgt_data[tgt_i] + _tgt_term)
+                  * std::log((tgt_data[tgt_i] + _tgt_term) / _src_term);
 
-	  // One active
-	  ++active_dims;
+          // One active
+          ++active_dims;
 
-	  // Advance target
-	  ++tgt_i;
-	}
-	else { // src_ridx[src_i] == tgt_ridx[tgt_i]
-	  // Update
-	  sum_s  += src_data[src_i];
-	  sum_t  += tgt_data[tgt_i];
-	  sum_st += (tgt_data[tgt_i] + _tgt_term)
-	          * std::log((tgt_data[tgt_i] + _tgt_term) /
-			     (src_data[src_i] + _src_term));
+          // Advance target
+          ++tgt_i;
+        }
+        else { // src_ridx[src_i] == tgt_ridx[tgt_i]
+          // Update
+          sum_s  += src_data[src_i];
+          sum_t  += tgt_data[tgt_i];
+          sum_st += (tgt_data[tgt_i] + _tgt_term)
+                  * std::log((tgt_data[tgt_i] + _tgt_term) /
+                             (src_data[src_i] + _src_term));
 
-	  // One active
-	  ++active_dims;
+          // One active
+          ++active_dims;
 
-	  // Advance both
-	  ++src_i;
-	  ++tgt_i;
-	}
+          // Advance both
+          ++src_i;
+          ++tgt_i;
+        }
       }
 
       // While source remains
       while (src_i < src_cidx[src + 1]) {
-	// Update
-	sum_s += src_data[src_i];
-	if (_tgt_term)
-	  sum_st += _tgt_term
-	          * std::log(_tgt_term / (src_data[src_i] + _src_term));
+        // Update
+        sum_s += src_data[src_i];
+        if (_tgt_term)
+          sum_st += _tgt_term
+                  * std::log(_tgt_term / (src_data[src_i] + _src_term));
 
-	// One active
-	++active_dims;
+        // One active
+        ++active_dims;
 
-	// Advance source
-	++src_i;
+        // Advance source
+        ++src_i;
       }
 
       // While target remains
       while (tgt_i < tgt_cidx[tgt + 1]) {
-	// Update
-	sum_t  += tgt_data[tgt_i];
-	sum_st += (tgt_data[tgt_i] + _tgt_term)
-	        * std::log((tgt_data[tgt_i] + _tgt_term) / _src_term);
+        // Update
+        sum_t  += tgt_data[tgt_i];
+        sum_st += (tgt_data[tgt_i] + _tgt_term)
+                * std::log((tgt_data[tgt_i] + _tgt_term) / _src_term);
 
-	// One active
-	++active_dims;
+        // One active
+        ++active_dims;
 
-	// Advance target
-	++tgt_i;
+        // Advance target
+        ++tgt_i;
       }
 
       // Add inactive terms
       sum_st += (n_dims - active_dims) * _tgt_term
-	      * std::log(_tgt_term / _src_term);
+              * std::log(_tgt_term / _src_term);
 
       // Normalize and set
       _distances(src, tgt) = sum_st / (sum_t + _tgt_term * n_dims)
-	                   - std::log((sum_t + _tgt_term * n_dims) /
-				      (sum_s + _src_term * n_dims));
+                           - std::log((sum_t + _tgt_term * n_dims) /
+                                      (sum_s + _src_term * n_dims));
     }
   }
 }
@@ -299,26 +299,26 @@ Find the smoothed kullback-leibler divergence between elements of\
 
       // Get target
       if (args(3).is_sparse_type()) {
-	// As a sparse matrix
-	SparseMatrix target = args(3).sparse_matrix_value();
+        // As a sparse matrix
+        SparseMatrix target = args(3).sparse_matrix_value();
 
-	// Check dimensions
-	if (source.rows() != target.rows())
-	  throw "source and target should have the same number of rows";
+        // Check dimensions
+        if (source.rows() != target.rows())
+          throw "source and target should have the same number of rows";
 
-	// Find distances
-	skl_divergence(distances, src_term, tgt_term, source, target);
+        // Find distances
+        skl_divergence(distances, src_term, tgt_term, source, target);
       }
       else {
-	// As a dense matrix
-	Matrix target = args(3).matrix_value();
+        // As a dense matrix
+        Matrix target = args(3).matrix_value();
 
-	// Check dimensions
-	if (source.rows() != target.rows())
-	  throw "source and target should have the same number of rows";
+        // Check dimensions
+        if (source.rows() != target.rows())
+          throw "source and target should have the same number of rows";
 
-	// Find distances
-	skl_divergence(distances, src_term, tgt_term, source, target);
+        // Find distances
+        skl_divergence(distances, src_term, tgt_term, source, target);
       }
     }
     else {
@@ -327,26 +327,26 @@ Find the smoothed kullback-leibler divergence between elements of\
 
       // Get target
       if (args(3).is_sparse_type()) {
-	// As a sparse matrix
-	SparseMatrix target = args(3).sparse_matrix_value();
+        // As a sparse matrix
+        SparseMatrix target = args(3).sparse_matrix_value();
 
-	// Check dimensions
-	if (source.rows() != target.rows())
-	  throw "source and target should have the same number of rows";
+        // Check dimensions
+        if (source.rows() != target.rows())
+          throw "source and target should have the same number of rows";
 
-	// Find distances
-	skl_divergence(distances, src_term, tgt_term, source, target);
+        // Find distances
+        skl_divergence(distances, src_term, tgt_term, source, target);
       }
       else {
-	// As a dense matrix
-	Matrix target = args(3).matrix_value();
+        // As a dense matrix
+        Matrix target = args(3).matrix_value();
 
-	// Check dimensions
-	if (source.rows() != target.rows())
-	  throw "source and target should have the same number of rows";
+        // Check dimensions
+        if (source.rows() != target.rows())
+          throw "source and target should have the same number of rows";
 
-	// Find distances
-	skl_divergence(distances, src_term, tgt_term, source, target);
+        // Find distances
+        skl_divergence(distances, src_term, tgt_term, source, target);
       }
     }
 

@@ -39,10 +39,10 @@ function [ tests ] = score_evolution(score_a, score_b)
 
     %% Pearson correlation on ranks
     [ rk_rho, rk_rho_t_pdf, rk_rho_z_pdf ] = ...
-	pearson_correlation(ranks_a, ranks_b);
+        pearson_correlation(ranks_a, ranks_b);
 
     %% Join the tests
     tests = [ a_nsq, rho, rho_t_pdf, rho_z_pdf, ...
-	     na_rsq, rk_rho, rk_rho_t_pdf, rk_rho_z_pdf ];
+             na_rsq, rk_rho, rk_rho_t_pdf, rk_rho_z_pdf ];
   endif
 endfunction

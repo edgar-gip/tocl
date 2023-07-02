@@ -2,7 +2,7 @@
 
 %% Minority clustering of data
 
-%% Author: Edgar Gonz‡lez i Pellicer
+%% Author: Edgar Gonz√†lez i Pellicer
 
 
 %% Division by zero
@@ -65,8 +65,8 @@ endif
 %% Check parameter length
 if ~any(length(args) == [ 7, 8, 9 ])
   error(cstrcat("Wrong number of arguments: Expected", ...
-		" <input> <distance> <d-extra> <method> <m-extra>", ...
-		" <k> <seed> [<output> [<scores>]]"));
+                " <input> <distance> <d-extra> <method> <m-extra>", ...
+                " <k> <seed> [<output> [<scores>]]"));
 endif
 
 %% Input file
@@ -99,7 +99,7 @@ mextra = regex_split(args{5}, '(,|\s+,)\s*');
 req_args = getfield(methods, met, "args");
 if length(mextra) ~= req_args
   error("Method '%s' requires %d extra arg(s): %s",
-	met, req_args, getfield(methods, met, "help"));
+        met, req_args, getfield(methods, met, "help"));
 endif
 
 %% k
@@ -180,7 +180,7 @@ if getfield(methods, met, "scor")
 
   %% AUC
   auc = sum(diff(roc_neg) .* ...
-	    (roc_pos(1 : n_data - 1) + roc_pos(2 : n_data))) / 2;
+            (roc_pos(1 : n_data - 1) + roc_pos(2 : n_data))) / 2;
 
   %% Prc/Rec/F1 curves
   prc_c = acc_pos ./ (acc_pos .+ acc_neg);
@@ -201,7 +201,7 @@ if getfield(methods, met, "scor")
       %% Find the threshold
       thfun    = getfield(th, "find");
       th_value = thfun(sort_scores, sort_data, sort_struth, msort_scores, ...
-		       msort_model, f1_c, model);
+                       msort_model, f1_c, model);
 
       %% Negative/positive cluster
       pos_cl = find(sort_scores >= th_value); n_pos_cl = length(pos_cl);
@@ -229,7 +229,7 @@ if getfield(methods, met, "scor")
 
       %% Display
       fprintf(fout, "%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
-	      getfield(th, "name"), n_pos_cl, prc, rec, nrec, f1);
+              getfield(th, "name"), n_pos_cl, prc, rec, nrec, f1);
     endif
   endfor
 
@@ -240,7 +240,7 @@ if getfield(methods, met, "scor")
 
     %% Display
     fprintf(fout, "%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
-	    "Model", n_pos_cl, prc, rec, nrec, f1);
+            "Model", n_pos_cl, prc, rec, nrec, f1);
   endif
 
 else
@@ -264,9 +264,9 @@ else
   %% Display
   fprintf(fout, "*** %8g %5.3f ***\n", cluster_time, auc);
   fprintf(fout, "%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
-	  "All", n_data, all_prc, 1.0, 1.0, all_f1);
+          "All", n_data, all_prc, 1.0, 1.0, all_f1);
   fprintf(fout, "%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
-	  "Model", n_pos_cl, prc, rec, nrec, f1);
+          "Model", n_pos_cl, prc, rec, nrec, f1);
 endif
 
 %% Close output

@@ -27,5 +27,5 @@ function [ this ] = HyperBB(divergence, opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "HyperBB", ...
-	       Simple());
+               Simple());
 endfunction

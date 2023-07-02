@@ -39,5 +39,5 @@ function [ this ] = BBC(divergence, opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "BBC", ...
-	       Simple());
+               Simple());
 endfunction

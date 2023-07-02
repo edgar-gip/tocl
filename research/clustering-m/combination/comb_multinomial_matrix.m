@@ -6,12 +6,12 @@ function [ CM KM ] = comb_multinomial_matrix (varargin)
   if nargin == 0
     error('There should be at least one clustering');
   end
-  
+
   %% Number of arguments should be pair
   if mod(nargin, 2) ~= 0
     error('The number of arguments should be pair');
   end
-  
+
   %% Size
   [ nelems dummy ] = size(varargin{1});
 
@@ -26,9 +26,7 @@ function [ CM KM ] = comb_multinomial_matrix (varargin)
 
     j = j + 1;
   end
-  
+
   %% That's all
 
 % endfunction
-  
-  

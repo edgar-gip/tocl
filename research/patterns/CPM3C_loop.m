@@ -27,12 +27,12 @@ function [ expec, model, info ] = CPM3C_loop(data, k, opts)
 
   %% omega
   omega = opts.omega_0;
-    
+
   %% xi
   xi = opts.xi_0;
 
   %% Constraint set
-  W   = {}; 
+  W   = {};
   n_W = 0;
 
 
@@ -56,9 +56,9 @@ function [ expec, model, info ] = CPM3C_loop(data, k, opts)
   while ~finish
     %% Solve the non-convex optimization problem via CCCP
     [ omega, xi, obj, its ] = ...
-	CPM3C_CCCP(data, omega, xi, W, opts.C, opts.l, opts.per_quit,
-		   sum_data, z, iterations, violation, opts.verbose);
- 
+        CPM3C_CCCP(data, omega, xi, W, opts.C, opts.l, opts.per_quit,
+                   sum_data, z, iterations, violation, opts.verbose);
+
     %% Add the iterations
     iterations = iterations + its;
 

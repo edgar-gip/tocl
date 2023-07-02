@@ -15,5 +15,5 @@ function [ this ] = KLDivergence()
   %% Bless
   %% And add inheritance
   this = class(struct(), "KLDivergence", ...
-	       Simple());
+               Simple());
 endfunction

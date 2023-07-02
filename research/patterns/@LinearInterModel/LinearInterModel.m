@@ -25,5 +25,5 @@ function [ this ] = LinearInterModel(low, high, low_in, high_in, step)
   %% Bless
   %% And add inheritance
   this = class(this, "LinearInterModel", ...
-	       Simple());
+               Simple());
 endfunction

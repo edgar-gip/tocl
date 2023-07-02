@@ -7,7 +7,7 @@
 
 function [ hard_expec, centroid_indices, radius ] = ...
       cluster_sone(this, n_samples, target_size, s_one, ...
-		   divs, sorted_divs, nearest_neighbours)
+                   divs, sorted_divs, nearest_neighbours)
   %% Cost of bregmanian ball centered on point
   cost = sum(sorted_divs(:, 1 : s_one), 2);
   [ sorted_cost, sorted_cost_idx ] = sort(cost);
@@ -36,7 +36,7 @@ function [ hard_expec, centroid_indices, radius ] = ...
       hard_expec(idx) = hard_expec(min_cost_idx);
       div_to_centroid = divs(idx, min_cost_idx);
       if div_to_centroid > radius
-	radius = div_to_centroid;
+        radius = div_to_centroid;
       endif
     endif
   endfor

@@ -22,5 +22,5 @@ function [ this ] = Gaussian1DNoise(opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "Gaussian1DNoise", ...
-	       Gaussian1D(opts));
+               Gaussian1D(opts));
 endfunction

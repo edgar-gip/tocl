@@ -10,7 +10,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Check arguments
   if ~any(nargin() == [ 2, 3, 4 ])
     usage(cstrcat("[ expec, model, info ] = ",
-		  "@HyperBB/cluster(this, data [, k [, expec_0]])"));
+                  "@HyperBB/cluster(this, data [, k [, expec_0]])"));
   endif
 
   %% The number of clusters must be 1
@@ -31,7 +31,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
 
   %% Centroid expectation
   centroid_expec = sparse([ 1 ], mid_info.centroid_idx, [ 1 ], ...
-			  1, n_samples);
+                          1, n_samples);
 
   %% Then, apply BBOCC
   [ expec, model, info ] = cluster(this.bbocc, data, 1, centroid_expec);

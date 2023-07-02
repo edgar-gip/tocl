@@ -61,7 +61,7 @@ endif
 
 # quadprog_turlach
 quadprog_turlach_SOURCES = extern/linpack_dpofa.f extern/qpgen2.f \
-	                   extern/qpgen2_util.f quadprog_common.cc
+			   extern/qpgen2_util.f quadprog_common.cc
 
 
 # regex

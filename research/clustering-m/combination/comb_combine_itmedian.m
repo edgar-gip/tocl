@@ -26,13 +26,11 @@ function Combination = comb_combine_itmedian (nclusters, varargin)
       t = t + 2;
     end
   end
-  
+
   %% Create the multinomial matrix
   CM = comb_itmedian_matrix (target{:});
-  
+
   %% Find k means clustering
   Combination = weak_kmeans(nclusters, CM);
 
 % end function
-
-

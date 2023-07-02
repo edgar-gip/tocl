@@ -23,5 +23,5 @@ function [ this ] = RandomProjModel(soft_alpha, projection, bias)
   %% Bless
   %% And add inheritance
   this = class(this, "RandomProjModel", ...
-	       Simple());
+               Simple());
 endfunction

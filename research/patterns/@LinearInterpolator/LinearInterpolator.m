@@ -22,5 +22,5 @@ function [ this ] = LinearInterpolator(low = 0.0, high = 1.0)
   %% Bless
   %% And add inheritance
   this = class(this, "LinearInterpolator", ...
-	       Simple());
+               Simple());
 endfunction

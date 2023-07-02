@@ -37,7 +37,7 @@ function [ model, info ] = simple_svm(data, classes, opts)
   %% Dual or primal?
   if opts.use_dual
     %% Create the quadratic programming dual problem
-  
+
     %% http://en.wikipedia.org/wiki/Support_vector_machine
 
     %% Objective function: Maximize
@@ -61,7 +61,7 @@ function [ model, info ] = simple_svm(data, classes, opts)
 
     %% Optimize
     [ alpha, fval, in_info ] = ...
-	qp([], H, f, Aeq, beq, lb, [], [], Ain, []);
+        qp([], H, f, Aeq, beq, lb, [], [], Ain, []);
 
     %% Find the weights
     omega = full(data * (alpha .* classes')); % n_dims * 1
@@ -89,7 +89,7 @@ function [ model, info ] = simple_svm(data, classes, opts)
 
     %% Optimize
     [ x, fval, in_info ] = ...
-	qp([], H, f, [], [], [], [], Alb, Ain, []);
+        qp([], H, f, [], [], [], [], Alb, Ain, []);
 
     %% Find the weights
     omega = x(1:n_dims);

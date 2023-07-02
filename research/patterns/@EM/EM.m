@@ -37,5 +37,5 @@ function [ this ] = EM(opts = struct())
 
   %% Bless
   this = class(this, "EM", ...
-	       Simple());
+               Simple());
 endfunction

@@ -10,7 +10,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Check arguments
   if ~any(nargin() == [ 2, 3, 4 ])
     usage(cstrcat("[ expec, model, info ] = ",
-		  "@DS/cluster(this, data [, k [, expec_0]]])"));
+                  "@DS/cluster(this, data [, k [, expec_0]]])"));
   endif
 
   %% Warn that k is ignored
@@ -39,9 +39,9 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
 
     %% Command line for Gene Diver
     cmd = sprintf(cstrcat("'%s' --ds --matrix --n-eps=%d --f-shave=%g", ...
-			  " --r-shave=%g --verbose '%s' '%s'"), ...
-		  this.wrap_path, this.n_eps, this.f_shave, this.f_shave, ...
-		  div_file, cls_file);
+                          " --r-shave=%g --verbose '%s' '%s'"), ...
+                  this.wrap_path, this.n_eps, this.f_shave, this.f_shave, ...
+                  div_file, cls_file);
     if this.verbose
       fprintf(2, "Running %s\n", cmd);
     else

@@ -2,8 +2,8 @@
       integer lda,n
       double precision a(lda,1)
 c
-c     dpori computes the inverse of the factor of a 
-c     double precision symmetric positive definite matrix 
+c     dpori computes the inverse of the factor of a
+c     double precision symmetric positive definite matrix
 c     using the factors computed by dpofa.
 c
 c     modification of dpodi by BaT 05/11/95
@@ -63,7 +63,7 @@ c
  100  continue
       return
       end
- 
+
       subroutine dposl(a,lda,n,b)
       integer lda,n
       double precision a(lda,1),b(1)

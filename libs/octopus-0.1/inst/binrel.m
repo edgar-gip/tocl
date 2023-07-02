@@ -2,7 +2,7 @@
 
 %% Convert a file name relative to the binary location
 
-%% Author: Edgar Gonz‡lez i Pellicer
+%% Author: Edgar Gonz√†lez i Pellicer
 
 function [ absolute ] = binrel(relative)
 

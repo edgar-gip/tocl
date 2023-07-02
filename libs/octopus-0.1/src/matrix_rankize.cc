@@ -1,4 +1,4 @@
-// Copyright (C) 2010 Edgar Gonz‡lez i Pellicer <edgar.gip@gmail.com>
+// Copyright (C) 2010 Edgar Gonz√†lez i Pellicer <edgar.gip@gmail.com>
 //
 // This file is part of octopus-0.1.
 //
@@ -11,7 +11,7 @@
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 // FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 // for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with octopus; see the file COPYING.  If not, see
 // <http://www.gnu.org/licenses/>.
@@ -43,7 +43,7 @@ Rankize a matrix\n\
     // Check the number of parameters
     if (args.length() < 1 or args.length() > 3 or nargout > 1)
       throw (const char*)0;
-	
+
     // Check first argument
     if (not args(0).is_real_matrix())
       throw "matrix should be a real matrix";
@@ -54,21 +54,21 @@ Rankize a matrix\n\
     if (args.length() == 1) {
       // Is it a row vector?
       if (m.rows() == 1)
-	// Work row-wise
-	column_wise = false;
+        // Work row-wise
+        column_wise = false;
       else
-	// Work column-wise
-	column_wise = true;
+        // Work column-wise
+        column_wise = true;
     }
     else { // args.length() > 2
       // Check second argument
       if (not args(1).is_real_scalar())
-	throw "dimension should be a real scalar";
+        throw "dimension should be a real scalar";
 
       // Which dimension?
       int dim = args(1).int_value();
       if (dim != 1 and dim != 2)
-	throw "dimension should be 1 or 2";
+        throw "dimension should be 1 or 2";
 
       // Column-wisity
       column_wise = (dim == 1);
@@ -79,12 +79,12 @@ Rankize a matrix\n\
     if (args.length() == 3) {
       // Check third argument
       if (not args(2).is_string())
-	throw "mode should be a string";
+        throw "mode should be a string";
       std::string mode = args(2).string_value();
-      
+
       // Check mode values
       if (mode != "ascend" and mode != "descend")
-	throw "mode should be 'ascend' or 'descend'";
+        throw "mode should be 'ascend' or 'descend'";
 
       // Mode
       ascending = mode == "ascend";
@@ -97,73 +97,73 @@ Rankize a matrix\n\
     if (column_wise) {
       // Column-wise
       for (int c = 0; c < m.columns(); ++c) {
-	// Prepare the column
-	std::vector< std::pair<double, int> > column;
-	column.reserve(m.rows());
-	for (int r = 0; r < m.rows(); ++r)
-	  column.push_back(std::make_pair(m(r, c), r));
+        // Prepare the column
+        std::vector< std::pair<double, int> > column;
+        column.reserve(m.rows());
+        for (int r = 0; r < m.rows(); ++r)
+          column.push_back(std::make_pair(m(r, c), r));
 
-	// Sort it
-	if (ascending)
-	  std::sort(column.begin(), column.end());
-	else
-	  std::sort(column.begin(), column.end(),
-		    std::greater< std::pair<double, int> >());
+        // Sort it
+        if (ascending)
+          std::sort(column.begin(), column.end());
+        else
+          std::sort(column.begin(), column.end(),
+                    std::greater< std::pair<double, int> >());
 
-	// Now, fill the ranks
-	int r = 0;
-	while (r < m.rows()) {
-	  // Find the end of the rank
-	  int re = r + 1;
-	  while (re < m.rows() and column[re].first == column[r].first)
-	    ++re;
+        // Now, fill the ranks
+        int r = 0;
+        while (r < m.rows()) {
+          // Find the end of the rank
+          int re = r + 1;
+          while (re < m.rows() and column[re].first == column[r].first)
+            ++re;
 
-	  // Find it
-	  double rank = 1.0 + double(r + (re - 1)) / 2.0;
+          // Find it
+          double rank = 1.0 + double(r + (re - 1)) / 2.0;
 
-	  // Set it
-	  for (int rk = r; rk  < re; ++rk)
-	    out(column[rk].second, c) = rank;
+          // Set it
+          for (int rk = r; rk  < re; ++rk)
+            out(column[rk].second, c) = rank;
 
-	  // Next
-	  r = re;
-	}
+          // Next
+          r = re;
+        }
       }
     }
     else {
       // Row-wise
       for (int r = 0; r < m.rows(); ++r) {
-	// Prepare the row
-	std::vector< std::pair<double, int> > row;
-	row.reserve(m.columns());
-	for (int c = 0; c < m.columns(); ++c)
-	  row.push_back(std::make_pair(m(r, c), c));
+        // Prepare the row
+        std::vector< std::pair<double, int> > row;
+        row.reserve(m.columns());
+        for (int c = 0; c < m.columns(); ++c)
+          row.push_back(std::make_pair(m(r, c), c));
 
-	// Sort it
-	if (ascending)
-	  std::sort(row.begin(), row.end());
-	else
-	  std::sort(row.begin(), row.end(),
-		    std::greater< std::pair<double, int> >());
+        // Sort it
+        if (ascending)
+          std::sort(row.begin(), row.end());
+        else
+          std::sort(row.begin(), row.end(),
+                    std::greater< std::pair<double, int> >());
 
-	// Now, fill the ranks
-	int c = 0;
-	while (c < m.columns()) {
-	  // Find the end of the rank
-	  int ce = c + 1;
-	  while (ce < m.columns() and row[ce].first == row[c].first)
-	    ++ce;
+        // Now, fill the ranks
+        int c = 0;
+        while (c < m.columns()) {
+          // Find the end of the rank
+          int ce = c + 1;
+          while (ce < m.columns() and row[ce].first == row[c].first)
+            ++ce;
 
-	  // Find it
-	  double rank = 1.0 + double(c + (ce - 1)) / 2.0;
+          // Find it
+          double rank = 1.0 + double(c + (ce - 1)) / 2.0;
 
-	  // Set it
-	  for (int ck = c; ck < ce; ++ck)
-	    out(r, row[ck].second) = rank;
+          // Set it
+          for (int ck = c; ck < ce; ++ck)
+            out(r, row[ck].second) = rank;
 
-	  // Next
-	  c = ce;
-	}
+          // Next
+          c = ce;
+        }
       }
     }
 
@@ -226,7 +226,7 @@ Blockize a matrix\n\
     if (args.length() > 2) {
       // Check it
       if (not args(2).is_real_scalar())
-	throw "column_block should be a real scalar if given";
+        throw "column_block should be a real scalar if given";
       column_block = args(2).int_value();
     }
     else {
@@ -244,13 +244,13 @@ Blockize a matrix\n\
     // For each one in the input
     for (int c = 0; c < m.columns(); ++c, m_ptr += m.rows()) {
       for (int crep = 0; crep < column_block; ++crep) {
-	double* m_col_ptr = m_ptr;
-	for (int r = 0; r < m.rows(); ++r, ++m_col_ptr)
-	  for (int rrep = 0; rrep < row_block; ++rrep, ++out_ptr)
-	    *out_ptr = *m_col_ptr;
+        double* m_col_ptr = m_ptr;
+        for (int r = 0; r < m.rows(); ++r, ++m_col_ptr)
+          for (int rrep = 0; rrep < row_block; ++rrep, ++out_ptr)
+            *out_ptr = *m_col_ptr;
       }
     }
-    
+
     // Set
     result.resize(1);
     result(0) = out;
@@ -315,12 +315,12 @@ Eye-Blockize a matrix\n\
     // For each one in the input
     for (int c = 0; c < m.columns(); ++c, m_ptr += m.rows()) {
       for (int crep = 0; crep < eye_block; ++crep) {
-	double* m_col_ptr = m_ptr;
-	for (int r = 0; r < m.rows(); ++r, ++m_col_ptr, out_ptr += eye_block)
-	  out_ptr[crep] = *m_col_ptr;
+        double* m_col_ptr = m_ptr;
+        for (int r = 0; r < m.rows(); ++r, ++m_col_ptr, out_ptr += eye_block)
+          out_ptr[crep] = *m_col_ptr;
       }
     }
-    
+
     // Set
     result.resize(1);
     result(0) = out;

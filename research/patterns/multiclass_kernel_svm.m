@@ -8,7 +8,7 @@
 %%  K. Crammer, Y. Singer,
 %%  "On the Algorithmic Implementation of Multiclass Kernel-based
 %%   Vector Machines",
-%% Journal of Machine Learning Research, 2 (2001), 265--292 
+%% Journal of Machine Learning Research, 2 (2001), 265--292
 
 %% Main procedure
 
@@ -76,7 +76,7 @@ function [ model, info, problem ] = multiclass_kernel_svm(data, classes, opts)
 
   %% Kernel matrix
   [ K, self_data ] = kernel_matrix(data, opts.radial, opts.kernel);
-  
+
   %% Objective function: Maximize
   %% \frac{1}{2} \cdot -\sum_{i=1}^{n_data} \sum_{j=1}^{n_data}
   %%   (\sum_{m=1}^{k} \tau_{im} \cdot \tau_{jm}) \cdot \K(x_i, x_j)
@@ -92,7 +92,7 @@ function [ model, info, problem ] = multiclass_kernel_svm(data, classes, opts)
   %% \forall i, r \tau_{ir} \leq \delta(y_i, r)
   lb = -inf * ones(n_vars, 1);
   ub = full(flat_classes);
-  
+
   %% \forall i \sum_{r=1}^{n_classes} \tau_{ir} = 0
   Aeq = matrix_blockize(diag(ones(1, n_data)), 1, n_classes);
   beq = zeros(n_data, 1);
@@ -125,10 +125,10 @@ function [ model, info, problem ] = multiclass_kernel_svm(data, classes, opts)
   %% A radial kernel?
   if model.radial
     %% Add self product and number of SVs
-    model.SV_self = self_data(SVs); % n_SV * 1 
+    model.SV_self = self_data(SVs); % n_SV * 1
     model.n_SV    = size(model.SV, 1);
   endif
-  
+
   %% The function is negated
   fval = -fval;
 

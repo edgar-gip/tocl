@@ -6,7 +6,7 @@
 %% Author: Edgar Gonzalez
 
 function [ this ] = ClusterInterpolator(clusterer = Gaussian1D(),
-					opts = struct())
+                                        opts = struct())
 
   %% Check arguments
   if ~any(nargin() == [ 0, 1 ])
@@ -24,5 +24,5 @@ function [ this ] = ClusterInterpolator(clusterer = Gaussian1D(),
   %% Bless
   %% And add inheritance
   this = class(this, "ClusterInterpolator", ...
-	       Simple());
+               Simple());
 endfunction

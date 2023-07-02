@@ -22,5 +22,5 @@ function [ this ] = LogInterpolator(low = 0.0, high = 1.0)
   %% Bless
   %% And add inheritance
   this = class(this, "LogInterpolator", ...
-	       Simple());
+               Simple());
 endfunction

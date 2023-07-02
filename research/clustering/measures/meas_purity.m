@@ -6,7 +6,7 @@ function [ pur ipur f1 Occ ] = meas_purity (Clusters, Labels)
 
   %% Occurrency matrix
   Occ = meas_occ(Clusters, Labels);
-  
+
   %% Purity, inverse purity, and F1
   pur  = sum(max(Occ'))  / nElems;
   ipur = sum(max(Occ)) / nElems;

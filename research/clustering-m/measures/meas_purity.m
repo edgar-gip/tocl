@@ -6,7 +6,7 @@ function [ pur ipur f1 Occ ] = meas_purity (Clusters, Labels)
 
   %% Occurrency matrix
   Occ = meas_occ(Clusters, Labels);
-  
+
   %% Number of filled elements
   nFillC = sum(Clusters ~=  -1);
   nFillL = sum(Labels   ~=  -1);

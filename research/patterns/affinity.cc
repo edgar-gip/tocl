@@ -60,12 +60,12 @@ _affinity(Matrix& _aff, const Matrix& _co_occ, const RowVector& _truth) {
 
       // Check
       if (den != dens(cl_i, cl_j))
-	std::cerr << cl_i << ',' << cl_j << " = " << den << " != "
-		  << dens(cl_i, cl_j) << std::endl;
+        std::cerr << cl_i << ',' << cl_j << " = " << den << " != "
+                  << dens(cl_i, cl_j) << std::endl;
 
       // Divide
       if (den != 0.0)
-	_aff(cl_i, cl_j) /= den;
+        _aff(cl_i, cl_j) /= den;
     }
   }
 }

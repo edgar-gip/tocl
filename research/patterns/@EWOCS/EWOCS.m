@@ -43,17 +43,17 @@ function [ this ] = EWOCS(clusterer, opts = struct())
     opts.score_function = tolower(opts.score_function);
     switch opts.score_function
       case "dense"
-	this.score_function = DenseCSF();
+        this.score_function = DenseCSF();
       case "ndense"
-	this.score_function = NDenseCSF();
+        this.score_function = NDenseCSF();
       case "nsize"
-	this.score_function = NSizeCSF();
+        this.score_function = NSizeCSF();
       case "radius"
-	this.score_function = RadiusCSF();
+        this.score_function = RadiusCSF();
       case "size"
-	this.score_function = SizeCSF();
+        this.score_function = SizeCSF();
       otherwise
-	error("Bad score function '%s'", opts.score_function)
+        error("Bad score function '%s'", opts.score_function)
     endswitch
 
   else
@@ -69,22 +69,22 @@ function [ this ] = EWOCS(clusterer, opts = struct())
     opts.interpolator = tolower(opts.interpolator);
     switch opts.interpolator
       case "exp"
-	this.interpolator = ExpInterpolator();
+        this.interpolator = ExpInterpolator();
       case "knee-dist"
-	this.interpolator = KneeInterpolator(DistanceKnee(), @LogInterpolator);
+        this.interpolator = KneeInterpolator(DistanceKnee(), @LogInterpolator);
       case "knee-gauss"
-	this.interpolator = KneeInterpolator(GaussianKnee(), @LogInterpolator);
+        this.interpolator = KneeInterpolator(GaussianKnee(), @LogInterpolator);
       case "knee-gauss-noise"
-	this.interpolator = KneeInterpolator(GaussianNoiseKnee(), ...
-					     @LogInterpolator);
+        this.interpolator = KneeInterpolator(GaussianNoiseKnee(), ...
+                                             @LogInterpolator);
       case "linear"
-	this.interpolator = LinearInterpolator();
+        this.interpolator = LinearInterpolator();
       case "log"
-	this.interpolator = LogInterpolator();
+        this.interpolator = LogInterpolator();
       case "null"
-	this.interpolator = NullInterpolator();
+        this.interpolator = NullInterpolator();
       otherwise
-	error("Bad interpolator '%s'", opts.interpolator)
+        error("Bad interpolator '%s'", opts.interpolator)
     endswitch
 
   else
@@ -94,5 +94,5 @@ function [ this ] = EWOCS(clusterer, opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "EWOCS", ...
-	       Simple());
+               Simple());
 endfunction

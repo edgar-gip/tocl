@@ -15,5 +15,5 @@ function [ this ] = SizeCSF()
   %% Bless
   %% And add inheritance
   this = class(struct(), "SizeCSF", ...
-	       Simple());
+               Simple());
 endfunction

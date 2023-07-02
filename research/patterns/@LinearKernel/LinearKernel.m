@@ -15,5 +15,5 @@ function [ this ] = LinearKernel()
   %% Bless
   %% And add inheritance
   this = class(struct(), "LinearKernel", ...
-	       Simple());
+               Simple());
 endfunction

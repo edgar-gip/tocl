@@ -26,5 +26,5 @@ function [ this ] = KMeansModel(divergence, centroids)
   %% Bless
   %% And add inheritance
   this = class(this, "KMeansModel", ...
-	       Simple());
+               Simple());
 endfunction

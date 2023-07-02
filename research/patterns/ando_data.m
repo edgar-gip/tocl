@@ -2,7 +2,7 @@
 
 %% Generate some nice data, in the style of Ando
 
-%% Author: Edgar Gonzàlez i Pellicer
+%% Author: Edgar GonzÃ lez i Pellicer
 
 %% Generate the data
 function [ data, truth, desc ] = ando_data(generator, dims, extra)
@@ -37,17 +37,17 @@ function [ data, truth, desc ] = data_unibg(dims, extra)
   %% Generate it
   desc = struct("dimensions", dims,
 
-		"noise_dist", P_UNIFORM,
-		"noise_size", 1000 * 2 ^ dims,
-		"noise_mean", 0.0,
-		"noise_var",  2.0,
+                "noise_dist", P_UNIFORM,
+                "noise_size", 1000 * 2 ^ dims,
+                "noise_mean", 0.0,
+                "noise_var",  2.0,
 
-		"signal_dist",  P_GAUSSIAN,
-		"signal_size",  [ 100, 150, 150, 200 ],
-		"signal_var",   0.125,
-		"signal_mean",  0.0,
-		"signal_shift", 0.75,
-		"signal_space", 0.75);
+                "signal_dist",  P_GAUSSIAN,
+                "signal_size",  [ 100, 150, 150, 200 ],
+                "signal_var",   0.125,
+                "signal_mean",  0.0,
+                "signal_shift", 0.75,
+                "signal_space", 0.75);
   [ data, truth ] = gen_data(desc);
 endfunction
 
@@ -73,23 +73,23 @@ function [ data, truth, desc ] = data_unibg_ss(dims, extra)
   signal_sizes     = zeros(1, signal_groups);
   while ~all(signal_sizes > 50)
     signal_sizes = ...
-	round(signal_scale * (mean_signal_size + 50 * randn(1, signal_groups)));
+        round(signal_scale * (mean_signal_size + 50 * randn(1, signal_groups)));
   endwhile
 
   %% Generate it
   desc = struct("dimensions", dims,
 
-		"noise_dist", P_UNIFORM,
-		"noise_size", noise_size,
-		"noise_mean", 0.0,
-		"noise_var",  2.0,
+                "noise_dist", P_UNIFORM,
+                "noise_size", noise_size,
+                "noise_mean", 0.0,
+                "noise_var",  2.0,
 
-		"signal_dist",  P_GAUSSIAN,
-		"signal_size",  signal_sizes,
-		"signal_var",   signal_var * 0.125,
-		"signal_mean",  0.0,
-		"signal_shift", 0.75,
-		"signal_space", 0.75);
+                "signal_dist",  P_GAUSSIAN,
+                "signal_size",  signal_sizes,
+                "signal_var",   signal_var * 0.125,
+                "signal_mean",  0.0,
+                "signal_shift", 0.75,
+                "signal_space", 0.75);
   [ data, truth ] = gen_data(desc);
 endfunction
 
@@ -103,17 +103,17 @@ function [ data, truth, desc ] = data_unibg_rs(dims, extra)
   %% Generate
   desc = struct("dimensions", dims,
 
-		"noise_dist", P_UNIFORM,
-		"noise_size", noise_size,
-		"noise_mean", 0.0,
-		"noise_var",  2.0,
+                "noise_dist", P_UNIFORM,
+                "noise_size", noise_size,
+                "noise_mean", 0.0,
+                "noise_var",  2.0,
 
-		"signal_dist",  P_GAUSSIAN,
-		"signal_size",  signal_size,
-		"signal_var",   0.125,
-		"signal_mean",  0.0,
-		"signal_shift", 0.75,
-		"signal_space", 0.75);
+                "signal_dist",  P_GAUSSIAN,
+                "signal_size",  signal_size,
+                "signal_var",   0.125,
+                "signal_mean",  0.0,
+                "signal_shift", 0.75,
+                "signal_space", 0.75);
   [ data, truth ] = gen_data(desc);
 endfunction
 
@@ -122,17 +122,17 @@ function [ data, truth, desc ] = data_gaussbg(dims, extra)
   %% Generate it
   desc = struct("dimensions", dims,
 
- 		"noise_dist", P_SPHERICAL,
-		"noise_size", 1000 * 2 ^ dims,
-		"noise_mean", 0.0,
-		"noise_var",  2.0,
+                "noise_dist", P_SPHERICAL,
+                "noise_size", 1000 * 2 ^ dims,
+                "noise_mean", 0.0,
+                "noise_var",  2.0,
 
-		"signal_dist",  P_GAUSSIAN,
-		"signal_size",  [ 100, 150, 150, 200 ],
-		"signal_var",   0.125,
-		"signal_mean",  0.0,
-		"signal_shift", 0.75,
-		"signal_space", 0.75);
+                "signal_dist",  P_GAUSSIAN,
+                "signal_size",  [ 100, 150, 150, 200 ],
+                "signal_var",   0.125,
+                "signal_mean",  0.0,
+                "signal_shift", 0.75,
+                "signal_space", 0.75);
   [ data, truth ] = gen_data(desc);
 endfunction
 
@@ -166,7 +166,7 @@ function [ data, truth, desc ] = data_bernoulli(dims, extra)
 
     %% Data
     signal_data = ...
-	sparse(rand(dims, sizes(c)) < signal_theta * ones(1, sizes(c)));
+        sparse(rand(dims, sizes(c)) < signal_theta * ones(1, sizes(c)));
 
     %% Join
     data  = [ data,  signal_data ];
@@ -191,17 +191,17 @@ function [ data, truth, desc ] = data_special1(dims, extra)
   if dims == 2
     %% Triangle
     means = [ 0.000,  1.000 ; ...
-	      0.866, -0.500 ; ...
-	     -0.866, -0.500 ]';
+              0.866, -0.500 ; ...
+             -0.866, -0.500 ]';
     sizes = [ 100, 150, 200 ];
 
   elseif dims == 3
     %% Tetrahedron
     %% From http://www.cs.umbc.edu/~squire/reference/polyhedra.shtml
     means = [ 0.000,  0.000,  1.000 ; ...
-	      0.943,  0.000, -0.333 ; ...
-	     -0.471,  0.816, -0.333 ; ...
-	     -0.471, -0.816, -0.333 ]';
+              0.943,  0.000, -0.333 ; ...
+             -0.471,  0.816, -0.333 ; ...
+             -0.471, -0.816, -0.333 ]';
     sizes = [ 100, 150, 150, 200 ];
 
   else
@@ -219,7 +219,7 @@ function [ data, truth, desc ] = data_special1(dims, extra)
   %% Signals
   for c = 1 : length(sizes)
     data  = [ data, 2.0 * means(:, c) * ones(1, sizes(c)) + ...
-	            sx_var * eye(dims) * randn(dims, sizes(c)) ];
+                    sx_var * eye(dims) * randn(dims, sizes(c)) ];
     truth = [ truth, (c + 1) * ones(1, sizes(c)) ];
   endfor
 

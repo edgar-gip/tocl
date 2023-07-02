@@ -6,7 +6,7 @@
 %%  Analysis of Minority And Outlier Detection"
 %% 7th IEEE Conference on Data Mining, 2007
 
-%% Author: Edgar Gonz‡lez i Pellicer
+%% Author: Edgar Gonz√†lez i Pellicer
 
 
 %% Octopus
@@ -24,7 +24,7 @@ enum P_BERNOULLI P_GAUSSIAN P_SPHERICAL P_UNIFORM
 args = argv();
 if length(args) ~= 5
   error(cstrcat("Wrong number of arguments:", ...
-		" Expected <generator> <extra> <dimensions> <seed> <output>"));
+                " Expected <generator> <extra> <dimensions> <seed> <output>"));
 endif
 
 %% Generator

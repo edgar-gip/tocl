@@ -2,7 +2,7 @@
 
 %% Generate some nice data: the Toy dataset of our late JMLR article
 
-%% Author: Edgar Gonz‡lez i Pellicer
+%% Author: Edgar Gonz√†lez i Pellicer
 
 %% Generate the data
 function [ data, truth ] = jmlr_data(generator)
@@ -107,7 +107,7 @@ function [ data, truth ] = gen_three_gauss_d()
   %% Join them
   data  = [ data1, data2, data3, data4 ];
   truth = [ 1 * ones(1, 2000), 2 * ones(1, 200), ...
-	    3 * ones(1, 100),  4 * ones(1, 100) ];
+            3 * ones(1, 100),  4 * ones(1, 100) ];
 endfunction
 
 %% Gaussian and triangle set
@@ -145,7 +145,7 @@ function [ data, truth ] = gen_gauss_tri_hm()
   %% Join them
   data  = [ data1, data2, data3, data4 ];
   truth = [ 1 * ones(1, 2000), 2 * ones(1, 200), 3 * ones(1, 200), ...
-	    4 * ones(1, 200) ];
+            4 * ones(1, 200) ];
 endfunction
 
 %% Two gaussian, triangle and half moon set
@@ -160,7 +160,7 @@ function [ data, truth ] = gen_two_gauss_tri_hm()
   %% Join them
   data  = [ data1, data2, data3, data4, data5 ];
   truth = [ 1 * ones(1, 2000), 2 * ones(1, 200), 3 * ones(1, 200), ...
-	    4 * ones(1, 200), 5 * ones(1, 100) ];
+            4 * ones(1, 200), 5 * ones(1, 100) ];
 endfunction
 
 %% Three gaussian, triangle and half moon set
@@ -177,6 +177,6 @@ function [ data, truth ] = gen_three_gauss_tri_hm()
   %% Join them
   data  = [ data1, data2, data3, data4, data5, data6 ];
   truth = [ 1 * ones(1, 2000), 2 * ones(1, 200), 3 * ones(1, 200), ...
-	    4 * ones(1, 200), 5 * ones(1, 100), 6 * ones(1, 100) ];
+            4 * ones(1, 200), 5 * ones(1, 100), 6 * ones(1, 100) ];
 endfunction
 

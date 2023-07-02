@@ -21,8 +21,8 @@ struct queue_element {
 
   // Default constructor
   queue_element(double _cost = 0.0,
-		octave_idx_type _row = 0,
-		octave_idx_type _col = 0) :
+                octave_idx_type _row = 0,
+                octave_idx_type _col = 0) :
     cost(_cost), row(_row), col(_col) {
   }
 
@@ -57,10 +57,10 @@ struct group {
 
 // Helper function
 static void multi_assignment(const Matrix& _costs,
-			     double& _cost,
-			     ColumnVector& _row_map,
-			     ColumnVector& _col_map,
-			     int& _groups) {
+                             double& _cost,
+                             ColumnVector& _row_map,
+                             ColumnVector& _col_map,
+                             int& _groups) {
   // Number of rows and columns
   octave_idx_type n_rows = _costs.rows();
   octave_idx_type n_cols = _costs.columns();
@@ -93,69 +93,69 @@ static void multi_assignment(const Matrix& _costs,
     if (row_group[r]) {
       // Col assignment?
       if (col_group[c]) {
-	// row_group[r] and col_group[c]
+        // row_group[r] and col_group[c]
 
-	// They can't be the same
-	assert(row_group[r] != col_group[c]);
+        // They can't be the same
+        assert(row_group[r] != col_group[c]);
       }
       else {
-	// row_group[r] and not col_group[c]
-	switch (row_group[r]->sense) {
-	case group::MULTI_ROW:
-	  // Skip...
-	  break;
+        // row_group[r] and not col_group[c]
+        switch (row_group[r]->sense) {
+        case group::MULTI_ROW:
+          // Skip...
+          break;
 
-	case group::ONE_ONE:
-	  // Convert into a MULTI_COL
-	  col_group[c] = row_group[r];
-	  col_group[c]->sense = group::MULTI_COL;
-	  col_group[c]->multi.push_back(c);
-	  added = true;
-	  break;
+        case group::ONE_ONE:
+          // Convert into a MULTI_COL
+          col_group[c] = row_group[r];
+          col_group[c]->sense = group::MULTI_COL;
+          col_group[c]->multi.push_back(c);
+          added = true;
+          break;
 
-	case group::MULTI_COL:
-	  // Just add
-	  col_group[c] = row_group[r];
-	  col_group[c]->multi.push_back(c);
-	  added = true;
-	  break;
-	}
+        case group::MULTI_COL:
+          // Just add
+          col_group[c] = row_group[r];
+          col_group[c]->multi.push_back(c);
+          added = true;
+          break;
+        }
       }
     }
     else {
       // Col assignment?
       if (col_group[c]) {
-	// not row_group[r] and col_group[c]
-	switch (col_group[c]->sense) {
-	case group::MULTI_ROW:
-	  // Just add
-	  row_group[r] = col_group[c];
-	  row_group[r]->multi.push_back(r);
-	  added = true;
-	  break;
+        // not row_group[r] and col_group[c]
+        switch (col_group[c]->sense) {
+        case group::MULTI_ROW:
+          // Just add
+          row_group[r] = col_group[c];
+          row_group[r]->multi.push_back(r);
+          added = true;
+          break;
 
-	case group::ONE_ONE:
-	  // Convert into a MULTI_ROW
-	  // (Switch first of multi and single!)
-	  row_group[r] = col_group[c];
-	  row_group[r]->sense = group::MULTI_ROW;
-	  std::swap(row_group[r]->single, row_group[r]->multi.front());
-	  row_group[r]->multi.push_back(r);
-	  added = true;
-	  break;
+        case group::ONE_ONE:
+          // Convert into a MULTI_ROW
+          // (Switch first of multi and single!)
+          row_group[r] = col_group[c];
+          row_group[r]->sense = group::MULTI_ROW;
+          std::swap(row_group[r]->single, row_group[r]->multi.front());
+          row_group[r]->multi.push_back(r);
+          added = true;
+          break;
 
-	case group::MULTI_COL:
-	  // Skip...
-	  break;
-	}
+        case group::MULTI_COL:
+          // Skip...
+          break;
+        }
       }
       else {
-	// not row_group[r] and not col_group[c]
+        // not row_group[r] and not col_group[c]
 
-	// Add a new group
-	groups.push_back(new group(r, c));
-	row_group[r] = col_group[c] = groups.back();
-	added = true;
+        // Add a new group
+        groups.push_back(new group(r, c));
+        row_group[r] = col_group[c] = groups.back();
+        added = true;
       }
     }
 
@@ -190,8 +190,8 @@ static void multi_assignment(const Matrix& _costs,
 
       // Assign each row
       for (std::vector<octave_idx_type>::const_iterator it =
-	     groups[i]->multi.begin(); it != groups[i]->multi.end(); ++it)
-	_row_map(*it) = i + 1;
+             groups[i]->multi.begin(); it != groups[i]->multi.end(); ++it)
+        _row_map(*it) = i + 1;
 
       break;
 
@@ -202,8 +202,8 @@ static void multi_assignment(const Matrix& _costs,
 
       // Assign each column
       for (std::vector<octave_idx_type>::const_iterator it =
-	     groups[i]->multi.begin(); it != groups[i]->multi.end(); ++it)
-	_col_map(*it) = i + 1;
+             groups[i]->multi.begin(); it != groups[i]->multi.end(); ++it)
+        _col_map(*it) = i + 1;
 
       break;
     }

@@ -18,5 +18,5 @@ function [ this ] = NullInterpolator()
   %% Bless
   %% And add inheritance
   this = class(this, "NullInterpolator", ...
-	       Simple());
+               Simple());
 endfunction

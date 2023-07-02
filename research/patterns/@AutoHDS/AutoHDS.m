@@ -58,5 +58,5 @@ function [ this ] = AutoHDS(divergence, opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "AutoHDS", ...
-	       Simple());
+               Simple());
 endfunction

@@ -1,4 +1,4 @@
-// Copyright (C) 2011 Edgar Gonz‡lez i Pellicer <edgar.gip@gmail.com>
+// Copyright (C) 2011 Edgar Gonz√†lez i Pellicer <edgar.gip@gmail.com>
 //
 // This file is part of octopus-0.1.
 //
@@ -262,8 +262,8 @@ namespace std {
 
 // In convex hull
 static void in_convex_hull(const Matrix& _set,
-			   const Matrix& _targets,
-			   boolMatrix& _outcome) {
+                           const Matrix& _targets,
+                           boolMatrix& _outcome) {
   // Relation type ("=")
   typedef CGAL::Const_oneset_iterator<CGAL::Comparison_result> R_it;
 
@@ -290,8 +290,8 @@ static void in_convex_hull(const Matrix& _set,
 
     // Create a program
     Program lp(n_set,      // Number of variables
-	       n_dims + 1, // Number of constraints
-	       set_it, target_it, R_it(CGAL::EQUAL), C_it(0.0));
+               n_dims + 1, // Number of constraints
+               set_it, target_it, R_it(CGAL::EQUAL), C_it(0.0));
 
     // Solve it
     CGAL::MP_Float dummy;
@@ -308,7 +308,7 @@ static void in_convex_hull(const Matrix& _set,
 DEFUN_DLD(in_convex_hull, _args, _nargout,
           "-*- texinfo -*-\n\
 @deftypefn {Loadable Function} {[ @var{inside} ] =}\
- in_convex_hull(@var{set}, @var{target})\n	\
+ in_convex_hull(@var{set}, @var{target})\n      \
 \n\
 Determine if target points are inside the convex hull of set\n\
 @end deftypefn") {

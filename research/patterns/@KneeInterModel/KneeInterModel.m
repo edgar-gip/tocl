@@ -10,7 +10,7 @@ function [ this ] = KneeInterModel(mid, mid_in, low_model, high_model)
   %% Check arguments
   if nargin() ~= 4
     usage(cstrcat("[ this ] = KneeInterModel(mid, mid_in,",
-		  " high_in, low_model, high_model)"));
+                  " high_in, low_model, high_model)"));
   endif
 
   %% This object
@@ -25,5 +25,5 @@ function [ this ] = KneeInterModel(mid, mid_in, low_model, high_model)
   %% Bless
   %% And add inheritance
   this = class(this, "KneeInterModel", ...
-	       Simple());
+               Simple());
 endfunction

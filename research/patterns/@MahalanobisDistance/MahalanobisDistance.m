@@ -21,5 +21,5 @@ function [ this ] = MahalanobisDistance(data)
   %% Bless
   %% And add inheritance
   this = class(this, "MahalanobisDistance", ...
-	       Simple());
+               Simple());
 endfunction

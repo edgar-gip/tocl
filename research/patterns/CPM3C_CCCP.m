@@ -10,7 +10,7 @@
 
 function [ omega, xi, obj, its ] = ...
       CPM3C_CCCP(data, omega, xi, W, C, l, per_quit, sum_data, z, ...
-		 iterations, violation, verbose)
+                 iterations, violation, verbose)
 
   %% Sizes
   [ n_dims, n_data ] = size(data);
@@ -63,12 +63,12 @@ function [ omega, xi, obj, its ] = ...
 
   %% Starting objective function value
   obj = CPM3C_cost(omega, xi, C);
-  
+
   %% Display
   if verbose
     if rem(iterations + 1, 10) == 0
       fprintf(2, "+ %6d %4d %8g %8g %8g\n", iterations + 1, nConstraints, ...
-	      obj, xi, violation);
+              obj, xi, violation);
     else
       fprintf(2, "+");
     endif
@@ -109,10 +109,10 @@ function [ omega, xi, obj, its ] = ...
     %% Display
     if verbose
       if rem(iterations + its + 1, 10) == 0
-	fprintf(2, ". %6d %4d %8g %8g %8g\n", iterations + its + 1, ...
-		n_constraints, obj, xi, violation);
+        fprintf(2, ". %6d %4d %8g %8g %8g\n", iterations + its + 1, ...
+                n_constraints, obj, xi, violation);
       else
-	fprintf(2, ".");
+        fprintf(2, ".");
       endif
     endif
 

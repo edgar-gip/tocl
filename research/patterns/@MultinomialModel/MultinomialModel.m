@@ -23,5 +23,5 @@ function [ this ] = MultinomialModel(k, alpha, theta)
   %% Bless
   %% And add inheritance
   this = class(this, "MultinomialModel", ...
-	       Simple());
+               Simple());
 endfunction

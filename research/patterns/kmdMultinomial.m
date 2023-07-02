@@ -58,7 +58,7 @@ args = argv();
 %% Check parameter length
 if length(args) ~= 5
   error(cstrcat("Wrong number of arguments: Expected", ...
-		" <input> <s_0> <s_min> <iterations> <seed>"));
+                " <input> <s_0> <s_min> <iterations> <seed>"));
 endif
 
 %% Input file
@@ -82,9 +82,9 @@ set_all_seeds(seed);
 
 %% Create kMD clusterer
 kmd_clusterer = KMD(@KMDMultinomial, [], ...
-		    struct("start_size",     s_0,   ...
-			   "min_size",       s_min, ...
-			   "max_iterations", its));
+                    struct("start_size",     s_0,   ...
+                           "min_size",       s_min, ...
+                           "max_iterations", its));
 
 %% Perform clustering
 [ kmd_expec, kmd_model ] = cluster(kmd_clusterer, data);

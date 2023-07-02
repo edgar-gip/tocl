@@ -10,7 +10,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Check arguments
   if ~any(nargin() == [ 3, 4 ])
     usage(cstrcat("[ expec, model, info ] = ", ...
-		  "@KMeans/cluster(this, data, k [, expec_0])"));
+                  "@KMeans/cluster(this, data, k [, expec_0])"));
   endif
 
   %% Size
@@ -72,7 +72,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
 
     %% Make the expectation
     expec = sparse(min_indices, 1 : n_samples, ones(1, n_samples), ...
-		   k, n_samples);
+                   k, n_samples);
 
     %% Cluster sizes
     sizes = full(sum(expec, 2))'; % 1 * k

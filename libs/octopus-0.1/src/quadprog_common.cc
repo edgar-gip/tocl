@@ -1,4 +1,4 @@
-// Copyright (C) 2010 Edgar Gonz‡lez i Pellicer <edgar.gip@gmail.com>
+// Copyright (C) 2010 Edgar Gonz√†lez i Pellicer <edgar.gip@gmail.com>
 //
 // This file is part of octopus-0.1.
 //
@@ -25,12 +25,12 @@
 
 // Parse quadprog arguments
 void parse_quadprog_args(const octave_value_list& args,
-			 int& n_vars, int& n_ineq, int& n_eq,
-			 Matrix& H, ColumnVector& f,
-			 Matrix& Aineq, ColumnVector& bineq,
-			 Matrix& Aeq, ColumnVector& beq,
-			 ColumnVector& lb, ColumnVector& ub,
-			 ColumnVector& x, Octave_map& opts) throw (const char*) {
+                         int& n_vars, int& n_ineq, int& n_eq,
+                         Matrix& H, ColumnVector& f,
+                         Matrix& Aineq, ColumnVector& bineq,
+                         Matrix& Aeq, ColumnVector& beq,
+                         ColumnVector& lb, ColumnVector& ub,
+                         ColumnVector& x, Octave_map& opts) throw (const char*) {
   // Check the number of parameters
   if (args.length() < 4 or args.length() > 10)
     throw (const char*)0;

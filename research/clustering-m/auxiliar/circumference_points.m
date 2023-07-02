@@ -23,7 +23,7 @@ function [ X Y ] = circumference_points(xc, yc, r)
     %% Find new point
     if p < 0
       dx = dx + 1;
-      p  = p + 2 * dx + 1;      
+      p  = p + 2 * dx + 1;
     else
       dx = dx + 1;
       dy = dy - 1;
@@ -43,5 +43,5 @@ function [ X Y ] = circumference_points(xc, yc, r)
   %% Shift
   X = X + xc;
   Y = Y + yc;
-  
+
 % end function

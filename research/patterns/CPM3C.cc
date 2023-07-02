@@ -23,15 +23,15 @@ Find the CPM3C most violated constraint\n\
     print_usage();
     return octave_value_list();
   }
-  
+
   // Check data
-  if (not args(0).is_matrix_type()) { 
+  if (not args(0).is_matrix_type()) {
     error("data should be a matrix");
     return octave_value_list();
   }
 
   // Get omega
-  if (not args(1).is_matrix_type()) { 
+  if (not args(1).is_matrix_type()) {
     error("omega should be a matrix");
     return octave_value_list();
   }
@@ -143,14 +143,14 @@ Find the CPM3C most violated constraint\n\
       std::fill(z.data(), z.data() + n_samples, 1.0);
       std::copy(z_rows.begin(), z_rows.end(), z.ridx());
       std::copy(ttcl::ut::range(0), ttcl::ut::range(n_samples + 1), z.cidx());
-      
+
       // Assign
       output(2) = z;
 
       // More output?
       if (nargout > 3) {
-	// Assign the product
-	output(3) = product;
+        // Assign the product
+        output(3) = product;
       }
     }
   }
@@ -175,15 +175,15 @@ Find the CPM3C z matrix\n\
     print_usage();
     return octave_value_list();
   }
-  
+
   // Check data
-  if (not args(0).is_matrix_type()) { 
+  if (not args(0).is_matrix_type()) {
     error("data should be a matrix");
     return octave_value_list();
   }
 
   // Get omega
-  if (not args(1).is_matrix_type()) { 
+  if (not args(1).is_matrix_type()) {
     error("omega should be a matrix");
     return octave_value_list();
   }
@@ -235,7 +235,7 @@ Find the CPM3C z matrix\n\
     // For the others
     for (int r = 1; r < product.rows(); ++r)
       if (product(r, i) > product(win, i))
-	win = r;
+        win = r;
 
     // Add the winer
     z_rows.push_back(win);
@@ -250,7 +250,7 @@ Find the CPM3C z matrix\n\
   std::fill(z.data(), z.data() + n_samples, 1.0);
   std::copy(z_rows.begin(), z_rows.end(), z.ridx());
   std::copy(ttcl::ut::range(0), ttcl::ut::range(n_samples + 1), z.cidx());
-      
+
   // Assign
   output(0) = z;
 
@@ -275,15 +275,15 @@ Find the CPM3C clustering\n\
     print_usage();
     return octave_value_list();
   }
-  
+
   // Check data
-  if (not args(0).is_matrix_type()) { 
+  if (not args(0).is_matrix_type()) {
     error("data should be a matrix");
     return octave_value_list();
   }
 
   // Get omega
-  if (not args(1).is_matrix_type()) { 
+  if (not args(1).is_matrix_type()) {
     error("omega should be a matrix");
     return octave_value_list();
   }
@@ -332,7 +332,7 @@ Find the CPM3C clustering\n\
     // For the others
     for (int r = 1; r < product.rows(); ++r)
       if (product(r, i) > product(win, i))
-	win = r;
+        win = r;
 
     // Set the winer
     clustering(i) = win;

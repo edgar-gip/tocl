@@ -81,7 +81,7 @@ function [ expec, model, info ] = CPM3C_clustering(data, k, opts)
       %% Random in [-1...+1] range
       opts.omega_0 = 2 * rand(n_dims, k) - 1;
     endif
-    
+
     %% Call generic CPM3C
     [ expec, model, info ] = CPM3C_loop(data, k, opts);
   endif

@@ -30,7 +30,7 @@ function [ model ] = maximization(this, data, expec)
   for c = 1 : k
     %% Sum of products
     sum2 = full((data .* (ones(n_dims, 1) * expec(c, :))) * ...
-		 data'); % n_dims * n_dims
+                 data'); % n_dims * n_dims
 
     %% Covariance
     sigma = sum2 / cl_sizes(c) - cl_mu(:, c) * cl_mu(:, c)';
@@ -60,7 +60,7 @@ function [ model ] = maximization(this, data, expec)
 
   %% Create the model
   model = GaussianEMModel(k, ...
-			  cl_sizes + cl_norm, ... % 1 * k
-			  cl_mu,              ... % n_dims * k
-			  cl_isigma);             % n_dims * n_dims * k
+                          cl_sizes + cl_norm, ... % 1 * k
+                          cl_mu,              ... % n_dims * k
+                          cl_isigma);             % n_dims * n_dims * k
 endfunction

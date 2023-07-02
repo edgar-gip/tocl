@@ -15,5 +15,5 @@ function [ this ] = Histogram()
   %% Bless
   %% And add inheritance
   this = class(struct(), "Histogram", ...
-	       Simple());
+               Simple());
 endfunction

@@ -6,5 +6,5 @@ function Out = normalize_matrix(In)
 
   %% Normalize
   Out = -1.0 + 2.0 * (In - small) / (big - small);
-  
+
 % end function

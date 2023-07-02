@@ -7,8 +7,8 @@
 // Helper function
 template <typename SMatrix, typename TMatrix>
 static void kl_divergence(Matrix& _distances,
-			  const SMatrix& _source,
-			  const TMatrix& _target) {
+                          const SMatrix& _source,
+                          const TMatrix& _target) {
   // Number of dimensions
   octave_idx_type n_dims = _source.rows(); // == _target.rows();
 
@@ -29,11 +29,11 @@ static void kl_divergence(Matrix& _distances,
       double sum_t  = 0.0;
       double sum_st = 0.0;
       for (octave_idx_type i = 0; i < n_dims; ++i) {
-	sum_s += _source(i, src);
-	sum_t += _target(i, tgt);
-	if (_target(i, tgt))
-	  sum_st += _target(i, tgt) * std::log(_target(i, tgt) /
-					       _source(i, src));
+        sum_s += _source(i, src);
+        sum_t += _target(i, tgt);
+        if (_target(i, tgt))
+          sum_st += _target(i, tgt) * std::log(_target(i, tgt) /
+                                               _source(i, src));
       }
 
       // Normalize and set
@@ -44,8 +44,8 @@ static void kl_divergence(Matrix& _distances,
 
 // Specialization for two sparse matrices
 static void kl_divergence(Matrix& _distances,
-			  const SparseMatrix& _source,
-			  const SparseMatrix& _target) {
+                          const SparseMatrix& _source,
+                          const SparseMatrix& _target) {
   // Number of dimensions
   octave_idx_type n_dims = _source.rows(); // == _target.rows();
 
@@ -81,41 +81,41 @@ static void kl_divergence(Matrix& _distances,
       octave_idx_type src_i = src_cidx[src];
       octave_idx_type tgt_i = tgt_cidx[tgt];
       while (src_i < src_cidx[src + 1] and
-	     tgt_i < tgt_cidx[tgt + 1]) {
-	// What?
-	if (src_ridx[src_i] < tgt_ridx[tgt_i]) {
-	  // Advance source
-	  sum_s  += src_data[src_i++];
-	}
-	else if (src_ridx[src_i] > tgt_ridx[tgt_i]) {
-	  // Advance target
-	  sum_t  += tgt_data[tgt_i++];
-	  sum_st += INFINITY;
-	}
-	else { // src_ridx[src_i] == tgt_ridx[tgt_i]
-	  // Update
-	  sum_s  += src_data[src_i];
-	  sum_t  += tgt_data[tgt_i];
-	  sum_st += tgt_data[tgt_i]
-	          * std::log(tgt_data[tgt_i] / src_data[src_i]);
+             tgt_i < tgt_cidx[tgt + 1]) {
+        // What?
+        if (src_ridx[src_i] < tgt_ridx[tgt_i]) {
+          // Advance source
+          sum_s  += src_data[src_i++];
+        }
+        else if (src_ridx[src_i] > tgt_ridx[tgt_i]) {
+          // Advance target
+          sum_t  += tgt_data[tgt_i++];
+          sum_st += INFINITY;
+        }
+        else { // src_ridx[src_i] == tgt_ridx[tgt_i]
+          // Update
+          sum_s  += src_data[src_i];
+          sum_t  += tgt_data[tgt_i];
+          sum_st += tgt_data[tgt_i]
+                  * std::log(tgt_data[tgt_i] / src_data[src_i]);
 
-	  // Advance both
-	  ++src_i;
-	  ++tgt_i;
-	}
+          // Advance both
+          ++src_i;
+          ++tgt_i;
+        }
       }
 
       // While source remains
       while (src_i < src_cidx[src + 1]) {
-	// Advance source
-	sum_s += src_data[src_i++];
+        // Advance source
+        sum_s += src_data[src_i++];
       }
 
       // While target remains
       while (tgt_i < tgt_cidx[tgt + 1]) {
-	// Advance target
-	sum_t  += tgt_data[tgt_i++];
-	sum_st += INFINITY;
+        // Advance target
+        sum_t  += tgt_data[tgt_i++];
+        sum_st += INFINITY;
       }
 
       // Normalize and set
@@ -220,26 +220,26 @@ Find the kullback-leibler divergence between elements of @var{source} and\
 
       // Get target
       if (args(1).is_sparse_type()) {
-	// As a sparse matrix
-	SparseMatrix target = args(1).sparse_matrix_value();
+        // As a sparse matrix
+        SparseMatrix target = args(1).sparse_matrix_value();
 
-	// Check dimensions
-	if (source.rows() != target.rows())
-	  throw "source and target should have the same number of rows";
+        // Check dimensions
+        if (source.rows() != target.rows())
+          throw "source and target should have the same number of rows";
 
-	// Find distances
-	kl_divergence(distances, source, target);
+        // Find distances
+        kl_divergence(distances, source, target);
       }
       else {
-	// As a dense matrix
-	Matrix target = args(1).matrix_value();
+        // As a dense matrix
+        Matrix target = args(1).matrix_value();
 
-	// Check dimensions
-	if (source.rows() != target.rows())
-	  throw "source and target should have the same number of rows";
+        // Check dimensions
+        if (source.rows() != target.rows())
+          throw "source and target should have the same number of rows";
 
-	// Find distances
-	kl_divergence(distances, source, target);
+        // Find distances
+        kl_divergence(distances, source, target);
       }
     }
     else {
@@ -248,26 +248,26 @@ Find the kullback-leibler divergence between elements of @var{source} and\
 
       // Get target
       if (args(1).is_sparse_type()) {
-	// As a sparse matrix
-	SparseMatrix target = args(1).sparse_matrix_value();
+        // As a sparse matrix
+        SparseMatrix target = args(1).sparse_matrix_value();
 
-	// Check dimensions
-	if (source.rows() != target.rows())
-	  throw "source and target should have the same number of rows";
+        // Check dimensions
+        if (source.rows() != target.rows())
+          throw "source and target should have the same number of rows";
 
-	// Find distances
-	kl_divergence(distances, source, target);
+        // Find distances
+        kl_divergence(distances, source, target);
       }
       else {
-	// As a dense matrix
-	Matrix target = args(1).matrix_value();
+        // As a dense matrix
+        Matrix target = args(1).matrix_value();
 
-	// Check dimensions
-	if (source.rows() != target.rows())
-	  throw "source and target should have the same number of rows";
+        // Check dimensions
+        if (source.rows() != target.rows())
+          throw "source and target should have the same number of rows";
 
-	// Find distances
-	kl_divergence(distances, source, target);
+        // Find distances
+        kl_divergence(distances, source, target);
       }
     }
 

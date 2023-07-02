@@ -60,9 +60,9 @@ static double digamma_inv(double y) {
  */
 static void
 dirichlet_estimate(Matrix& _alpha, Matrix& _log_z,
-		   const Matrix& _suff,
-		   octave_idx_type _cl, octave_idx_type _bl,
-		   octave_idx_type _start, octave_idx_type _end) {
+                   const Matrix& _suff,
+                   octave_idx_type _cl, octave_idx_type _bl,
+                   octave_idx_type _start, octave_idx_type _end) {
   // Start with an equal solution
   double eq_alpha = 1.0 / (_end - _start);
   for (int j = _start; j < _end; ++j)
@@ -156,12 +156,12 @@ Estimate the alpha parameters in Dirichlet clusters\n\
       // For each block
       octave_idx_type start = 0;
       for (octave_idx_type bl = 0; bl < blocks.length(); ++bl) {
-	// Estimate from suff(k, start : start + blocks(bl) - 1)
-	dirichlet_estimate(alpha, log_z, suff, cl, bl,
-			   start, start + blocks(bl));
+        // Estimate from suff(k, start : start + blocks(bl) - 1)
+        dirichlet_estimate(alpha, log_z, suff, cl, bl,
+                           start, start + blocks(bl));
 
-	// Next block start
-	start += blocks(bl);
+        // Next block start
+        start += blocks(bl);
       }
     }
 

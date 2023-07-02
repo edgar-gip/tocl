@@ -39,5 +39,5 @@ function [ this ] = SoftBBCEM(divergence, opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "SoftBBCEM", ...
-	       EM(opts));
+               EM(opts));
 endfunction

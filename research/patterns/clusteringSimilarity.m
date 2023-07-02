@@ -2,7 +2,7 @@
 
 %% Random clustering similarity
 
-%% Author: Edgar Gonz‡lez i Pellicer
+%% Author: Edgar Gonz√†lez i Pellicer
 
 
 %% Octopus
@@ -36,7 +36,7 @@ function [ value ] = nmi(cl_1, marg_1, sqrt_h_1, cl_2, marg_2, sqrt_h_2)
 
   %% Mutual information
   mi = sum(sum(act .* log(act ./ ((marg_1 * ones(1, k_2)) .* ...
-				  (ones(k_1, 1) * marg_2')))));
+                                  (ones(k_1, 1) * marg_2')))));
 
   %% Normalize
   value = full(mi) / sqrt_h_1 / sqrt_h_2;
@@ -67,8 +67,8 @@ function [ value ] = nmi(cl_1, marg_1, sqrt_h_1, cl_2, marg_2, sqrt_h_2)
 
   %% %% Mi
   %% map_mi = sum(sum(map_act .* ...
-  %% 		   log(map_act ./ ((map_marg_1 * ones(1, groups)) .* ...
-  %% 				   (ones(groups, 1) * map_marg_2')))));
+  %%               log(map_act ./ ((map_marg_1 * ones(1, groups)) .* ...
+  %%                               (ones(groups, 1) * map_marg_2')))));
 
   %% %% Normalize
   %% m_value = full(map_mi) / map_sqrt_h_1 / map_sqrt_h_2;
@@ -83,8 +83,8 @@ endfunction
 args = argv();
 if length(args) ~= 8
   error(cstrcat("Wrong number of arguments: Expected", ...
-		" <input> <distance> <d-extra> <clusterer> <c-extra>", ...
-		" <repeats> <max_k> <seed>"));
+                " <input> <distance> <d-extra> <clusterer> <c-extra>", ...
+                " <repeats> <max_k> <seed>"));
 endif
 
 %% Input file
@@ -117,7 +117,7 @@ cextra = regex_split(args{5}, '(,|\s+,)\s*');
 req_args = getfield(clusterers, clu, "args");
 if length(cextra) ~= req_args
   error("Clusterer '%s' requires %d extra arg(s): %s",
-	clu, req_args, getfield(clusterers, clu, "help"));
+        clu, req_args, getfield(clusterers, clu, "help"));
 endif
 
 %% Repeats

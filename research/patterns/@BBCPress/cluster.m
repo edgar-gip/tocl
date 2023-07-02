@@ -10,7 +10,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Check arguments
   if ~any(nargin() == [ 3, 4 ])
     usage(cstrcat("[ expec, model, info ] = ",
-		  "@BBCPress/cluster(this, data, k [, expec_0]])"));
+                  "@BBCPress/cluster(this, data, k [, expec_0]])"));
   endif
 
   %% Size
@@ -68,12 +68,12 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
 
       %% Only one cluster?
       if k == 1
-	%% It's it
-	min_divs    = divs;
-	min_indices = ones(1, n_samples);
+        %% It's it
+        min_divs    = divs;
+        min_indices = ones(1, n_samples);
       else
-	%% Select the closest cluster
-	[ min_divs, min_indices ] = min(divs);
+        %% Select the closest cluster
+        [ min_divs, min_indices ] = min(divs);
       endif
 
       %% Sort the clusters

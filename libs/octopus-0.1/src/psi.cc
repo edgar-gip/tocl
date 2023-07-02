@@ -1,4 +1,4 @@
-// Copyright (C) 2010 Edgar Gonz‡lez i Pellicer <edgar.gip@gmail.com>
+// Copyright (C) 2010 Edgar Gonz√†lez i Pellicer <edgar.gip@gmail.com>
 //
 // This file is part of octopus-0.1.
 //
@@ -11,7 +11,7 @@
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 // FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 // for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with octopus; see the file COPYING.  If not, see
 // <http://www.gnu.org/licenses/>.
@@ -50,12 +50,12 @@ static double psigamma_inv(double y, double deriv) {
 
     // New function value
     f = psigamma(x, deriv) - y;
-    
+
     // Exit if the function is close enough to zero
     if (std::abs(f) < THRESHOLD)
       return x;
   }
-  
+
   // Not found!
   return NAN;
 }
@@ -99,13 +99,13 @@ of array @var{X}\n\
 
       // Get the argument
       if (args(0).is_real_scalar()) {
-	is_x_scalar = true;
+        is_x_scalar = true;
       }
       else if (args(0).is_real_matrix()) {
-	is_x_scalar = false;
+        is_x_scalar = false;
       }
       else {
-	throw "x should be a real scalar or matrix";
+        throw "x should be a real scalar or matrix";
       }
       x = args(0).matrix_value();
 
@@ -116,13 +116,13 @@ of array @var{X}\n\
     else {
       // Get the first argument
       if (args(0).is_real_scalar()) {
-	is_k_scalar = true;
+        is_k_scalar = true;
       }
       else if (args(0).is_real_matrix()) {
-	is_k_scalar = false;
+        is_k_scalar = false;
       }
       else {
-	throw "k should be a real scalar or matrix";
+        throw "k should be a real scalar or matrix";
       }
       k = args(0).matrix_value();
 
@@ -132,25 +132,25 @@ of array @var{X}\n\
 
       // Get the second argument
       if (args(1).is_real_scalar()) {
-	is_x_scalar = true;
+        is_x_scalar = true;
       }
       else if (args(1).is_real_matrix()) {
-	is_x_scalar = false;
+        is_x_scalar = false;
       }
       else {
-	throw "x should be a real scalar or matrix";
+        throw "x should be a real scalar or matrix";
       }
       x = args(1).matrix_value();
-      
+
       // Check dimensions
       if (not is_x_scalar) {
-	if (is_k_scalar) {
-	  rows = x.rows();
-	  cols = x.columns();
-	}
-	else if (x.rows() != rows or x.columns() != cols) {
-	  throw "k and x should have the same size";
-	}
+        if (is_k_scalar) {
+          rows = x.rows();
+          cols = x.columns();
+        }
+        else if (x.rows() != rows or x.columns() != cols) {
+          throw "k and x should have the same size";
+        }
       }
     }
 
@@ -165,11 +165,11 @@ of array @var{X}\n\
 
       // Loop
       for (int r = 0; r < rows; ++r) {
-	for (int c = 0; c < cols; ++c) {
-	  double kv = is_k_scalar ? k(0, 0) : k(r, c);
-	  double xv = is_x_scalar ? x(0, 0) : x(r, c);
-	  out(r, c) = psigamma(xv, kv);
-	}
+        for (int c = 0; c < cols; ++c) {
+          double kv = is_k_scalar ? k(0, 0) : k(r, c);
+          double xv = is_x_scalar ? x(0, 0) : x(r, c);
+          out(r, c) = psigamma(xv, kv);
+        }
       }
 
       // Set it
@@ -235,13 +235,13 @@ of array @var{X}\n\
 
       // Get the argument
       if (args(0).is_real_scalar()) {
-	is_x_scalar = true;
+        is_x_scalar = true;
       }
       else if (args(0).is_real_matrix()) {
-	is_x_scalar = false;
+        is_x_scalar = false;
       }
       else {
-	throw "x should be a real scalar or matrix";
+        throw "x should be a real scalar or matrix";
       }
       x = args(0).matrix_value();
 
@@ -252,13 +252,13 @@ of array @var{X}\n\
     else {
       // Get the first argument
       if (args(0).is_real_scalar()) {
-	is_k_scalar = true;
+        is_k_scalar = true;
       }
       else if (args(0).is_real_matrix()) {
-	is_k_scalar = false;
+        is_k_scalar = false;
       }
       else {
-	throw "k should be a real scalar or matrix";
+        throw "k should be a real scalar or matrix";
       }
       k = args(0).matrix_value();
 
@@ -268,25 +268,25 @@ of array @var{X}\n\
 
       // Get the second argument
       if (args(1).is_real_scalar()) {
-	is_x_scalar = true;
+        is_x_scalar = true;
       }
       else if (args(1).is_real_matrix()) {
-	is_x_scalar = false;
+        is_x_scalar = false;
       }
       else {
-	throw "x should be a real scalar or matrix";
+        throw "x should be a real scalar or matrix";
       }
       x = args(1).matrix_value();
-      
+
       // Check dimensions
       if (not is_x_scalar) {
-	if (is_k_scalar) {
-	  rows = x.rows();
-	  cols = x.columns();
-	}
-	else if (x.rows() != rows or x.columns() != cols) {
-	  throw "k and x should have the same size";
-	}
+        if (is_k_scalar) {
+          rows = x.rows();
+          cols = x.columns();
+        }
+        else if (x.rows() != rows or x.columns() != cols) {
+          throw "k and x should have the same size";
+        }
       }
     }
 
@@ -301,11 +301,11 @@ of array @var{X}\n\
 
       // Loop
       for (int r = 0; r < rows; ++r) {
-	for (int c = 0; c < cols; ++c) {
-	  double kv = is_k_scalar ? k(0, 0) : k(r, c);
-	  double xv = is_x_scalar ? x(0, 0) : x(r, c);
-	  out(r, c) = psigamma_inv(xv, kv);
-	}
+        for (int c = 0; c < cols; ++c) {
+          double kv = is_k_scalar ? k(0, 0) : k(r, c);
+          double xv = is_x_scalar ? x(0, 0) : x(r, c);
+          out(r, c) = psigamma_inv(xv, kv);
+        }
       }
 
       // Set it

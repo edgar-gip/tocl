@@ -21,5 +21,5 @@ function [ this ] = RBFKernel(rbf_gamma)
   %% Bless
   %% And add inheritance
   this = class(this, "RBFKernel", ...
-	       Simple());
+               Simple());
 endfunction

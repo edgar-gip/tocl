@@ -29,5 +29,5 @@ function [ this ] = GeneratedVoronoi(distance_gen, opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "GeneratedVoronoi", ...
-	       Simple());
+               Simple());
 endfunction

@@ -2,9 +2,9 @@
 
 %% Add something to the LOADPATH
 addpath("/home/usuaris/egonzalez/devel/research/matlabClustering/combination",...
-	"/home/usuaris/egonzalez/devel/research/matlabClustering/io",       ...
-	"/home/usuaris/egonzalez/devel/research/matlabClustering/measures", ...
-	"/home/usuaris/egonzalez/devel/research/matlabClustering/weak");
+        "/home/usuaris/egonzalez/devel/research/matlabClustering/io",       ...
+        "/home/usuaris/egonzalez/devel/research/matlabClustering/measures", ...
+        "/home/usuaris/egonzalez/devel/research/matlabClustering/weak");
 
 %% Data
 
@@ -86,5 +86,3 @@ for i = 1:4
   fclose(file);
 
 end
-
-

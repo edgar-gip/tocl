@@ -10,7 +10,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Check arguments
   if ~any(nargin() == [ 2, 3, 4 ])
     usage(cstrcat("[ expec, model, info ] = ",
-		  "@DGRADE/cluster(this, data [, k [, expec_0]])"));
+                  "@DGRADE/cluster(this, data [, k [, expec_0]])"));
   endif
 
   %% Warn that k is ignored
@@ -33,7 +33,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
 
     %% Call helper
     [ hard_expec, centroids, radius ] = ...
-	cluster_singleton(this, n_samples, target_size, data);
+        cluster_singleton(this, n_samples, target_size, data);
   else
     %% Divergence matrix
     divs = apply(this.divergence, data);
@@ -41,8 +41,8 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
 
     %% Call helper
     [ hard_expec, centroid_indices, radius ] = ...
-	cluster_sone(this, n_samples, target_size, this.s_one, ...
-		     divs, sorted_divs, nearest_neighbours);
+        cluster_sone(this, n_samples, target_size, this.s_one, ...
+                     divs, sorted_divs, nearest_neighbours);
 
     %% Centroids
     centroids = data(:, centroid_indices);
@@ -53,7 +53,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   expec_on = find(hard_expec);
   expec    = ...
       sparse(hard_expec(expec_on), expec_on, ones(1, length(expec_on)), ...
-	     k, n_samples);
+             k, n_samples);
 
   %% Model
   model = BregmanBallModel(this.divergence, centroids, radius);

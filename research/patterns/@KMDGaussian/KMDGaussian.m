@@ -82,5 +82,5 @@ function [ this ] = KMDGaussian(first, sum0, sum1, sum2)
   %% Bless
   %% And add inheritance
   this = class(this, "KMDGaussian", ...
-	       KMDComponent());
+               KMDComponent());
 endfunction

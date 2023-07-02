@@ -26,10 +26,10 @@ function Eigen = comb_combine_binary (varargin)
       t = t + 2;
     end
   end
-  
+
   %% Create the binary matrix
   CM = comb_binary_matrix (target{:});
-  
+
   %% Find the eigenvalues
   Eigen = eig(CM * CM');
 

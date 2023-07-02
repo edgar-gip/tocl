@@ -50,17 +50,17 @@ namespace ttcl {
   public:
     /// Constructor
     /** @param _file    Exception source file
-	@param _line_no Exception source line number
-	@param _message Description message
+        @param _line_no Exception source line number
+        @param _message Description message
     */
     exception(const std::string& _file, uint _line_no,
-	      const std::string& _message);
+              const std::string& _message);
 
     /// Constructor from a char* and a variable argument list
     /** printf-style interpolation
      */
     exception(const std::string& _file, uint _line_no,
-	      const char* _format, ...) TTCL_PRINTF_CHECK(4, 5);
+              const char* _format, ...) TTCL_PRINTF_CHECK(4, 5);
 
   protected:
     /// Non-message specifying constructor
@@ -127,16 +127,15 @@ namespace ttcl {
 }
 
 /// Throw an exception
-#define TTCL_FIRE(...)						\
+#define TTCL_FIRE(...)                                          \
   throw ttcl::exception(__FILE__, __LINE__, __VA_ARGS__)
 
 /// TODO
-#define TTCL_TODO						\
+#define TTCL_TODO                                               \
   TTCL_FIRE("%s not implemented", __PRETTY_FUNCTION__)
 
 /// Virtual
-#define TTCL_PSEUDOVIRTUAL						\
+#define TTCL_PSEUDOVIRTUAL                                              \
   TTCL_FIRE("%s pseudovirtual version called", __PRETTY_FUNCTION__)
 
 #endif
-

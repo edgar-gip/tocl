@@ -21,5 +21,5 @@ function [ this ] = GaussianNoiseKnee()
   %% Bless
   %% And add inheritance
   this = class(this, "GaussianNoiseKnee", ...
-	       Simple());
+               Simple());
 endfunction

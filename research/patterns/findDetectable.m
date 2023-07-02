@@ -2,7 +2,7 @@
 
 %% Find detectable clusters from affinity matrix
 
-%% Author: Edgar Gonz‡lez i Pellicer
+%% Author: Edgar Gonz√†lez i Pellicer
 
 
 %% Division by zero
@@ -63,17 +63,17 @@ for i = 1 : n
       cluster_total   = setfield(cluster_total,   met, n_clust);
     else
       consistency_sum = setfield(consistency_sum, met, ...
-				 getfield(consistency_sum, met) + consistency);
+                                 getfield(consistency_sum, met) + consistency);
       consistency_den = setfield(consistency_den, met, ...
-				 getfield(consistency_den, met) + 1);
+                                 getfield(consistency_den, met) + 1);
       detectablty_sum = setfield(detectablty_sum, met, ...
-				 getfield(detectablty_sum, met) + detectablty);
+                                 getfield(detectablty_sum, met) + detectablty);
       detectablty_den = setfield(detectablty_den, met, ...
-				 getfield(detectablty_den, met) + 1);
+                                 getfield(detectablty_den, met) + 1);
       cluster_det     = setfield(cluster_det,     met, ...
-				 getfield(cluster_det,     met) + n_dets);
+                                 getfield(cluster_det,     met) + n_dets);
       cluster_total   = setfield(cluster_total,   met, ...
-				 getfield(cluster_total,   met) + n_clust);
+                                 getfield(cluster_total,   met) + n_clust);
     endif
   endfor
 endfor
@@ -93,5 +93,5 @@ for j = 1 : length(methods)
 
   %% Print them
   printf("%s %.2f %.2f %.2f\n", met, 100 * consistency, ...
-	 100 * macro_detectablty, 100 * micro_detectablty);
+         100 * macro_detectablty, 100 * micro_detectablty);
 endfor

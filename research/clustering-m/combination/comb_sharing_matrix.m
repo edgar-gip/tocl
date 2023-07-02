@@ -9,6 +9,6 @@ function M = comb_sharing_matrix (Clustering)
 
   %% Create the matrix
   M = ((Clustering * ones(1, nelems) ==
-	ones(nelems, 1) * Clustering'));
+        ones(nelems, 1) * Clustering'));
 
 % end function

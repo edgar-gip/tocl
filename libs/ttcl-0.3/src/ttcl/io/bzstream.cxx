@@ -16,14 +16,14 @@ using namespace ttcl::io;
 /// Flush buffer
 int bzstreambuf::
 flush_buffer() {
-	// Separate the writing of the buffer from overflow() and
-	// sync() operation.
-	int w = pptr() - pbase();
-	if (BZ2_bzwrite(file_, pbase(), w) != w)
-	  return EOF;
-	pbump(-w);
-	return w;
-      }
+  // Separate the writing of the buffer from overflow() and
+  // sync() operation.
+  int w = pptr() - pbase();
+  if (BZ2_bzwrite(file_, pbase(), w) != w)
+    return EOF;
+  pbump(-w);
+  return w;
+}
 
 /// Constructor
 bzstreambuf::

@@ -41,5 +41,5 @@ function [ this ] = DGRADE(divergence, opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "DGRADE", ...
-	       Simple());
+               Simple());
 endfunction

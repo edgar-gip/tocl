@@ -31,7 +31,7 @@ function [ model ] = maximization(this, data, expec)
   for c = 1 : k
     %% Sum of squares
     sum2 = full(sum((data .* data) .* ...
-		    (ones(n_dims, 1) * expec(c, :)), 2)); % n_dims * 1
+                    (ones(n_dims, 1) * expec(c, :)), 2)); % n_dims * 1
 
     %% Variances
     sigma = sum2 / cl_sizes(c) - cl_mu(:, c) .* cl_mu(:, c);
@@ -61,7 +61,7 @@ function [ model ] = maximization(this, data, expec)
 
   %% Create the model
   model = AlignedGaussianEMModel(k, ...
-				 cl_sizes + cl_norm, ... % 1 * k
-				 cl_mu,              ... % n_dims * k
-				 cl_isigma);             % n_dims * k
+                                 cl_sizes + cl_norm, ... % 1 * k
+                                 cl_mu,              ... % n_dims * k
+                                 cl_isigma);             % n_dims * k
 endfunction

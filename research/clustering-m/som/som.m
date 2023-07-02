@@ -4,7 +4,7 @@ function [ Mapping W ] = som(Data, dim, iter, geometry)
   if nargin < 3 || nargin > 4
     error("som: 4 parameters required");
   end
-  
+
   % Learning parameters
   alpha = 0.2;
 
@@ -27,12 +27,12 @@ function [ Mapping W ] = som(Data, dim, iter, geometry)
   printf("Assigning prototypes...\n");
   Idx   = floor(1.0 + rand(size(X), 1) * docs);
   W     = full(Data(Idx, :));
-  
+
   % Iterate
   for it = 1 : iter
     % Iteration
     printf("Iteration %d...\n", it);
-  
+
     % Linear decay of learning parameters
     it_alpha  = (1.0 - it / (iter + 1)) * alpha;
     it_radius = (1.0 - it / (iter + 1)) * sqrt(2.0);
@@ -41,14 +41,14 @@ function [ Mapping W ] = som(Data, dim, iter, geometry)
     for idx = randperm(docs)
       % Find the bmu
       bmu = som_best_match(W, Data(idx,:));
-      
+
       % Update neighbours
       W = som_update_neighbours(W, Data(idx,:), bmu, DistX,...
-				it_alpha, it_radius);
+                                it_alpha, it_radius);
     end
   end
-  
+
   % Return the mapping
   Mapping = som_mapping(W, X, Data);
-  
+
 % end function

@@ -2,7 +2,7 @@
 
 %% Test alpha value for fuzzy clustering
 
-%% Author: Edgar Gonz‡lez i Pellicer
+%% Author: Edgar Gonz√†lez i Pellicer
 
 
 %% Octopus
@@ -71,7 +71,7 @@ function [ data, truth, centr ] = gen_data(clusters, csize, radius, variance)
 
     %% Data
     data(:, base : base + (csize - 1)) = ...
-	centr(:, c) * ones(1, csize) + variance * randn(2, csize);
+        centr(:, c) * ones(1, csize) + variance * randn(2, csize);
 
     %% Truth
     truth(base : base + (csize - 1)) = c;
@@ -129,16 +129,16 @@ args = argv();
 %% Check parameter length
 if length(args) ~= 7
   error(cstrcat("Wrong number of arguments: Expected", ...
-		" <input>", ...
-		" <min_alpha> <max_alpha> <alpha_steps>", ...
-		" <min_gamma> <max_gamma> <gamma_steps>"));
+                " <input>", ...
+                " <min_alpha> <max_alpha> <alpha_steps>", ...
+                " <min_gamma> <max_gamma> <gamma_steps>"));
 endif
 
 %% Input argument format
 if ~isempty(tokens =
-	    regexp(args{1}, ...
-		   "^(\\d+)x(\\d+)xN\\(([\\d\\.]+),([\\d\\.]+)\\)$", ...
-		   "once", "tokens"))
+            regexp(args{1}, ...
+                   "^(\\d+)x(\\d+)xN\\(([\\d\\.]+),([\\d\\.]+)\\)$", ...
+                   "once", "tokens"))
   %% Generate the data
   clusters  = parse_double(tokens{1}, "number of clusters");
   csize     = parse_double(tokens{2}, "size");
@@ -225,7 +225,7 @@ for i = 1 : n_gamma
   for j = 1 : n_alpha
     %% Clusterer
     clusterer = BregmanEM(KernelDistance(RBFKernel(gamma(i, j))), ...
-			  struct("beta", alpha(i, j)));
+                          struct("beta", alpha(i, j)));
 
     %% True
 
@@ -255,7 +255,7 @@ for i = 1 : n_gamma
 
     %% %% Log
     fprintf("a_%3d=%8g g_%3d = %8g --> %8g / %8g\n", ...
-     	    j, alpha(i, j), i, gamma(i, j), min_dist_true, min_dist_true);
+            j, alpha(i, j), i, gamma(i, j), min_dist_true, min_dist_true);
 
     %% Store it
     centroid_distance_true(i, j) = min_dist_true;
@@ -265,15 +265,15 @@ endfor
 
 %% True
 log_contour("alpha", "gamma", "True clusters", ...
-	    alpha, gamma, centroid_distance_true);
+            alpha, gamma, centroid_distance_true);
 log_contour("alpha", "gamma", "True clusters", ...
-	    alpha, gamma, centroid_distance_true > epsilon);
+            alpha, gamma, centroid_distance_true > epsilon);
 
 %% Sqrt
 log_contour("alpha", "gamma", "SPQR clusters", ...
-	    alpha, gamma, centroid_distance_sqrt);
+            alpha, gamma, centroid_distance_sqrt);
 log_contour("alpha", "gamma", "SPQR clusters", ...
-	    alpha, gamma, centroid_distance_sqrt > epsilon);
+            alpha, gamma, centroid_distance_sqrt > epsilon);
 
 %% Wait
 pause();

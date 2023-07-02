@@ -43,7 +43,7 @@ static hashTable hPresent;
 // String duplication
 static char* mxStrDup(char* string) {
     char* output;
-    
+
     output = mxMalloc((strlen(string) + 1) * sizeof(char));
     strcpy(output, string);
     return output;
@@ -61,7 +61,7 @@ static void hashInit(hashTable* ht) {
 // Deinitialization
 static void hashFree(hashTable* ht) {
     int i;
-    
+
     for (i = 0; i < HASH_SIZE; ++i) {
         mxFree(ht->hashKeys[i]);
         mxFree(ht->hashVals[i]);
@@ -73,7 +73,7 @@ static void hashFree(hashTable* ht) {
 static int hashFunc(char* key) {
     int x   = 0;
     char* p = key;
-    
+
     while (*p) x += *p++;
     return (x & (HASH_SIZE - 1));
 }
@@ -82,7 +82,7 @@ static int hashFunc(char* key) {
 // Get
 static char* hashGet(hashTable* ht, char* key) {
     int h;
-    
+
     // Linear hashing
     h = hashFunc(key);
     while (ht->hashKeys[h]) {
@@ -98,10 +98,10 @@ static char* hashGet(hashTable* ht, char* key) {
 // Set
 static int hashSet(hashTable* ht, char* key, char* val) {
     int h;
-    
+
     if (ht->hashFill == HASH_SIZE - 1)
         return 0;
-        
+
     // Linear hashing
     h = hashFunc(key);
     while (ht->hashKeys[h]) {
@@ -118,7 +118,7 @@ static int hashSet(hashTable* ht, char* key, char* val) {
             }
             return 1;
         }
-        
+
         ++h;
         h &= (HASH_SIZE - 1);
     }
@@ -146,7 +146,7 @@ static errcode readDoc2Cat(char* doc2cat) {
 
     // File
     FILE* file;
-  
+
     // Open the doc2cat file
     if (!(file = fopen(doc2cat, "r")))
         return err_noopen;
@@ -162,7 +162,7 @@ static errcode readDoc2Cat(char* doc2cat) {
 
         ++errLine;
     }
-    
+
     // Error or EOF?
     if (ferror(file)) {
         fclose(file);
@@ -183,14 +183,14 @@ static errcode readRLabel(int ndocs, char* filename,
 
     // File
     FILE* file;
-    
+
     // Open the rlabel file
     if (!(file = fopen(filename, "r")))
         return err_noopen;
-  
+
     // Reserve memory
     *labels = mxMalloc(ndocs * sizeof(char*));
-    
+
     // Read rlabel
     errLine = 1;
     while(fgets(buffer, MAX_LINE_LENGTH, file)) {
@@ -199,19 +199,19 @@ static errcode readRLabel(int ndocs, char* filename,
             fclose(file);
             return err_linefor;
         }
-        
+
         if (!((*labels)[errLine - 1] = hashGet(&hDoc2Cat, docId))) {
             mxFree(*labels);
-            fclose(file);            
+            fclose(file);
             return err_nodocid;
         }
-        
+
         if (!hashGet(&hPresent, (*labels)[errLine - 1]))
             hashSet(&hPresent, (*labels)[errLine - 1], "present");
-        
+
         ++errLine;
     }
-    
+
     // Error or EOF?
     if (ferror(file)) {
         mxFree(*labels);
@@ -231,11 +231,11 @@ static errcode readRLabel(int ndocs, char* filename,
 static mxArray* fillCellArray(int size, char** content) {
     mxArray* output;
     int i;
-    
+
     output = mxCreateCellMatrix(size, 1);
     for (i = 0; i < size; ++i)
         mxSetCell(output, i, mxCreateString(content[i]));
-        
+
     return output;
 }
 
@@ -244,7 +244,7 @@ static mxArray* fillCellArray(int size, char** content) {
 static mxArray* fillCellArrayWithKeys(hashTable* ht) {
     mxArray* output;
     int i, j;
-    
+
     output = mxCreateCellMatrix(ht->hashFill, 1);
     for (i = 0, j = 0; i < HASH_SIZE && j < ht->hashFill; ++i)
         if (ht->hashKeys[i])
@@ -259,28 +259,28 @@ void mexFunction(int nlhs, mxArray *plhs[],
                  int nrhs, const mxArray *prhs[]) {
     // Buffer
     char filename[MAX_LINE_LENGTH];
-    
+
     // Matrix information
     int ndocs;
-    
+
     // Outputs
     char** labels;
-    
+
     // Auxiliary vars
     int status;
-    
+
     // Check the number of input parameters
     if (nrhs != 3)
         mexErrMsgTxt("Input parameters: <rlabel> <doc2cat> <ndocs>");
 
-    // Check the number of output parameters    
+    // Check the number of output parameters
     if (nlhs < 1 ||nlhs > 2)
         mexErrMsgTxt("One or two outputs required.");
-     
+
     // Check the type of first input
     if (!mxIsChar(prhs[0]) || mxGetM(prhs[0]) != 1)
         mexErrMsgTxt("First input parameter must be a string.");
-    
+
     // Check the type of second input
     if (!mxIsChar(prhs[1]) || mxGetM(prhs[1]) != 1)
         mexErrMsgTxt("Second input parameter must be a string.");
@@ -291,7 +291,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
 
     // Initialize the hash
     hashInit(&hDoc2Cat);
-    
+
     // Read doc2cat
     if (mxGetString(prhs[1], filename, MAX_LINE_LENGTH))
         mexErrMsgTxt("<doc2cat> filename too long.");
@@ -300,7 +300,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
                 filename, errLine);
         mexErrMsgTxt(errBuffer);
     }
-    
+
     // Create document label list
     if (mxGetString(prhs[0], filename, MAX_LINE_LENGTH)) {
         hashFree(&hDoc2Cat);
@@ -316,7 +316,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
     // Read rlabel
     if (status = readRLabel(ndocs, filename, &labels)) {
         hashFree(&hDoc2Cat);
-        hashFree(&hPresent);        
+        hashFree(&hPresent);
         sprintf(errBuffer, "%s at %s:%d.", errMessages[status],
                 filename, errLine);
         mexErrMsgTxt(errBuffer);
@@ -326,10 +326,10 @@ void mexFunction(int nlhs, mxArray *plhs[],
     plhs[0] = fillCellArray(ndocs, labels);
     if (nlhs == 2)
         plhs[1] = fillCellArrayWithKeys(&hPresent);
-    
+
     // Free the hashes
     hashFree(&hDoc2Cat);
-    hashFree(&hPresent);        
+    hashFree(&hPresent);
 
     // That's all!
 }

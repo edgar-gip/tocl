@@ -1,4 +1,4 @@
-// Copyright (C) 2010 Edgar Gonz‡lez i Pellicer <edgar.gip@gmail.com>
+// Copyright (C) 2010 Edgar Gonz√†lez i Pellicer <edgar.gip@gmail.com>
 //
 // This file is part of octopus-0.1.
 //
@@ -11,7 +11,7 @@
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 // FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 // for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with octopus; see the file COPYING.  If not, see
 // <http://www.gnu.org/licenses/>.
@@ -39,7 +39,7 @@ Append cells\n\
     // Check the number of parameters
     if (nargout != 1)
       throw (const char*)0;
-	
+
     // Result
     Cell cat;
 
@@ -47,13 +47,13 @@ Append cells\n\
     for (int i = 0; i < args.length(); ++i) {
       // Is it a cell?
       if (not args(i).is_cell())
-	throw "Arguments should be cells";
+        throw "Arguments should be cells";
 
       // Add each element
       Cell current = args(i).cell_value();
       for (int j = 0; j < current.length(); ++j) {
-	cat.resize(cat.length() + 1);
-	cat(cat.length() - 1) = current(j);
+        cat.resize(cat.length() + 1);
+        cat(cat.length() - 1) = current(j);
       }
     }
 
@@ -99,7 +99,7 @@ Push to a cell\n\
     // Check the number of parameters
     if (args.length() < 1 or nargout != 1)
       throw (const char*)0;
-	
+
     // Value
     if (not args(0).is_cell())
       throw "First argument should be a cell";
@@ -153,7 +153,7 @@ Tail of a cell\n\
     // Check the number of parameters
     if (args.length() != 1 or nargout != 1)
       throw (const char*)0;
-	
+
     // Value
     if (not args(0).is_cell())
       throw "First argument should be a cell";

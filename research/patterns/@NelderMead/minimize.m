@@ -53,15 +53,15 @@ function [ p_min, y_min ] = minimize(this, f, p_0)
     %% For the rest...
     for i = 3 : n_p
       if y(i) < y(i_lo)
-	i_lo = i;
+        i_lo = i;
       endif
 
       if y(i) > y(i_hi)
-	i_nhi = i_hi;
-	i_hi  = i;
+        i_nhi = i_hi;
+        i_hi  = i;
 
       elseif y(i) > y(i_nhi)
-	i_nhi = i;
+        i_nhi = i;
       endif
     endfor
 
@@ -78,40 +78,40 @@ function [ p_min, y_min ] = minimize(this, f, p_0)
     else
       %% Extrapolate across the high point
       [ p, y, p_sum, y_try, p_try ] = ...
-	  simplex_try(f, p, y, p_sum, i_hi, -1.0);
+          simplex_try(f, p, y, p_sum, i_hi, -1.0);
       ++n_eval;
 
       %% What?
       if y_try < y(i_lo)
-	%% Try additional extrapolation
-	[ p, y, p_sum ] = simplex_try(f, p, y, p_sum, i_hi, 2.0);
-	++n_eval;
+        %% Try additional extrapolation
+        [ p, y, p_sum ] = simplex_try(f, p, y, p_sum, i_hi, 2.0);
+        ++n_eval;
 
       elseif y_try >= y(i_nhi)
-	%% Look for an intermediate point
-	y_save = y(i_nhi);
-	p_save = p(:, i_nhi);
-	[ p, y, p_sum, y_try, p_try ] = ...
-	    simplex_try(f, p, y, p_sum, i_hi, 0.5);
-	++n_eval;
+        %% Look for an intermediate point
+        y_save = y(i_nhi);
+        p_save = p(:, i_nhi);
+        [ p, y, p_sum, y_try, p_try ] = ...
+            simplex_try(f, p, y, p_sum, i_hi, 0.5);
+        ++n_eval;
 
-	%% What?
-	if y_try >= y_save
-	  %% Contract around the best point
-	  is = 1 : n_p ~= i;
-	  p(:, is) = (repmat(p(:, i_lo), 1, n_p - 1) + p(:, is)) / 2;
+        %% What?
+        if y_try >= y_save
+          %% Contract around the best point
+          is = 1 : n_p ~= i;
+          p(:, is) = (repmat(p(:, i_lo), 1, n_p - 1) + p(:, is)) / 2;
 
-	  %% Eval
-	  y(is) = f(p(:, is)); n_eval += n_p - 1;
+          %% Eval
+          y(is) = f(p(:, is)); n_eval += n_p - 1;
 
-	  %% Update point sum
-	  p_sum = sum(p, 2);
-	endif
+          %% Update point sum
+          p_sum = sum(p, 2);
+        endif
       endif
 
       %% Callback
       if ~isempty(this.callback)
-	this.callback(p, y, 1);
+        this.callback(p, y, 1);
       endif
     endif
   endwhile

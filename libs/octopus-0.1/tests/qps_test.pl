@@ -10,27 +10,27 @@ while (<$fin>) {
     # Format ?
     if (/^\s*(\S+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+(\d+)\s+
          ([\+\-\d\.Ee]+)\s*$/x) {
-	push(@problems, { 'name'                 => uc($1),
-			  'constraints'          => $2,
-			  'variables'            => $3,
-			  'non_zero_constraints' => $4,
-			  'quadratic_variables'  => $5,
-			  'quadratic_non_zero'   => $6,
-			  'objective'            => $7 });
+        push(@problems, { 'name'                 => uc($1),
+                          'constraints'          => $2,
+                          'variables'            => $3,
+                          'non_zero_constraints' => $4,
+                          'quadratic_variables'  => $5,
+                          'quadratic_non_zero'   => $6,
+                          'objective'            => $7 });
     }
 }
 
 # Sort
 @problems = sort { $a->{'variables'} <=>
-		   $b->{'variables'} } @problems;
+                   $b->{'variables'} } @problems;
 
 # For each one
 foreach my $p (@problems) {
     # Find it
     my ($dir) = grep { -e "qps/qpdata$_/$p->{name}.QPS" } (1 .. 3);
     if (!defined($dir)) {
-	warn "Cannot find file for problem $p->{name}\n";
-	next;
+        warn "Cannot find file for problem $p->{name}\n";
+        next;
     }
 
     # Call it

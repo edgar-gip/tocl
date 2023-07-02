@@ -29,5 +29,5 @@ function [ this ] = BregmanEM(divergence, opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "BregmanEM", ...
-	       EM(opts));
+               EM(opts));
 endfunction

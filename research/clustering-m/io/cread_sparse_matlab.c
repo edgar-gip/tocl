@@ -39,15 +39,15 @@ static int  errLine;
 static errcode readHeader(FILE* file, int* ndocs, int* nterms, int* nnz) {
     // Buffer
     char buffer[MAX_LINE_LENGTH];
-  
+
     // Read the header
     if (!fgets(buffer, MAX_LINE_LENGTH, file))
         return err_premature;
-  
+
     // Parse
     if (sscanf(buffer, "%d %d %d", ndocs, nterms, nnz) < 3)
         return err_illhead;
-        
+
     // Ok
     ++errLine;
     return err_noerr;
@@ -65,15 +65,15 @@ static int insertSorted(double* valArray, int* idxArray,
         valArray[pos] = valArray[pos - 1];
         --pos;
     }
-    
+
     // Add
     idxArray[pos] = idx;
     valArray[pos] = val;
-    
+
     // Increase size
     return size + 1;
 }
-    
+
 
 // Load a sparse matrix in the simple way
 static errcode readSparse(FILE* file, int ndocs, int nterms,
@@ -81,15 +81,15 @@ static errcode readSparse(FILE* file, int ndocs, int nterms,
                           int* jcs) {
     // Buffer
     char buffer[MAX_LINE_LENGTH];
-                     
+
     // Document terms
     double values [MAX_LINE_ELEMS];
     int    indices[MAX_LINE_ELEMS];
     int    arrSize;
-   
+
     // Current filling position
     int i = 0;
-  
+
     // Current column
     int c = 0;
 
@@ -105,10 +105,10 @@ static errcode readSparse(FILE* file, int ndocs, int nterms,
         // Check column
         if (c >= ndocs)
             return err_toodoc;
-            
+
         // Set column start
         jcs[c] = i;
-        
+
         // Process the line
         p       = buffer;
         more    = true;
@@ -118,7 +118,7 @@ static errcode readSparse(FILE* file, int ndocs, int nterms,
             // Skip blank
             while (*p && isspace(*p)) ++p;
             if (!*p) break;
-      
+
             // Keep the pos
             q = p++;
             while(*p && !isspace(*p)) ++p;
@@ -126,44 +126,44 @@ static errcode readSparse(FILE* file, int ndocs, int nterms,
             // Finished?
             if (!*p)
                 return err_illnoval;
-       
-	        // Parse
+
+                // Parse
             *p++ = '\0';
             idx = strtoul(q, &perr, 10);
             if (*perr)
-	            return err_illidxfor;
+                    return err_illidxfor;
 
             // Check index
             if (idx < 1 || idx > nterms)
                 return err_idxrange;
-                
+
             // Move index to where it belongs
             --idx;
-            
+
             // Skip blank
             while (*p && isspace(*p)) ++p;
             if (!*p)
-	            return err_illnoval;
+                    return err_illnoval;
 
             // Keep the pos
             q = p++;
             while(*p && !isspace(*p)) ++p;
-      
+
             if (!*p) {
-	            more = false;
+                    more = false;
             } else {
-	            *p++ = '\0';
+                    *p++ = '\0';
             }
 
             // Parse
             val = strtod(q, &perr);
             if (*perr)
-	            return err_illvalfor;
+                    return err_illvalfor;
 
             // If everything went fine, add it to the matrix
             arrSize = insertSorted(values, indices,
                                    val, idx, arrSize);
-            
+
             // DEBUG
             // printf("(%d, %d) = %g\n", idx, c, val);
         }
@@ -178,24 +178,24 @@ static errcode readSparse(FILE* file, int ndocs, int nterms,
         ++c;
         ++errLine;
     }
- 
+
     // Error or EOF?
     if (ferror(file))
         return err_inerr;
 
     // Free
     fclose(file);
-  
+
     // Enough data read?
     if (i < nnz) {
         printf("%d %d\n", i, nnz);
         return err_premature;
     }
-    
+
     // Finish the columns
     for (j = c; j <= ndocs; ++j)
         jcs[j] = i;
-        
+
     // Everythink OK
     return err_noerr;
 }
@@ -206,32 +206,32 @@ void mexFunction(int nlhs, mxArray *plhs[],
                  int nrhs, const mxArray *prhs[]) {
     // Buffers
     char filename[MAX_LINE_LENGTH];
-    
+
     // File
     FILE* file;
 
     // Matrix information
     int ndocs, nterms, nnz;
-    
+
     // Matrix contents
     double *sr;
     int    *irs, *jcs;
-    
+
     // Auxiliary vars
     int status;
-    
+
     // Check the number of input parameters
     if (nrhs != 1)
         mexErrMsgTxt("One input required.");
 
-    // Check the number of output parameters    
+    // Check the number of output parameters
     if (nlhs != 1)
         mexErrMsgTxt("One output required.");
-     
+
     // Check the type of first input
     if (!mxIsChar(prhs[0]) || mxGetM(prhs[0]) != 1)
         mexErrMsgTxt("First input parameter must be a string.");
-    
+
     // Open the file
     if (mxGetString(prhs[0], filename, MAX_LINE_LENGTH))
         mexErrMsgTxt("Filename too long.");
@@ -240,7 +240,7 @@ void mexFunction(int nlhs, mxArray *plhs[],
                 filename);
         mexErrMsgTxt(errBuffer);
     }
-    
+
     errLine = 1;
 
     // Get header information
@@ -250,20 +250,20 @@ void mexFunction(int nlhs, mxArray *plhs[],
                 filename, errLine);
         mexErrMsgTxt(errBuffer);
     }
-    
+
     // Create matrix
     // We will return the trasposed
     plhs[0] = mxCreateSparse(nterms, ndocs, nnz, mxREAL);
     sr  = mxGetPr(plhs[0]);
     irs = mxGetIr(plhs[0]);
     jcs = mxGetJc(plhs[0]);
-    
+
     // Read
     status = readSparse(file, ndocs, nterms, nnz, sr, irs, jcs);
-    
+
     // Close the file
     fclose(file);
-    
+
     // Errors?
     if (status) {
         mxDestroyArray(plhs[0]);
@@ -272,6 +272,6 @@ void mexFunction(int nlhs, mxArray *plhs[],
                 filename, errLine);
         mexErrMsgTxt(errBuffer);
     }
-    
+
     // That's all!
 }

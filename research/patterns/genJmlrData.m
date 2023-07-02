@@ -5,7 +5,7 @@
 %% The invocation in the paper is: 1 3gauss-tri-hm <output>
 %% The method used after is: rbf 10.0 ewocs_voro 100,100
 
-%% Author: Edgar Gonz‡lez i Pellicer
+%% Author: Edgar Gonz√†lez i Pellicer
 
 
 %% Octopus
@@ -79,7 +79,7 @@ function [ data, truth ] = gen_three_gauss_d()
   %% Join them
   data  = [ data1, data2, data3, data4 ];
   truth = [ 1 * ones(1, 2000), 2 * ones(1, 200), ...
-	    3 * ones(1, 100),  4 * ones(1, 100) ];
+            3 * ones(1, 100),  4 * ones(1, 100) ];
 endfunction
 
 %% Gaussian and triangle set
@@ -117,7 +117,7 @@ function [ data, truth ] = gen_gauss_tri_hm()
   %% Join them
   data  = [ data1, data2, data3, data4 ];
   truth = [ 1 * ones(1, 2000), 2 * ones(1, 200), 3 * ones(1, 200), ...
-	    4 * ones(1, 200) ];
+            4 * ones(1, 200) ];
 endfunction
 
 %% Two gaussian, triangle and half moon set
@@ -132,7 +132,7 @@ function [ data, truth ] = gen_two_gauss_tri_hm()
   %% Join them
   data  = [ data1, data2, data3, data4, data5 ];
   truth = [ 1 * ones(1, 2000), 2 * ones(1, 200), 3 * ones(1, 200), ...
-	    4 * ones(1, 200), 5 * ones(1, 100) ];
+            4 * ones(1, 200), 5 * ones(1, 100) ];
 endfunction
 
 %% Three gaussian, triangle and half moon set
@@ -148,7 +148,7 @@ function [ data, truth ] = gen_three_gauss_tri_hm()
   %% Join them
   data  = [ data1, data2, data3, data4, data5, data6 ];
   truth = [ 1 * ones(1, 2000), 2 * ones(1, 200), 3 * ones(1, 200), ...
-	    4 * ones(1, 200), 5 * ones(1, 100), 6 * ones(1, 100) ];
+            4 * ones(1, 200), 5 * ones(1, 100), 6 * ones(1, 100) ];
 endfunction
 
 
@@ -160,7 +160,7 @@ endfunction
 args = argv();
 if length(args) ~= 3
   error(cstrcat("Wrong number of arguments:", ...
-		"Expected <seed> <dataset> <output>"));
+                "Expected <seed> <dataset> <output>"));
 endif
 
 %% Seed

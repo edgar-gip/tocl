@@ -23,7 +23,7 @@ function [ expec, log_like ] = expectation(this, data)
 
   %% Expectation
   expec = sparse(min_indices, 1 : n_samples, ones(1, n_samples), ...
-		 this.k, n_samples);
+                 this.k, n_samples);
 
   %% Log-likelihood is not considered here
   log_like = nan;

@@ -37,5 +37,5 @@ function [ this ] = NelderMead(opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "NelderMead", ...
-	       Simple());
+               Simple());
 endfunction

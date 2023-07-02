@@ -3,7 +3,7 @@
 %% Optimal minority clustering of data
 %% (Using convex hull)
 
-%% Author: Edgar Gonz‡lez i Pellicer
+%% Author: Edgar Gonz√†lez i Pellicer
 
 
 %% Octopus
@@ -103,7 +103,7 @@ fprintf(fout, "*** %8g %5.3f ***\n", cluster_time, auc);
 
 %% Display
 fprintf(fout, "%7s %5d  %5.3f %5.3f %5.3f %5.3f\n", ...
-	"Best", n_pos_cl, prc, rec, nrec, f1);
+        "Best", n_pos_cl, prc, rec, nrec, f1);
 
 %% Close output
 if fout ~= 1

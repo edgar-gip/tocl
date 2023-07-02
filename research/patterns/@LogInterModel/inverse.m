@@ -15,7 +15,7 @@ function [ input ] = inverse(this, output)
   %% Input
   input = ...
       this.low_in * exp(this.log_denom * (output - this.low) / ...
-			(this.high - this.low));
+                        (this.high - this.low));
 
   %% Saturate
   input(input < this.low_in)  = nan;

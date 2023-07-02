@@ -1,4 +1,4 @@
-// Copyright (C) 2011 Edgar Gonz‡lez i Pellicer <edgar.gip@gmail.com>
+// Copyright (C) 2011 Edgar Gonz√†lez i Pellicer <edgar.gip@gmail.com>
 //
 // This file is part of octopus-0.1.
 //
@@ -104,7 +104,7 @@ find_it(const octave_value_list& _args, int _nargout) {
     if (_args.length() >= 2) {
       // Check it is a scalar
       if (not _args(1).is_scalar_type() and _args(0).is_real_type())
-	throw "threshold must be a real scalar";
+        throw "threshold must be a real scalar";
 
       // Fetch it
       threshold = _args(1).double_value();
@@ -131,12 +131,12 @@ find_it(const octave_value_list& _args, int _nargout) {
     octave_idx_type output;
     bool found = false;
     for (octave_idx_type i = DirP::start(length);
-	 not found and DirP::more(i, length); DirP::next(i)) {
+         not found and DirP::more(i, length); DirP::next(i)) {
       // Is the condition accomplished?
       if (FallP::active(data[i], data[i + 1], threshold)) {
-	// Found!
-	output = i;
-	found  = true;
+        // Found!
+        output = i;
+        found  = true;
       }
     }
 

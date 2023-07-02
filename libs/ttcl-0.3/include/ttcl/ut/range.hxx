@@ -47,69 +47,69 @@ namespace ttcl {
     public:
       /// Constructor
       range_iterator(const value_type& _value = value_type()) :
-	value_(_value) {
+        value_(_value) {
       }
 
       /// Constructor
       template <typename T2>
       range_iterator(const range_iterator<T2>& _other) :
-	value_(*_other) {
+        value_(*_other) {
       }
 
       /// Dereference
       const_reference
       operator*() const {
-	return value_;
+        return value_;
       }
 
       /// Preincrement
       range_iterator&
       operator++() {
-	++value_;
-	return *this;
+        ++value_;
+        return *this;
       }
 
       /// Postincrement
       range_iterator
       operator++(int) {
-	range_iterator copy = *this;
-	++value_;
-	return copy;
+        range_iterator copy = *this;
+        ++value_;
+        return copy;
       }
 
       /// Increment
       range_iterator&
       operator+=(const difference_type& _incr) {
-	value_ += _incr;
-	return *this;
+        value_ += _incr;
+        return *this;
       }
 
       /// Predecrement
       range_iterator&
       operator--() {
-	--value_;
-	return *this;
+        --value_;
+        return *this;
       }
 
       /// Postdecrement
       range_iterator
       operator--(int) {
-	range_iterator copy = *this;
-	--value_;
-	return copy;
+        range_iterator copy = *this;
+        --value_;
+        return copy;
       }
 
       /// Decrement
       range_iterator&
       operator-=(const difference_type& _decr) {
-	value_ -= _decr;
-	return *this;
+        value_ -= _decr;
+        return *this;
       }
 
       /// Element operator
       value_type
       operator[](const difference_type& _index) const {
-	return value_ + _index;
+        return value_ + _index;
       }
     };
 
@@ -160,16 +160,16 @@ namespace ttcl {
     public:
       /// Constructor
       range_generator(const result_type& _value = result_type(),
-		      const result_type& _incr  = result_type(1)) :
-	value_(_value), incr_(_incr) {
+                      const result_type& _incr  = result_type(1)) :
+        value_(_value), incr_(_incr) {
       }
 
       /// Invocation
       result_type
       operator()() {
-	result_type result = value_;
-	value_ += incr_;
-	return result;
+        result_type result = value_;
+        value_ += incr_;
+        return result;
       }
     };
   }

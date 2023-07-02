@@ -5,5 +5,3 @@ function bmu = som_best_match(W, Sample);
   [ val bmu ] = max(Sample * W');
 
 % end function
-
-      

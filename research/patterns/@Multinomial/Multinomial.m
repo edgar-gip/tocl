@@ -26,5 +26,5 @@ function [ this ] = Multinomial(opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "Multinomial", ...
-	       EM(opts));
+               EM(opts));
 endfunction

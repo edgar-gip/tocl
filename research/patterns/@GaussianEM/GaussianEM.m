@@ -26,5 +26,5 @@ function [ this ] = GaussianEM(opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "GaussianEM", ...
-	       EM(opts));
+               EM(opts));
 endfunction

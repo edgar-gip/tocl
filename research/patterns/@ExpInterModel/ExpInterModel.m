@@ -6,12 +6,12 @@
 %% Author: Edgar Gonzalez
 
 function [ this ] = ExpInterModel(low, high, convexity, ...
-				  low_in, high_in, exp_denom)
+                                  low_in, high_in, exp_denom)
 
   %% Check arguments
   if nargin() ~= 6
     usage(cstrcat("[ this ] = ExpInterModel(low, high, convexity,", ...
-		  " low_in, high_in, exp_denom)"));
+                  " low_in, high_in, exp_denom)"));
   endif
 
   %% This object
@@ -28,5 +28,5 @@ function [ this ] = ExpInterModel(low, high, convexity, ...
   %% Bless
   %% And add inheritance
   this = class(this, "ExpInterModel", ...
-	       Simple());
+               Simple());
 endfunction

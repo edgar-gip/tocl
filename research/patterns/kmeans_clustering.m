@@ -87,9 +87,9 @@ function [ expec, model, info ] = kmeans_clustering(data, k, opts)
     %% Display
     if opts.verbose
       if rem(i, 10) == 0
-	fprintf(2, ". %6d %8g %8g\n", i, sum_sq, change);
+        fprintf(2, ". %6d %8g %8g\n", i, sum_sq, change);
       else
-	fprintf(2, ".");
+        fprintf(2, ".");
       endif
     endif
 

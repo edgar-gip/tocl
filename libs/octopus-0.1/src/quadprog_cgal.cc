@@ -1,4 +1,4 @@
-// Copyright (C) 2010 Edgar Gonz‡lez i Pellicer <edgar.gip@gmail.com>
+// Copyright (C) 2010 Edgar Gonz√†lez i Pellicer <edgar.gip@gmail.com>
 //
 // This file is part of octopus-0.1.
 //
@@ -11,7 +11,7 @@
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 // FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 // for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with octopus; see the file COPYING.  If not, see
 // <http://www.gnu.org/licenses/>.
@@ -35,8 +35,8 @@ using namespace CGAL;
 
 // Decompose a bound
 static void decompose_bound(const ColumnVector& _v,
-			    std::vector<bool>& _finiteness,
-			    std::vector<double>& _value) {
+                            std::vector<bool>& _finiteness,
+                            std::vector<double>& _value) {
   // Resize
   _finiteness.resize(_v.rows());
   _value     .resize(_v.rows());
@@ -63,13 +63,13 @@ static const double** indexMatrix(const Matrix& _m) {
   }
   return index;
 }
-  
+
 // Solve quadratic programming problems
 DEFUN_DLD(quadprog_cgal, args, /* nargout */,
           "-*- texinfo -*-\n\
 @deftypefn {Loadable Function} {[ @var{x}, @var{fval}, @var{exitflag} ] =}\
  quadprog_cgal(@var{H}, @var{f}, @var{Aineq}, @var{bineq}, @var{Aeq}, @var{beq},\
- @var{lb}, @var{ub}, @var{x0}, @var{options})\n	\
+ @var{lb}, @var{ub}, @var{x0}, @var{options})\n         \
 \n\
 Solve quadratic programming problems using CGAL\n\
 @end deftypefn") {
@@ -83,8 +83,8 @@ Solve quadratic programming problems using CGAL\n\
     ColumnVector _f, _bineq, _beq, _lb, _ub, _x;
     Octave_map _opts;
     parse_quadprog_args(args, _n_vars, _n_ineq,  _n_eq, _H, _f,
-			_Aineq, _bineq, _Aeq, _beq, _lb, _ub,
-			_x, _opts);
+                        _Aineq, _bineq, _Aeq, _beq, _lb, _ub,
+                        _x, _opts);
 
     // Bounds
     std::vector<bool>   lb_finiteness;
@@ -116,8 +116,8 @@ Solve quadratic programming problems using CGAL\n\
       // Check
       is_linear = true;
       for (int i = 0; is_linear and i < _n_vars; ++i)
-	for (int j = 0; is_linear and j < _n_vars; ++j)
-	  is_linear = A(i, j) == 0.0;
+        for (int j = 0; is_linear and j < _n_vars; ++j)
+          is_linear = A(i, j) == 0.0;
     }
 
     // Is it nonnegative?
@@ -130,8 +130,8 @@ Solve quadratic programming problems using CGAL\n\
       // Check
       is_nonnegative = true;
       for (int i = 0; is_nonnegative and i < _n_vars; ++i)
-	is_nonnegative = (lb_finiteness[i] and lb_value[i] == 0.0 and
-			  not ub_finiteness[i]);
+        is_nonnegative = (lb_finiteness[i] and lb_value[i] == 0.0 and
+                          not ub_finiteness[i]);
     }
 
     // Solve the problem
@@ -149,69 +149,69 @@ Solve quadratic programming problems using CGAL\n\
 
       // Nonnegativity/Generality?
       if (is_nonnegative) {
-	// Linear nonnegative
-	solution = solve_nonnegative_linear_program
-	  (make_nonnegative_linear_program_from_iterators
-	   (_n_vars,
-	    _n_ineq + _n_eq,
-	    A_index,
-	    b.data(),
-	    &R.front(),
-	    _f.data()),
-	   MP_Float());
+        // Linear nonnegative
+        solution = solve_nonnegative_linear_program
+          (make_nonnegative_linear_program_from_iterators
+           (_n_vars,
+            _n_ineq + _n_eq,
+            A_index,
+            b.data(),
+            &R.front(),
+            _f.data()),
+           MP_Float());
       }
       else {
-	// Linear general
-	solution = solve_linear_program
-	  (make_linear_program_from_iterators
-	   (_n_vars,
-	    _n_ineq + _n_eq,
-	    A_index,
-	    b.data(),
-	    &R.front(),
-	    lb_finiteness.begin(),
-	    lb_value.begin(),
-	    ub_finiteness.begin(),
-	    ub_value.begin(),
-	    _f.data()),
-	   MP_Float());
+        // Linear general
+        solution = solve_linear_program
+          (make_linear_program_from_iterators
+           (_n_vars,
+            _n_ineq + _n_eq,
+            A_index,
+            b.data(),
+            &R.front(),
+            lb_finiteness.begin(),
+            lb_value.begin(),
+            ub_finiteness.begin(),
+            ub_value.begin(),
+            _f.data()),
+           MP_Float());
       }
     }
     else {
       // Index H row-wise (or the transposed of H)
       TH      = _H.transpose();
       H_index = indexMatrix(TH);
-    
+
       // Nonnegativity/Generality?
       if (is_nonnegative) {
-	// Quadratic nonnegative
-	solution = solve_nonnegative_quadratic_program
-	  (make_nonnegative_quadratic_program_from_iterators
-	   (_n_vars,
-	    _n_ineq + _n_eq,
-	    A_index,
-	    b.data(),
-	    &R.front(),
-	    H_index,
-	    _f.data()),
-	   MP_Float());
+        // Quadratic nonnegative
+        solution = solve_nonnegative_quadratic_program
+          (make_nonnegative_quadratic_program_from_iterators
+           (_n_vars,
+            _n_ineq + _n_eq,
+            A_index,
+            b.data(),
+            &R.front(),
+            H_index,
+            _f.data()),
+           MP_Float());
       }
       else {
-	// Quadratic general
-	solution = solve_quadratic_program
-	  (make_quadratic_program_from_iterators
-	   (_n_vars,
-	    _n_ineq + _n_eq,
-	    A_index,
-	    b.data(),
-	    &R.front(),
-	    lb_finiteness.begin(),
-	    lb_value.begin(),
-	    ub_finiteness.begin(),
-	    ub_value.begin(),
-	    H_index,
-	    _f.data()),
-	   MP_Float());
+        // Quadratic general
+        solution = solve_quadratic_program
+          (make_quadratic_program_from_iterators
+           (_n_vars,
+            _n_ineq + _n_eq,
+            A_index,
+            b.data(),
+            &R.front(),
+            lb_finiteness.begin(),
+            lb_value.begin(),
+            ub_finiteness.begin(),
+            ub_value.begin(),
+            H_index,
+            _f.data()),
+           MP_Float());
       }
     }
 
@@ -219,8 +219,8 @@ Solve quadratic programming problems using CGAL\n\
     ColumnVector x(_n_vars);
     int v = 0;
     for (Quadratic_program_solution<MP_Float>::Variable_value_iterator
-	   it = solution.variable_values_begin();
-	 it != solution.variable_values_end(); ++it, ++v)
+           it = solution.variable_values_begin();
+         it != solution.variable_values_end(); ++it, ++v)
       x(v) = to_double(*it);
 
     // Objective function

@@ -42,5 +42,5 @@ function [ this ] = KMDMultinomial(first, un_theta)
   %% Bless
   %% And add inheritance
   this = class(this, "KMDMultinomial", ...
-	       KMDComponent());
+               KMDComponent());
 endfunction

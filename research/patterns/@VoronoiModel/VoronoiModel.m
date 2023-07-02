@@ -23,5 +23,5 @@ function [ this ] = VoronoiModel(soft_alpha, distance, centroids)
   %% Bless
   %% And add inheritance
   this = class(this, "VoronoiModel", ...
-	       Simple());
+               Simple());
 endfunction

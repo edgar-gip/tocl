@@ -15,8 +15,8 @@ function [ distances ] = simple_kernel_svm_distances(data, model)
     n_data    = size(data, 2);
     product   = full(model.SV * data);
     self_data = full(sum(data .^ 2, 1)); % 1 * n_data
-    K         = model.kernel(model.SV_self * ones(1, n_data) + 
-			     ones(model.n_SV, 1) * self_data - 2 * product);
+    K         = model.kernel(model.SV_self * ones(1, n_data) +
+                             ones(model.n_SV, 1) * self_data - 2 * product);
   else
     %% Non-radial kernel
     K = model.kernel(full(model.SV * data));

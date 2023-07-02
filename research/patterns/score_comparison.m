@@ -26,8 +26,8 @@ function [ tests ] = score_comparison(scores, truth, sizes)
   %% Student-t Test
   mean_t     = (mean_a - mean_b) / sqrt(var_a / size_a + var_b / size_b);
   mean_t_df  = ((var_a / size_a + var_b / size_b) ^ 2) / ...
-               ((var_a / size_a) ^ 2 / (size_a - 1) + ... 
-		(var_b / size_b) ^ 2 / (size_b - 1));
+               ((var_a / size_a) ^ 2 / (size_a - 1) + ...
+                (var_b / size_b) ^ 2 / (size_b - 1));
   mean_t_cdf = tcdf(mean_t, mean_t_df); % formerly t_cdf
 
   %% Rank
@@ -36,9 +36,9 @@ function [ tests ] = score_comparison(scores, truth, sizes)
   %% Mann-Whitney U test
   R       = truth * ranks';
   U       = min(R(1) - (size_a * (size_a - 1)) / 2, ...
-		R(2) - (size_b * (size_b - 1)) / 2);
+                R(2) - (size_b * (size_b - 1)) / 2);
   U_z_cdf = normcdf(U, size_a * size_b / 2, ... % formerly normal_cdf
-		    size_a * size_b * (size_a + size_b + 1) / 12);
+                    size_a * size_b * (size_a + size_b + 1) / 12);
 
   %% Join the tests
   tests = [ mean_all, mean_a, mean_b, mean_t_cdf, U, U_z_cdf ];

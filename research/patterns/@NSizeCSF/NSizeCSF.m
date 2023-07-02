@@ -15,5 +15,5 @@ function [ this ] = NSizeCSF()
   %% Bless
   %% And add inheritance
   this = class(struct(), "NSizeCSF", ...
-	       Simple());
+               Simple());
 endfunction

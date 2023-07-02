@@ -42,9 +42,9 @@ open(const char* _filename, ios::openmode _mode) {
   }
   // Filename ends in .bz2 or .tbz or .tb2?
   else if (length > 4 and
-	   (not strcmp(_filename + length - 4, ".bz2") or
-	    not strcmp(_filename + length - 4, ".tbz") or
-	    not strcmp(_filename + length - 4, ".tb2"))) {
+           (not strcmp(_filename + length - 4, ".bz2") or
+            not strcmp(_filename + length - 4, ".tbz") or
+            not strcmp(_filename + length - 4, ".tb2"))) {
     // Open bzip2-compressed
     ibzstream* ibzs = new ibzstream(_filename, _mode);
     if (not ibzs->is_open()) {

@@ -6,12 +6,12 @@ function [ CM KM Labels ] = comb_unfuzzy_matrix (rlabel, varargin)
   if nargin < 2
     error('There should be at least one clustering');
   end
-  
+
   %% Number of arguments should be impair
   if mod(nargin, 2) ~= 1
     error('The number of arguments should be pair');
   end
-  
+
   %% Turn it into a single matrix
   CM = [];
   KM = zeros((nargin - 1)/ 2, 1);
@@ -24,9 +24,7 @@ function [ CM KM Labels ] = comb_unfuzzy_matrix (rlabel, varargin)
 
     j = j + 1;
   end
-  
+
   %% That's all
 
 % endfunction
-  
-  

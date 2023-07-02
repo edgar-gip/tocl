@@ -1,4 +1,4 @@
-%% Copyright (C) 2010 Edgar Gonz‡lez i Pellicer <edgar.gip@gmail.com>
+%% Copyright (C) 2010 Edgar Gonz√†lez i Pellicer <edgar.gip@gmail.com>
 %%
 %% This file is part of octopus-0.1.
 %%
@@ -11,7 +11,7 @@
 %% ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 %% FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 %% for more details.
-%% 
+%%
 %% You should have received a copy of the GNU General Public License
 %% along with octopus; see the file COPYING.  If not, see
 %% <http://www.gnu.org/licenses/>.
@@ -66,132 +66,132 @@ function [ args, opts ] = get_options(varargin)
 
       %% Simple option
       if isfunctionhandle(arg_tgt)
-	%% With a function handle
-	sw_funcs = setfield(sw_funcs, arg_str, ...
-			    @(o, args) { arg_tgt(o, true()), args });
+        %% With a function handle
+        sw_funcs = setfield(sw_funcs, arg_str, ...
+                            @(o, args) { arg_tgt(o, true()), args });
       else % ischar(arg_tgt)
-	%% With a string
-	sw_funcs = setfield(sw_funcs, arg_str, ...
-			    @(o, args) { setfield(o, arg_tgt, true()), args });
+        %% With a string
+        sw_funcs = setfield(sw_funcs, arg_str, ...
+                            @(o, args) { setfield(o, arg_tgt, true()), args });
       endif
 
     elseif (([ match, sw ] = ...
-	     regex_match(arg_str, '([a-zA-Z](?:[\w\-]*\w)?)!')))
+             regex_match(arg_str, '([a-zA-Z](?:[\w\-]*\w)?)!')))
       %% Convert - to _
       sw = strrep(sw, '-', '_');
 
       %% Negable option
       if isfunctionhandle(arg_tgt)
-	%% With a function handle
-	sw_funcs = setfield(sw_funcs, sw, ...
-			    @(o, as) { arg_tgt(o, true()), as });
-	sw_funcs = setfield(sw_funcs, strcat('no', sw), ...
-			    @(o, as) { arg_tgt(o, false()), as });
-	sw_funcs = setfield(sw_funcs, strcat('no_', sw), ...
-			    @(o, as) { arg_tgt(o, false()), as });
+        %% With a function handle
+        sw_funcs = setfield(sw_funcs, sw, ...
+                            @(o, as) { arg_tgt(o, true()), as });
+        sw_funcs = setfield(sw_funcs, strcat('no', sw), ...
+                            @(o, as) { arg_tgt(o, false()), as });
+        sw_funcs = setfield(sw_funcs, strcat('no_', sw), ...
+                            @(o, as) { arg_tgt(o, false()), as });
       else % ischar(arg_tgt)
-	%% With a string
-	sw_funcs = setfield(sw_funcs, sw, ...
-			    @(o, as) { setfield(o, arg_tgt, true()), as });
-	sw_funcs = setfield(sw_funcs, strcat('no', sw), ...
-			    @(o, as) { setfield(o, arg_tgt, false()), as });
-	sw_funcs = setfield(sw_funcs, strcat('no_', sw), ...
-			    @(o, as) { setfield(o, arg_tgt, false()), as });
+        %% With a string
+        sw_funcs = setfield(sw_funcs, sw, ...
+                            @(o, as) { setfield(o, arg_tgt, true()), as });
+        sw_funcs = setfield(sw_funcs, strcat('no', sw), ...
+                            @(o, as) { setfield(o, arg_tgt, false()), as });
+        sw_funcs = setfield(sw_funcs, strcat('no_', sw), ...
+                            @(o, as) { setfield(o, arg_tgt, false()), as });
       endif
 
     elseif (([ match, sw ] = ...
-	     regex_match(arg_str, '([a-zA-Z](?:[\w\-]*\w)?)~')))
+             regex_match(arg_str, '([a-zA-Z](?:[\w\-]*\w)?)~')))
       %% Convert - to _
       sw = strrep(sw, '-', '_');
 
       %% Nullable option
       if isfunctionhandle(arg_tgt)
-	%% With a function handle
-	sw_funcs = setfield(sw_funcs, sw, ...
-			    @(o, as) { arg_tgt(o, false()), as });
+        %% With a function handle
+        sw_funcs = setfield(sw_funcs, sw, ...
+                            @(o, as) { arg_tgt(o, false()), as });
 
       else % ischar(arg_tgt)
-	%% With a string
-	sw_funcs = setfield(sw_funcs, sw, ...
-			    @(o, as) { setfield(o, arg_tgt, false()), as });
+        %% With a string
+        sw_funcs = setfield(sw_funcs, sw, ...
+                            @(o, as) { setfield(o, arg_tgt, false()), as });
       endif
-      
+
     elseif (([ match, sw ] = ...
-	     regex_match(arg_str, '([a-zA-Z](?:[\w\-]*\w)?)-')))
+             regex_match(arg_str, '([a-zA-Z](?:[\w\-]*\w)?)-')))
       %% Convert - to _
       sw = strrep(sw, '-', '_');
 
       %% Negated option
       if isfunctionhandle(arg_tgt)
-	%% With a function handle
-	sw_funcs = setfield(sw_funcs, sw, ...
-			    @(o, as) { arg_tgt(o, -1), as });
+        %% With a function handle
+        sw_funcs = setfield(sw_funcs, sw, ...
+                            @(o, as) { arg_tgt(o, -1), as });
 
       else % ischar(arg_tgt)
-	%% With a string
-	sw_funcs = setfield(sw_funcs, sw, ...
-			    @(o, as) { setfield(o, arg_tgt, -1), as });
+        %% With a string
+        sw_funcs = setfield(sw_funcs, sw, ...
+                            @(o, as) { setfield(o, arg_tgt, -1), as });
       endif
 
     elseif (([ match, sw ] = ...
-	     regex_match(arg_str, '([a-zA-Z](?:[\w\-]*\w)?)=s')))
+             regex_match(arg_str, '([a-zA-Z](?:[\w\-]*\w)?)=s')))
       %% Convert - to _
       sw = strrep(sw, '-', '_');
 
       %% String-Valued option
       if isfunctionhandle(arg_tgt)
-	%% With a function handle
-	sw_funcs = setfield(sw_funcs, sw, ...
-			    @(o, as) { arg_tgt(o, as{1}), ...
-				       cell_tail(as) });
+        %% With a function handle
+        sw_funcs = setfield(sw_funcs, sw, ...
+                            @(o, as) { arg_tgt(o, as{1}), ...
+                                       cell_tail(as) });
 
       else % ischar(arg_tgt)
-	%% With a string
-	sw_funcs = setfield(sw_funcs, sw, ...
-			    @(o, as) { setfield(o, arg_tgt, as{1}), ...
-				       cell_tail(as) });
+        %% With a string
+        sw_funcs = setfield(sw_funcs, sw, ...
+                            @(o, as) { setfield(o, arg_tgt, as{1}), ...
+                                       cell_tail(as) });
       endif
 
     elseif (([ match, sw ] = ...
-	     regex_match(arg_str, '([a-zA-Z](?:[\w\-]*\w)?)=f')))
+             regex_match(arg_str, '([a-zA-Z](?:[\w\-]*\w)?)=f')))
       %% Convert - to _
       sw = strrep(sw, '-', '_');
 
       %% Double-Valued option
       if isfunctionhandle(arg_tgt)
-	%% With a function handle
-	sw_funcs = setfield(sw_funcs, sw, ...
-			    @(o, as) { arg_tgt(o, str2double(as{1})), ...
-				       cell_tail(as) });
+        %% With a function handle
+        sw_funcs = setfield(sw_funcs, sw, ...
+                            @(o, as) { arg_tgt(o, str2double(as{1})), ...
+                                       cell_tail(as) });
       else % ischar(arg_tgt)
-	%% With a string
-	sw_funcs = setfield(sw_funcs, sw, ...
-			    @(o, as) { setfield(o, arg_tgt, ...
-						str2double(as{1})), ...
-				      cell_tail(as) });
+        %% With a string
+        sw_funcs = setfield(sw_funcs, sw, ...
+                            @(o, as) { setfield(o, arg_tgt, ...
+                                                str2double(as{1})), ...
+                                      cell_tail(as) });
       endif
 
     elseif (([ match, sw ] = ...
-	     regex_match(arg_str, '([a-zA-Z](?:[\w\-]*\w)?)=i')))
+             regex_match(arg_str, '([a-zA-Z](?:[\w\-]*\w)?)=i')))
       %% Convert - to _
       sw = strrep(sw, '-', '_');
 
       %% Integer-Valued option
       if isfunctionhandle(arg_tgt)
-	%% With a function handle
-	sw_funcs = setfield(sw_funcs, sw, ...
-			    @(o, as) { arg_tgt(o, fix(str2double(as{1}))), ...
-				       cell_tail(as) });
+        %% With a function handle
+        sw_funcs = setfield(sw_funcs, sw, ...
+                            @(o, as) { arg_tgt(o, fix(str2double(as{1}))), ...
+                                       cell_tail(as) });
       else % ischar(arg_tgt)
-	%% With a string
-	sw_funcs = setfield(sw_funcs, sw, ...
-			    @(o, as) { setfield(o, arg_tgt, ...
-						fix(str2double(as{1}))), ...
-				      cell_tail(as) });
+        %% With a string
+        sw_funcs = setfield(sw_funcs, sw, ...
+                            @(o, as) { setfield(o, arg_tgt, ...
+                                                fix(str2double(as{1}))), ...
+                                      cell_tail(as) });
       endif
 
     elseif (([ match, sw, value ] = ...
-	     regex_match(arg_str, '([a-zA-Z](?:[\w\-]*\w)?)=r(\d+)')))
+             regex_match(arg_str, '([a-zA-Z](?:[\w\-]*\w)?)=r(\d+)')))
       %% Convert - to _
       sw = strrep(sw, '-', '_');
 
@@ -200,14 +200,14 @@ function [ args, opts ] = get_options(varargin)
 
       %% Radio-Valued option
       if isfunctionhandle(arg_tgt)
-	%% With a function handle
-	sw_funcs = setfield(sw_funcs, sw, ...
-			    @(o, as) { arg_tgt(o, value), ...
-				       cell_tail(as) });
+        %% With a function handle
+        sw_funcs = setfield(sw_funcs, sw, ...
+                            @(o, as) { arg_tgt(o, value), ...
+                                       cell_tail(as) });
       else % ischar(arg_tgt)
-	%% With a string
-	sw_funcs = setfield(sw_funcs, sw, ...
-			    @(o, as) { setfield(o, arg_tgt, value), as });
+        %% With a string
+        sw_funcs = setfield(sw_funcs, sw, ...
+                            @(o, as) { setfield(o, arg_tgt, value), as });
       endif
 
     else
@@ -240,19 +240,19 @@ function [ args, opts ] = get_options(varargin)
       inargs = {};
 
     elseif (([ match, sw ] = ...
-	     regex_match(inarg, '--([a-zA-Z](?:[\w\-]*\w)?)')))
+             regex_match(inarg, '--([a-zA-Z](?:[\w\-]*\w)?)')))
       %% Convert - to _
       sw = strrep(sw, '-', '_');
 
       %% Look for it
       if isfield(sw_funcs, sw)
-	%% Apply it
-	res    = getfield(sw_funcs, sw)(opts, inargs);
-	opts   = res{1};
-	inargs = res{2};
+        %% Apply it
+        res    = getfield(sw_funcs, sw)(opts, inargs);
+        opts   = res{1};
+        inargs = res{2};
       else
-	%% Error
-	error("Wrong option %s", inarg);
+        %% Error
+        error("Wrong option %s", inarg);
       endif
 
     else

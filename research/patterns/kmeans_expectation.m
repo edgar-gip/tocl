@@ -20,7 +20,7 @@ function [ expec, sum_dist ] = kmeans_expectation(data, model, auto_data)
   centroids      = model.centroids;
   auto_centroids = sum(centroids .* centroids); % 1 * k
 
-  %% d(x,y) = x · x + y · y - 2 · x · y
+  %% d(x,y) = x Â· x + y Â· y - 2 Â· x Â· y
   distance = ones(k, 1) * auto_data + auto_centroids' * ones(1, n_data) ...
            - 2 * centroids' * data; % k * n_data
 

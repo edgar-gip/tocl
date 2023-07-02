@@ -25,5 +25,5 @@ function [ this ] = KdeEM(kernel, opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "KdeEM", ...
-	       EM(opts));
+               EM(opts));
 endfunction

@@ -11,5 +11,5 @@ function [ Labels Present ] = read_labels(rlabel_file, doc2cat_file)
   %% Convert to cell arrays
   Labels  = cellstr(LM);
   Present = cellstr(PM);
-  
+
 % end function

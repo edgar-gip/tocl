@@ -25,5 +25,5 @@ function [ this ] = AlignedGaussianEMModel(k, alpha_norm, mu, isigma)
   %% Bless
   %% And add inheritance
   this = class(this, "AlignedGaussianEMModel", ...
-	       Simple());
+               Simple());
 endfunction

@@ -7,8 +7,8 @@
 // Helper function
 template <typename SMatrix, typename TMatrix>
 static void js_divergence(Matrix& _distances,
-			  const SMatrix& _source,
-			  const TMatrix& _target) {
+                          const SMatrix& _source,
+                          const TMatrix& _target) {
   // Number of dimensions
   octave_idx_type n_dims = _source.rows(); // == _target.rows();
 
@@ -27,11 +27,11 @@ static void js_divergence(Matrix& _distances,
       // Accumulate
       double sum_st = 0.0;
       for (octave_idx_type i = 0; i < n_dims; ++i) {
-	if (_source(i, src) or _target(i, tgt)) {
-	  double mean = (_target(i, tgt) + _source(i, src)) / 2;
-	  sum_st += _target(i, tgt) * std::log(_target(i, tgt) / mean)
-	         +  _source(i, src) * std::log(_source(i, src) / mean);
-	}
+        if (_source(i, src) or _target(i, tgt)) {
+          double mean = (_target(i, tgt) + _source(i, src)) / 2;
+          sum_st += _target(i, tgt) * std::log(_target(i, tgt) / mean)
+                 +  _source(i, src) * std::log(_source(i, src) / mean);
+        }
       }
 
       // Normalize and set
@@ -42,8 +42,8 @@ static void js_divergence(Matrix& _distances,
 
 // Specialization for two sparse matrices
 static void js_divergence(Matrix& _distances,
-			  const SparseMatrix& _source,
-			  const SparseMatrix& _target) {
+                          const SparseMatrix& _source,
+                          const SparseMatrix& _target) {
   // Number of dimensions
   octave_idx_type n_dims = _source.rows(); // == _target.rows();
 
@@ -77,38 +77,38 @@ static void js_divergence(Matrix& _distances,
       octave_idx_type src_i = src_cidx[src];
       octave_idx_type tgt_i = tgt_cidx[tgt];
       while (src_i < src_cidx[src + 1] and
-	     tgt_i < tgt_cidx[tgt + 1]) {
-	// What?
-	if (src_ridx[src_i] < tgt_ridx[tgt_i]) {
-	  // Advance source
-	  sum_st += src_data[src_i++] * M_LN2;
-	}
-	else if (src_ridx[src_i] > tgt_ridx[tgt_i]) {
-	  // Advance target
-	  sum_st += tgt_data[tgt_i++] * M_LN2;
-	}
-	else { // src_ridx[src_i] == tgt_ridx[tgt_i]
-	  // Update
-	  double mean = (tgt_data[tgt_i] + src_data[src_i]) / 2;
-	  sum_st += tgt_data[tgt_i] * std::log(tgt_data[tgt_i] / mean)
-	         +  src_data[src_i] * std::log(src_data[src_i] / mean);
+             tgt_i < tgt_cidx[tgt + 1]) {
+        // What?
+        if (src_ridx[src_i] < tgt_ridx[tgt_i]) {
+          // Advance source
+          sum_st += src_data[src_i++] * M_LN2;
+        }
+        else if (src_ridx[src_i] > tgt_ridx[tgt_i]) {
+          // Advance target
+          sum_st += tgt_data[tgt_i++] * M_LN2;
+        }
+        else { // src_ridx[src_i] == tgt_ridx[tgt_i]
+          // Update
+          double mean = (tgt_data[tgt_i] + src_data[src_i]) / 2;
+          sum_st += tgt_data[tgt_i] * std::log(tgt_data[tgt_i] / mean)
+                 +  src_data[src_i] * std::log(src_data[src_i] / mean);
 
-	  // Advance both
-	  ++src_i;
-	  ++tgt_i;
-	}
+          // Advance both
+          ++src_i;
+          ++tgt_i;
+        }
       }
 
       // While source remains
       while (src_i < src_cidx[src + 1]) {
-	// Advance source
-	sum_st += src_data[src_i++] * M_LN2;
+        // Advance source
+        sum_st += src_data[src_i++] * M_LN2;
       }
 
       // While target remains
       while (tgt_i < tgt_cidx[tgt + 1]) {
-	// Advance target
-	sum_st += tgt_data[tgt_i++] * M_LN2;
+        // Advance target
+        sum_st += tgt_data[tgt_i++] * M_LN2;
       }
 
       // Normalize and set
@@ -213,26 +213,26 @@ Find the Jensen-Shannon divergence between elements of @var{source} and\
 
       // Get target
       if (args(1).is_sparse_type()) {
-	// As a sparse matrix
-	SparseMatrix target = args(1).sparse_matrix_value();
+        // As a sparse matrix
+        SparseMatrix target = args(1).sparse_matrix_value();
 
-	// Check dimensions
-	if (source.rows() != target.rows())
-	  throw "source and target should have the same number of rows";
+        // Check dimensions
+        if (source.rows() != target.rows())
+          throw "source and target should have the same number of rows";
 
-	// Find distances
-	js_divergence(distances, source, target);
+        // Find distances
+        js_divergence(distances, source, target);
       }
       else {
-	// As a dense matrix
-	Matrix target = args(1).matrix_value();
+        // As a dense matrix
+        Matrix target = args(1).matrix_value();
 
-	// Check dimensions
-	if (source.rows() != target.rows())
-	  throw "source and target should have the same number of rows";
+        // Check dimensions
+        if (source.rows() != target.rows())
+          throw "source and target should have the same number of rows";
 
-	// Find distances
-	js_divergence(distances, source, target);
+        // Find distances
+        js_divergence(distances, source, target);
       }
     }
     else {
@@ -241,26 +241,26 @@ Find the Jensen-Shannon divergence between elements of @var{source} and\
 
       // Get target
       if (args(1).is_sparse_type()) {
-	// As a sparse matrix
-	SparseMatrix target = args(1).sparse_matrix_value();
+        // As a sparse matrix
+        SparseMatrix target = args(1).sparse_matrix_value();
 
-	// Check dimensions
-	if (source.rows() != target.rows())
-	  throw "source and target should have the same number of rows";
+        // Check dimensions
+        if (source.rows() != target.rows())
+          throw "source and target should have the same number of rows";
 
-	// Find distances
-	js_divergence(distances, source, target);
+        // Find distances
+        js_divergence(distances, source, target);
       }
       else {
-	// As a dense matrix
-	Matrix target = args(1).matrix_value();
+        // As a dense matrix
+        Matrix target = args(1).matrix_value();
 
-	// Check dimensions
-	if (source.rows() != target.rows())
-	  throw "source and target should have the same number of rows";
+        // Check dimensions
+        if (source.rows() != target.rows())
+          throw "source and target should have the same number of rows";
 
-	// Find distances
-	js_divergence(distances, source, target);
+        // Find distances
+        js_divergence(distances, source, target);
       }
     }
 

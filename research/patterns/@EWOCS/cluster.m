@@ -10,7 +10,7 @@ function [ expec, model, info, scores ] = cluster(this, data, k, expec_0)
   %% Check arguments
   if ~any(nargin() == [ 2, 3, 4 ])
     usage(cstrcat("[ expec, model, info ] = ",
-		  "@EWOCS/cluster(this, data [, k [, expec_0]])"));
+                  "@EWOCS/cluster(this, data [, k [, expec_0]])"));
   endif
 
   %% The number of clusters must be 1

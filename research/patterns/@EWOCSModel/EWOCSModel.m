@@ -23,5 +23,5 @@ function [ this ] = EWOCSModel(models, cluster_scores, inter_model)
   %% Bless
   %% And add inheritance
   this = class(this, "EWOCSModel", ...
-	       Simple());
+               Simple());
 endfunction

@@ -23,7 +23,7 @@ function M = read_cals_combi (file)
 
     %% Add to the output
     M = [ M ; a b c cal ];
-    
+
     %% Read next line
     line = fgetl(f);
   end

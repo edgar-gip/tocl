@@ -34,5 +34,5 @@ function [ this ] = HOCC(divergence, opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "HOCC", ...
-	       Simple());
+               Simple());
 endfunction

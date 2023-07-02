@@ -24,5 +24,5 @@ function [ this ] = BernoulliModel(k, alpha, alpha_ctheta, theta)
   %% Bless
   %% And add inheritance
   this = class(this, "BernoulliModel", ...
-	       Simple());
+               Simple());
 endfunction

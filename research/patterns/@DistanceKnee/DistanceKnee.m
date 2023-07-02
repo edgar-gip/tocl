@@ -18,5 +18,5 @@ function [ this ] = DistanceKnee()
   %% Bless
   %% And add inheritance
   this = class(this, "DistanceKnee", ...
-	       Simple());
+               Simple());
 endfunction

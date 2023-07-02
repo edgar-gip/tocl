@@ -33,9 +33,9 @@ function [ model ] = maximization(this, log_data, blocks, expec)
 
   %% Create the model
   model = DirichletModel(k,
-			 blocks,
-			 cl_sizes,                    % k * 1
-			 cl_log_z,                    % k * n_blocks
-			 cl_sizes - sum(cl_log_z, 2), % k * 1
-			 cl_theta - 1);               % k * n_dims
+                         blocks,
+                         cl_sizes,                    % k * 1
+                         cl_log_z,                    % k * n_blocks
+                         cl_sizes - sum(cl_log_z, 2), % k * 1
+                         cl_theta - 1);               % k * n_dims
 endfunction

@@ -10,7 +10,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Check arguments
   if ~any(nargin() == [ 3, 4 ])
     usage(cstrcat("[ expec, model, info ] = ", ...
-		  "@EM/cluster(this, data, k [, expec_0 ])"));
+                  "@EM/cluster(this, data, k [, expec_0 ])"));
   endif
 
   %% Size
@@ -76,9 +76,9 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
     %% Display
     if this.verbose
       if rem(i, 10) == 0
-	fprintf(2, ". %6d %8g %8g\n", i, log_like, change);
+        fprintf(2, ". %6d %8g %8g\n", i, log_like, change);
       else
-	fprintf(2, ".");
+        fprintf(2, ".");
       endif
     endif
 
@@ -87,9 +87,9 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
       figure(fig, "name", sprintf("EM: Iteration %d", i));
       expectation_plot(data, model, expec, true, fig);
       if isempty(this.plot_delay)
-	replot();
+        replot();
       else
-	pause(this.plot_delay);
+        pause(this.plot_delay);
       endif
     endif
 

@@ -30,5 +30,5 @@ function [ this ] = Dirichlet(opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "Dirichlet", ...
-	       Simple());
+               Simple());
 endfunction

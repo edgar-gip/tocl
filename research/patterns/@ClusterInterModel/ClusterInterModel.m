@@ -22,5 +22,5 @@ function [ this ] = ClusterInterModel(cl_model, mapping)
   %% Bless
   %% And add inheritance
   this = class(this, "ClusterInterModel", ...
-	       Simple());
+               Simple());
 endfunction

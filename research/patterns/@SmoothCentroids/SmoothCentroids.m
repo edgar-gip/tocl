@@ -22,5 +22,5 @@ function [ this ] = SmoothCentroids(data_term = 1, size_term = 2)
   %% Bless
   %% And add inheritance
   this = class(this, "SmoothCentroids", ...
-	       Simple());
+               Simple());
 endfunction

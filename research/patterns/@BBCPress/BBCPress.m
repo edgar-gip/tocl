@@ -49,11 +49,11 @@ function [ this ] = BBCPress(divergence, opts = struct())
     opts.centroid_finder = tolower(opts.centroid_finder);
     switch opts.centroid_finder
       case "raw"
-	this.centroid_finder = RawCentroids();
+        this.centroid_finder = RawCentroids();
       case "smooth"
-	this.centroid_finder = SmoothCentroids();
+        this.centroid_finder = SmoothCentroids();
       otherwise
-	error("Bad centroid finder '%s'", opts.centroid_finder);
+        error("Bad centroid finder '%s'", opts.centroid_finder);
     endswitch
 
   else
@@ -67,5 +67,5 @@ function [ this ] = BBCPress(divergence, opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "BBCPress", ...
-	       Simple());
+               Simple());
 endfunction

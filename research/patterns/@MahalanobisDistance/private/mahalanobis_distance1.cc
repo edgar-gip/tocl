@@ -7,9 +7,9 @@
 // Helper function
 template <typename SMatrix, typename TMatrix>
 static void mahalanobis_distance(Matrix& _distances,
-				 const Matrix& _S,
-				 const SMatrix& _source,
-				 const TMatrix& _target) {
+                                 const Matrix& _S,
+                                 const SMatrix& _source,
+                                 const TMatrix& _target) {
   // Number of dimensions
   octave_idx_type n_dims = _source.rows(); // == _target.rows();
 
@@ -74,7 +74,7 @@ Find the mahalanobis distance between elements of @var{source}\n\
 
       // Check dimensions
       if (data.rows() != n_dims)
-	throw "S and data should have the same number of rows";
+        throw "S and data should have the same number of rows";
 
       // Find distances
       mahalanobis_distance(distances, S, data, data);
@@ -85,7 +85,7 @@ Find the mahalanobis distance between elements of @var{source}\n\
 
       // Check dimensions
       if (data.rows() != n_dims)
-	throw "S and data should have the same number of rows";
+        throw "S and data should have the same number of rows";
 
       // Find distances
       mahalanobis_distance(distances, S, data, data);
@@ -157,30 +157,30 @@ Find the mahalanobis distance between elements of @var{source} and @var{target}\
 
       // Check dimensions
       if (source.rows() != n_dims)
-	throw "S and source should have the same number of rows";
+        throw "S and source should have the same number of rows";
 
       // Get target
       if (args(2).is_sparse_type()) {
-	// As a sparse matrix
-	SparseMatrix target = args(2).sparse_matrix_value();
+        // As a sparse matrix
+        SparseMatrix target = args(2).sparse_matrix_value();
 
-	// Check dimensions
-	if (target.rows() != n_dims)
-	  throw "S and target should have the same number of rows";
+        // Check dimensions
+        if (target.rows() != n_dims)
+          throw "S and target should have the same number of rows";
 
-	// Find distances
-	mahalanobis_distance(distances, S, source, target);
+        // Find distances
+        mahalanobis_distance(distances, S, source, target);
       }
       else {
-	// As a dense matrix
-	Matrix target = args(2).matrix_value();
+        // As a dense matrix
+        Matrix target = args(2).matrix_value();
 
-	// Check dimensions
-	if (target.rows() != n_dims)
-	  throw "S and target should have the same number of rows";
+        // Check dimensions
+        if (target.rows() != n_dims)
+          throw "S and target should have the same number of rows";
 
-	// Find distances
-	mahalanobis_distance(distances, S, source, target);
+        // Find distances
+        mahalanobis_distance(distances, S, source, target);
       }
     }
     else {
@@ -189,30 +189,30 @@ Find the mahalanobis distance between elements of @var{source} and @var{target}\
 
       // Check dimensions
       if (source.rows() != n_dims)
-	throw "S and source should have the same number of rows";
+        throw "S and source should have the same number of rows";
 
       // Get target
       if (args(2).is_sparse_type()) {
-	// As a sparse matrix
-	SparseMatrix target = args(2).sparse_matrix_value();
+        // As a sparse matrix
+        SparseMatrix target = args(2).sparse_matrix_value();
 
-	// Check dimensions
-	if (target.rows() != n_dims)
-	  throw "S and target should have the same number of rows";
+        // Check dimensions
+        if (target.rows() != n_dims)
+          throw "S and target should have the same number of rows";
 
-	// Find distances
-	mahalanobis_distance(distances, S, source, target);
+        // Find distances
+        mahalanobis_distance(distances, S, source, target);
       }
       else {
-	// As a dense matrix
-	Matrix target = args(2).matrix_value();
+        // As a dense matrix
+        Matrix target = args(2).matrix_value();
 
-	// Check dimensions
-	if (target.rows() != n_dims)
-	  throw "S and target should have the same number of rows";
+        // Check dimensions
+        if (target.rows() != n_dims)
+          throw "S and target should have the same number of rows";
 
-	// Find distances
-	mahalanobis_distance(distances, S, source, target);
+        // Find distances
+        mahalanobis_distance(distances, S, source, target);
       }
     }
 

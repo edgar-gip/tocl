@@ -37,7 +37,7 @@ Read a sparse matrix from a file\n\
     bool has_truth = false;
     if (args.length() > 1) {
       if (not args(1).is_bool_type())
-	throw "has_truth should be a boolean if present";
+        throw "has_truth should be a boolean if present";
       has_truth = args(1).bool_value();
     }
 
@@ -71,27 +71,27 @@ Read a sparse matrix from a file\n\
 
       // Truth and entities
       if (has_truth) {
-	int cl;
-	string dummy;
-	iss >> cl >> dummy >> dummy;
-	if (nargout > 1)
-	  truth.push_back(double(cl));
+        int cl;
+        string dummy;
+        iss >> cl >> dummy >> dummy;
+        if (nargout > 1)
+          truth.push_back(double(cl));
       }
 
       // Features
       string feat;
       while (iss >> feat) {
-	// Format?
-	string::size_type idx = feat.find(':');
-	if (idx != string::npos) {
-	  feat[idx] = '\0';
-	  cols.  push_back(atoi(feat.c_str()));
-	  values.push_back(atof(feat.c_str() + (idx + 1)));
-	}
-	else {
-	  cols.  push_back(atoi(feat.c_str()));
-	  values.push_back(1.0);
-	}
+        // Format?
+        string::size_type idx = feat.find(':');
+        if (idx != string::npos) {
+          feat[idx] = '\0';
+          cols.  push_back(atoi(feat.c_str()));
+          values.push_back(atof(feat.c_str() + (idx + 1)));
+        }
+        else {
+          cols.  push_back(atoi(feat.c_str()));
+          values.push_back(1.0);
+        }
       }
 
       // One more column (or red nightmare)?
@@ -108,7 +108,7 @@ Read a sparse matrix from a file\n\
     // Data matrix
     /* It is created transposed */
     SparseMatrix m_data(n_cols, rows.size() - 1,
-			octave_idx_type(values.size()));
+                        octave_idx_type(values.size()));
     copy(rows  .begin(), rows  .end(), m_data.cidx());
     copy(cols  .begin(), cols  .end(), m_data.ridx());
     copy(values.begin(), values.end(), m_data.data());

@@ -26,5 +26,5 @@ function [ this ] = Random(opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "Random", ...
-	       Simple());
+               Simple());
 endfunction

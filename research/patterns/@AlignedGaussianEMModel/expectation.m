@@ -11,7 +11,7 @@ function [ expec, log_like ] = expectation(this, data)
   %% Check arguments
   if nargin() ~= 2
     usage(cstrcat("[ expec, log_like ] =", ...
-		  " @AlignedGaussianEMModel/expectation(this, data)"));
+                  " @AlignedGaussianEMModel/expectation(this, data)"));
   endif
 
   %% Number of data

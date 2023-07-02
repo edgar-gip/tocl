@@ -1,4 +1,4 @@
-// Copyright (C) 2010 Edgar Gonz‡lez i Pellicer <edgar.gip@gmail.com>
+// Copyright (C) 2010 Edgar Gonz√†lez i Pellicer <edgar.gip@gmail.com>
 //
 // This file is part of octopus-0.1.
 //
@@ -11,7 +11,7 @@
 // ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 // FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
 // for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with octopus; see the file COPYING.  If not, see
 // <http://www.gnu.org/licenses/>.
@@ -111,18 +111,18 @@ Cross zip two arrays @var{x} and @var{y} using function @var{f}\n\
       args(0) = x(r);
 
       for (int c = 0; c < y.length(); ++c) {
-	// y
-	args(1) = y(c);
+        // y
+        args(1) = y(c);
 
-	// Result
-	octave_value_list res = feval(f, args, 1);
-	if (res.length() < 1 or not res(0).is_real_scalar())
-	  out(r, c) = NAN;
-	else
-	  out(r, c) = res(0).scalar_value();
+        // Result
+        octave_value_list res = feval(f, args, 1);
+        if (res.length() < 1 or not res(0).is_real_scalar())
+          out(r, c) = NAN;
+        else
+          out(r, c) = res(0).scalar_value();
       }
     }
-	
+
     // Set
     result.resize(1);
     result(0) = out;

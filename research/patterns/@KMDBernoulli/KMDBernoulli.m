@@ -45,5 +45,5 @@ function [ this ] = KMDBernoulli(first, un_theta)
   %% Bless
   %% And add inheritance
   this = class(this, "KMDBernoulli", ...
-	       KMDComponent());
+               KMDComponent());
 endfunction

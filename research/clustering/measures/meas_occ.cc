@@ -7,9 +7,9 @@
 
 // Find the occurrency matrix
 void occMatrix(Matrix& occurrency,
-	       Matrix& cl1,
-	       Matrix& cl2,
-	       int nelems) {
+               Matrix& cl1,
+               Matrix& cl2,
+               int nelems) {
   // For every point
   for (int i = 0; i < nelems; ++i) {
     ++occurrency(int(cl1(i)), int(cl2(i)));
@@ -19,7 +19,7 @@ void occMatrix(Matrix& occurrency,
 
 // Maximum value of a matrix
 int matrixMax(Matrix& mat,
-	      int nelems) {
+              int nelems) {
   // Starting max
   double maxim = mat(0);
 
@@ -82,7 +82,7 @@ Find the occurrency matrix between two clusters.\n\
 
   // Return value
   Matrix occurrency(max1 + 1, max2 + 1, 0.0);
-  
+
   // Call the function
   occMatrix(occurrency, cl1, cl2, nelems);
 

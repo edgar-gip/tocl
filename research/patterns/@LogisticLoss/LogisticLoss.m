@@ -15,5 +15,5 @@ function [ this ] = LogisticLoss()
   %% Bless
   %% And add inheritance
   this = class(struct(), "LogisticLoss", ...
-	       Simple());
+               Simple());
 endfunction

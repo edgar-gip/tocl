@@ -44,7 +44,7 @@ function [ model, info ] = simple_kernel_svm(data, classes, opts)
   endif
 
   %% Create the quadratic programming dual problem
-  
+
   %% http://en.wikipedia.org/wiki/Support_vector_machine
 
   %% Kernel matrix
@@ -101,7 +101,7 @@ function [ model, info ] = simple_kernel_svm(data, classes, opts)
   %% A radial kernel?
   if model.radial
     %% Add self product and number of SVs
-    model.SV_self = self_data(SVs); % n_SV * 1 
+    model.SV_self = self_data(SVs); % n_SV * 1
     model.n_SV    = size(model.SV, 1);
   endif
 

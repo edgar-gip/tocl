@@ -25,5 +25,5 @@ function [ this ] = RBFKernelGenerator(min_rbf_gamma, max_rbf_gamma)
   %% Bless
   %% And add inheritance
   this = class(this, "RBFKernelGenerator", ...
-	       Simple());
+               Simple());
 endfunction

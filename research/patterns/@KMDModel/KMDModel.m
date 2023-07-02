@@ -22,5 +22,5 @@ function [ this ] = KMDModel(log_alpha, components)
   %% Bless
   %% And add inheritance
   this = class(this, "KMDModel", ...
-	       Simple());
+               Simple());
 endfunction

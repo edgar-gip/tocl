@@ -21,5 +21,5 @@ function [ this ] = FakeModel(scores)
   %% Bless
   %% And add inheritance
   this = class(this, "FakeModel", ...
-	       Simple());
+               Simple());
 endfunction

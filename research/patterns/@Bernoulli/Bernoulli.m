@@ -26,5 +26,5 @@ function [ this ] = Bernoulli(opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "Bernoulli", ...
-	       EM(opts));
+               EM(opts));
 endfunction

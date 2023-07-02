@@ -29,5 +29,5 @@ function [ this ] = Voronoi(distance, opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "Voronoi", ...
-	       Simple());
+               Simple());
 endfunction

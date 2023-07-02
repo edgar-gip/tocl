@@ -26,7 +26,7 @@ using namespace ttcl;
 /// Constructor
 ttcl::exception::
 exception(const string& _file, ttcl::uint _line_no,
-	  const string& _message) :
+          const string& _message) :
 #ifdef TTCL_EXCEPTION_BACKTRACE
   message_(_message), file_(_file), line_no_(_line_no),
   addresses_(0), functions_(0) {
@@ -40,7 +40,7 @@ exception(const string& _file, ttcl::uint _line_no,
 /// Constructor from a char* and a variable argument list
 ttcl::exception::
 exception(const string& _file, ttcl::uint _line_no,
-	  const char* _format, ...) :
+          const char* _format, ...) :
 #ifdef TTCL_EXCEPTION_BACKTRACE
   message_(), file_(_file), line_no_(_line_no),
   addresses_(0), functions_(0) {
@@ -115,18 +115,18 @@ get_backtrace() {
       // Find the '+'
       char* end = strchr(start, '+');
       if (end) {
-	// Copy to a dmg_buffer
-	char dmg_buffer[1024];
-	strncpy(dmg_buffer, start + 1, end - start - 1);
-	dmg_buffer[end - start - 1] = '\0';
+        // Copy to a dmg_buffer
+        char dmg_buffer[1024];
+        strncpy(dmg_buffer, start + 1, end - start - 1);
+        dmg_buffer[end - start - 1] = '\0';
 
-	// Demangle
-	int status;
-	demangled = abi::__cxa_demangle(dmg_buffer, NULL, 0, &status);
+        // Demangle
+        int status;
+        demangled = abi::__cxa_demangle(dmg_buffer, NULL, 0, &status);
 
-	// Error?
-	if (status)
-	  demangled = strdup(dmg_buffer);
+        // Error?
+        if (status)
+          demangled = strdup(dmg_buffer);
       }
     }
 
@@ -249,7 +249,7 @@ display(ostream& _os) const {
 #ifdef TTCL_EXCEPTION_BACKTRACE
   for (int i = 0; i < n_filled_; ++i)
     _os << " from " << functions_[i] << " ["
-	<< addresses_[i] << ']' << endl;
+        << addresses_[i] << ']' << endl;
 #endif
 }
 
@@ -262,18 +262,17 @@ what() const
   int printed =
 #endif
     snprintf(buffer, TTCL_EXCEPTION_WHAT_SIZE - 1, "%s in %s:%d",
-	     message_.c_str(), file_.c_str(), line_no_);
+             message_.c_str(), file_.c_str(), line_no_);
 
 #ifdef TTCL_EXCEPTION_BACKTRACE
   int i = 0;
   while (printed < TTCL_EXCEPTION_WHAT_SIZE - 1 and
-	 i < n_filled_) {
+         i < n_filled_) {
     printed += snprintf(buffer + printed, TTCL_EXCEPTION_WHAT_SIZE - printed,
-			" from %s [%p]", functions_[i], addresses_[i]);
+                        " from %s [%p]", functions_[i], addresses_[i]);
     ++i;
   }
 #endif
 
   return buffer;
 }
-

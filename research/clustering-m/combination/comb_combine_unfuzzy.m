@@ -4,7 +4,7 @@ function [ Clustering Labels ] = comb_combine_unfuzzy (Nclusters, rlabel, vararg
   if nargin < 3
     error('Must give at least a clustering');
   end
-  
+
   %% Check type of arguments
   target = {}; i = 1; t = 1;
   while i <= nargin - 2
@@ -26,13 +26,13 @@ function [ Clustering Labels ] = comb_combine_unfuzzy (Nclusters, rlabel, vararg
       t = t + 2;
     end
   end
-  
+
   %% Create the unfuzzy matrix
   [ CM KM Labels ] = comb_unfuzzy_matrix (rlabel, target{:});
 
   %% Normalize it
   CM = normalize_rows(CM);
-  
+
   %% Automatically find sizes?
   if Nclusters == 0
     low  = max(2, floor(0.80 * min(KM)));

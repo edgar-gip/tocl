@@ -37,5 +37,5 @@ function [ this ] = AutoDGRADE(divergence, opts = struct())
   %% Bless
   %% And add inheritance
   this = class(this, "AutoDGRADE", ...
-	       Simple());
+               Simple());
 endfunction

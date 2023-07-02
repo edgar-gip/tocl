@@ -2,7 +2,7 @@
 
 %% Plot multidimensional data pairwiselly
 
-%% Author: Edgar Gonz‡lez i Pellicer
+%% Author: Edgar Gonz√†lez i Pellicer
 
 
 %% Pairwise cluster plot
@@ -29,13 +29,13 @@ function pairwise_cluster_plot(data, truth, name = [], fig = [])
 
       %% For each cl
       for cl = 1 : k
-	%% Elements
-	cluster = find(truth == cl);
+        %% Elements
+        cluster = find(truth == cl);
 
-	%% Add their data
-	plots = cell_push(plots, ...
-			  data(d1, cluster), data(d2, cluster), ...
-			  sprintf("x%d", mod(cl - 1, 6)));
+        %% Add their data
+        plots = cell_push(plots, ...
+                          data(d1, cluster), data(d2, cluster), ...
+                          sprintf("x%d", mod(cl - 1, 6)));
       endfor
 
       %% Subplot

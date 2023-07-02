@@ -15,7 +15,7 @@ function [ CM KM ] = comb_binary_matrix (varargin)
   %% First element
   Clust1 = varargin{1};
   k1     = varargin{2};
-  
+
   %% Number of elements
   [ nelems dummy ] = size(Clust1);
 
@@ -49,7 +49,7 @@ function [ CM KM ] = comb_binary_matrix (varargin)
 
   %% KM
   KM   = zeros(nargin / 2, 1);
-  
+
   %% Current pos
   pos  = 1;
   off  = 1;
@@ -78,5 +78,3 @@ function [ CM KM ] = comb_binary_matrix (varargin)
   CM = sparse(Rows, Cols, Vals, nelems, kTotal, nTotal);
 
 % endfunction
-  
-  

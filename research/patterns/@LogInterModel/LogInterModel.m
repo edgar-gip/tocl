@@ -25,5 +25,5 @@ function [ this ] = LogInterModel(low, high, low_in, high_in, log_denom)
   %% Bless
   %% And add inheritance
   this = class(this, "LogInterModel", ...
-	       Simple());
+               Simple());
 endfunction

@@ -15,5 +15,5 @@ function [ this ] = SqEuclideanDistance()
   %% Bless
   %% And add inheritance
   this = class(struct(), "SqEuclideanDistance", ...
-	       Simple());
+               Simple());
 endfunction

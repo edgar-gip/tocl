@@ -10,7 +10,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   %% Check arguments
   if ~any(nargin() == [ 2, 3, 4 ])
     usage(cstrcat("[ expec, model, info ] = ",
-		  "@KMD/cluster(this, data [, k [, expec_0]])"));
+                  "@KMD/cluster(this, data [, k [, expec_0]])"));
   endif
 
   %% The number of clusters must be 1
@@ -94,10 +94,10 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
 
       %% Which are below it?
       if this.apriori_correction
-	out_idxs = fg_idxs(find(fg_lp + fg_ll < bg_lp + bg_ll(fg_idxs)));
+        out_idxs = fg_idxs(find(fg_lp + fg_ll < bg_lp + bg_ll(fg_idxs)));
       else
-	%% Original (Ando, 2007) implementation
-	out_idxs = fg_idxs(find(fg_ll < bg_ll(fg_idxs)));
+        %% Original (Ando, 2007) implementation
+        out_idxs = fg_idxs(find(fg_ll < bg_ll(fg_idxs)));
       end
 
       %% Remove
@@ -115,7 +115,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
 
       %% Changes below the threshold?
       final = length(out_idxs) < eff_change_threshold || ...
-	      length(fg_idxs)  < eff_min_size;
+              length(fg_idxs)  < eff_min_size;
     endwhile
 
     %% Is the size more than the threshold?
@@ -136,7 +136,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
 
       %% Not enough for a single cluster?
       if n_un < eff_min_size
-	break
+        break
       endif
     endif
   endfor
@@ -148,7 +148,7 @@ function [ expec, model, info ] = cluster(this, data, k, expec_0)
   expec_on = find(hard_expec);
   expec    = ...
       sparse(hard_expec(expec_on), expec_on, ones(1, length(expec_on)), ...
-	     fg_k, n_data);
+             fg_k, n_data);
 
   %% Model
   model = KMDModel(log_alpha, components);

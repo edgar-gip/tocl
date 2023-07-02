@@ -6,8 +6,8 @@
 %% Author: Edgar Gonzalez
 
 function [ this ] = KneeInterpolator(finder = DistanceKnee(), ...
-				     inner = @LogInterpolator, ...
-				     low = 0.0, mid = 0.5, high = 1.0)
+                                     inner = @LogInterpolator, ...
+                                     low = 0.0, mid = 0.5, high = 1.0)
 
   %% Check arguments
   if ~any(nargin() == [ 1, 2, 5 ])
@@ -28,5 +28,5 @@ function [ this ] = KneeInterpolator(finder = DistanceKnee(), ...
   %% Bless
   %% And add inheritance
   this = class(this, "KneeInterpolator", ...
-	       Simple());
+               Simple());
 endfunction

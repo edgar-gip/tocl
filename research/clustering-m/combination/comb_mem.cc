@@ -9,9 +9,9 @@
 
 // Expectation step
 void eStep(Matrix& expectation,
-	   Matrix& data,
-	   Matrix& alpha,
-	   Matrix* coefs) {
+           Matrix& data,
+           Matrix& alpha,
+           Matrix* coefs) {
 
 #ifdef DEBUG
   // DEBUG
@@ -35,7 +35,7 @@ void eStep(Matrix& expectation,
 
       // Multinomial components
       for (int f = 0; f < nFeats; ++f) {
-	val *= coefs[f](c, int(data(i, f)));
+        val *= coefs[f](c, int(data(i, f)));
       }
 
       // Add to matrix and total
@@ -46,7 +46,7 @@ void eStep(Matrix& expectation,
     // Normalize
     if (total != 0.0)
       for (int c = 0; c < nClust; ++c)
-	expectation(i, c) /= total;
+        expectation(i, c) /= total;
   }
 }
 
@@ -54,10 +54,10 @@ void eStep(Matrix& expectation,
 // Expectation step
 // Weighted
 void eStepW(Matrix& expectation,
-	    Matrix& data,
-	    Matrix& alpha,
-	    Matrix* coefs,
-	    Matrix& weights) {
+            Matrix& data,
+            Matrix& alpha,
+            Matrix* coefs,
+            Matrix& weights) {
 
 #ifdef DEBUG
   // DEBUG
@@ -81,7 +81,7 @@ void eStepW(Matrix& expectation,
 
       // Multinomial components
       for (int f = 0; f < nFeats; ++f) {
-	val *= pow(coefs[f](c, int(data(i, f))), weights(f));
+        val *= pow(coefs[f](c, int(data(i, f))), weights(f));
       }
 
       // Add to matrix and total
@@ -92,16 +92,16 @@ void eStepW(Matrix& expectation,
     // Normalize
     if (total != 0.0)
       for (int c = 0; c < nClust; ++c)
-	expectation(i, c) /= total;
+        expectation(i, c) /= total;
   }
 }
 
 
 // Maximization step
 void mStep(Matrix& alpha,
-	   Matrix* coefs,
-	   Matrix& data,
-	   Matrix& expectation) {
+           Matrix* coefs,
+           Matrix& data,
+           Matrix& expectation) {
 
 #ifdef DEBUG
   // DEBUG
@@ -126,17 +126,17 @@ void mStep(Matrix& alpha,
 
       // Add to every feature
       for (int f = 0; f < nFeats; ++f) {
-	int idx = int(data(i, f));
+        int idx = int(data(i, f));
 
 #ifdef DEBUG
-	// Check index validity
-	if (idx < 0 || idx >= coefs[f].cols()) {
-	  printf("Error! i: %d c: %d f: %d idx: %d\nPrepare to die!\n",
-		 i, c, f, idx);
-	}
+        // Check index validity
+        if (idx < 0 || idx >= coefs[f].cols()) {
+          printf("Error! i: %d c: %d f: %d idx: %d\nPrepare to die!\n",
+                 i, c, f, idx);
+        }
 #endif
 
-	coefs[f](c, idx) += expectation(i, c);
+        coefs[f](c, idx) += expectation(i, c);
       }
     }
   }
@@ -152,11 +152,11 @@ void mStep(Matrix& alpha,
     for (int c = 0; c < nClust; ++c) {
       double valTotal = 0.0;
       for (int v = 0; v < nValues; ++v)
-	valTotal += coefs[f](c, v);
+        valTotal += coefs[f](c, v);
 
       if (valTotal != 0.0)
-	for (int v = 0; v < nValues; ++v)
-	  coefs[f](c, v) /= valTotal;
+        for (int v = 0; v < nValues; ++v)
+          coefs[f](c, v) /= valTotal;
     }
   }
 }
@@ -164,8 +164,8 @@ void mStep(Matrix& alpha,
 
 // Log-Likelihood of data
 double logLike(Matrix& alpha,
-	       Matrix* coefs,
-	       Matrix& data) {
+               Matrix* coefs,
+               Matrix& data) {
 
 #ifdef DEBUG
   // DEBUG
@@ -192,18 +192,18 @@ double logLike(Matrix& alpha,
 
       // For every feature
       for (int f = 0; f < nFeats; ++f) {
-	int idx = int(data(i, f));
+        int idx = int(data(i, f));
 
 #ifdef DEBUG
-	// Check index validity
-	if (idx < 0 || idx >= coefs[f].cols()) {
-	  printf("Error! i: %d c: %d f: %d idx: %d\nPrepare to die!\n",
-		 i, c, f, idx);
-	}
+        // Check index validity
+        if (idx < 0 || idx >= coefs[f].cols()) {
+          printf("Error! i: %d c: %d f: %d idx: %d\nPrepare to die!\n",
+                 i, c, f, idx);
+        }
 #endif
 
-	// Add to the term
-	term *= coefs[f](c, idx);
+        // Add to the term
+        term *= coefs[f](c, idx);
       }
 
       // Add to the factor
@@ -222,9 +222,9 @@ double logLike(Matrix& alpha,
 // Log-Likelihood of data
 // Weighted
 double logLikeW(Matrix& alpha,
-		Matrix* coefs,
-		Matrix& data,
-		Matrix& weights) {
+                Matrix* coefs,
+                Matrix& data,
+                Matrix& weights) {
 
 #ifdef DEBUG
   // DEBUG
@@ -251,18 +251,18 @@ double logLikeW(Matrix& alpha,
 
       // For every feature
       for (int f = 0; f < nFeats; ++f) {
-	int idx = int(data(i, f));
+        int idx = int(data(i, f));
 
 #ifdef DEBUG
-	// Check index validity
-	if (idx < 0 || idx >= coefs[f].cols()) {
-	  printf("Error! i: %d c: %d f: %d idx: %d\nPrepare to die!\n",
-		 i, c, f, idx);
-	}
+        // Check index validity
+        if (idx < 0 || idx >= coefs[f].cols()) {
+          printf("Error! i: %d c: %d f: %d idx: %d\nPrepare to die!\n",
+                 i, c, f, idx);
+        }
 #endif
 
-	// Add to the term
-	term *= pow(coefs[f](c, idx), weights(f));
+        // Add to the term
+        term *= pow(coefs[f](c, idx), weights(f));
       }
 
       // Add to the factor
@@ -629,4 +629,3 @@ Find the log-likelihood of data according to the model.\n\
   output(0) = octave_value(llike);
   return output;
 }
-
